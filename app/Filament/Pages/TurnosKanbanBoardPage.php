@@ -164,4 +164,12 @@ protected function getCardAttributes(): array
                 ]);
             });
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $usuario = auth()->user();
+        $cargo = $usuario?->cargo?->car_nombre;
+
+        return in_array($cargo, ['Administrador']);
+    }
 }

@@ -18,6 +18,6 @@ class Seguridad extends Model
     // Relaciones
     public function usuario(): BelongsTo
     {
-        return $this->belongsTo(Usuarios::class, "seg_usuario_id", "num_doc");
+        return $this->belongsTo(User::class, "seg_usuario_id", "num_doc");
     }
 }

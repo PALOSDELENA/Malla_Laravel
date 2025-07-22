@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UsuariosResource\Pages;
 use App\Filament\Resources\UsuariosResource\RelationManagers;
-use App\Models\Usuarios;
+use App\Models\User;
 use Dom\Text;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Hash;
 
 class UsuariosResource extends Resource
 {
-    protected static ?string $model = Usuarios::class;
+    protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -54,7 +54,7 @@ class UsuariosResource extends Resource
                     ->maxLength(20)
                     ->label('Teléfono')
                     ->autocomplete('off'),
-                Forms\Components\TextInput::make('usu_email')
+                Forms\Components\TextInput::make('email')
                     ->email()
                     ->required()
                     ->maxLength(255)
@@ -87,9 +87,9 @@ class UsuariosResource extends Resource
                 TextColumn::make('usu_nombre')->label('Nombre'),
                 TextColumn::make('usu_apellido')->label('Apellido'),
                 TextColumn::make('usu_celular')->label('Teléfono'),
-                TextColumn::make('usu_email')->label('Email'),
-                TextColumn::make('usu_cargo.cargo')->label('Cargo'), // Ajusta 'car_nombre' según tu modelo Cargo
-                TextColumn::make('punto.usu_punto')->label('Punto de Trabajo'), // Ajusta 'nombre' según tu modelo Punto
+                TextColumn::make('email')->label('Email'),
+                TextColumn::make('cargo.car_nombre')->label('Cargo'), // Ajusta 'car_nombre' según tu modelo Cargo
+                TextColumn::make('punto.nombre')->label('Punto de Trabajo'), // Ajusta 'nombre' según tu modelo Punto
             ])
             ->filters([
                 //
@@ -118,5 +118,13 @@ class UsuariosResource extends Resource
             'create' => Pages\CreateUsuarios::route('/create'),
             'edit' => Pages\EditUsuarios::route('/{record}/edit'),
         ];
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $usuario = auth()->user();
+        $cargo = $usuario?->cargo?->car_nombre;
+
+        return in_array($cargo, ['Administrador']);
     }
 }

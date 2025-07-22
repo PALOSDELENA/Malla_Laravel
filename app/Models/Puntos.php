@@ -20,7 +20,7 @@ class Puntos extends Model
 
     public function usuariosAsignados(): HasMany
     {
-        return $this->hasMany(Usuarios::class, "usu_punto");
+        return $this->hasMany(User::class, "usu_punto");
     }
     public function inventarioHistorico(): HasMany
     {

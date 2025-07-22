@@ -71,4 +71,12 @@ class TurnosResource extends Resource
             'edit' => Pages\EditTurnos::route('/{record}/edit'),
         ];
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $usuario = auth()->user();
+        $cargo = $usuario?->cargo?->car_nombre;
+
+        return in_array($cargo, ['Administrador']);
+    }
 }
