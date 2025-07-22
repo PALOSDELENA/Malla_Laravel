@@ -21,8 +21,8 @@ return new class extends Migration
             $table->enum('estado', ['Pendiente', 'En Proceso', 'Completada', 'Cancelada']);
             $table->text('novedadProduccion')->nullable();
 
-            $table->foreign('produccion_id')->references('id')->on('produccion')->onDelete('cascade');
-            $table->foreign('responsable')->references('num_doc')->on('users')->onDelete('cascade'); // Assuming 'users' table exists for responsible person
+            $table->foreign('produccion_id')->references('id')->on('producciones')->onDelete('cascade');
+            $table->foreign('responsable')->references('num_doc')->on('usuarios')->onDelete('cascade'); // Assuming 'users' table exists for responsible person
         });
     }
 
