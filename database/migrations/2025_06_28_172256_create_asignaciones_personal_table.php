@@ -21,7 +21,7 @@ return new class extends Migration
             $table->enum('tipo_movimiento', ['Traslado','Nueva Asignación']);
             
             // Índices y claves foráneas
-            $table->foreign('usu_num_doc')->references('num_doc')->on('usuarios')->onDelete('restrict');
+            $table->foreign('usu_num_doc')->references('num_doc')->on('users')->onDelete('restrict');
             $table->foreign('punto_origen_id')->references('id')->on('puntos')->onDelete('restrict');
         });
     }

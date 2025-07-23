@@ -63,36 +63,39 @@ class TrazabilidadProductoResource extends Resource
                 Forms\Components\Select::make('traDestino')
                     ->required()
                     ->options([
-                        'puente' => 'Puente Aranda'
+                        'Puente Aranda' => 'Puente Aranda'
                     ])
                     ->label('Almacén/Ubicación'),
-                Forms\Components\TextInput::make('traResponsable')
+                Forms\Components\Select::make('traResponsable')
                     ->required()
-                    ->maxLength(255)
-                    ->label('Responsable'),
+                    ->relationship('responsable', 'usu_nombre')
+                    ->label('Responsable')
+                    ->searchable()
+                    ->preload()
+                    ->placeholder('Seleccione un Responsable'),
                 Forms\Components\Select::make('traColor')
                     ->label('Color del Producto')
                     ->options([
-                        'bueno' => 'Bueno',
-                        'malo' => 'Malo'
+                        'Bueno' => 'Bueno',
+                        'Malo' => 'Malo'
                     ])
-                    ->default('bueno')
+                    ->default('Bueno')
                     ->required(),
                 Forms\Components\Select::make('traTextura')
                     ->label('Textura del Producto')
                     ->options([
-                        'bueno' => 'Bueno',
-                        'malo' => 'Malo'
+                        'Bueno' => 'Bueno',
+                        'Malo' => 'Malo'
                     ])
-                    ->default('bueno')
+                    ->default('Bueno')
                     ->required(),
                 Forms\Components\Select::make('traOlor')
                     ->label('Olor del Producto')
                     ->options([
-                        'bueno' => 'Bueno',
-                        'malo' => 'Malo'
+                        'Bueno' => 'Bueno',
+                        'Malo' => 'Malo'
                     ])
-                    ->default('bueno')
+                    ->default('Bueno')
                     ->required(),
             ]);
     }
@@ -111,7 +114,7 @@ class TrazabilidadProductoResource extends Resource
                 TextColumn::make('traLoteSerie')->label('Lote/Serie'),
                 TextColumn::make('traObservaciones')->label('Observaciones'),
                 TextColumn::make('traDestino')->label('Almacén/Ubicación'),
-                TextColumn::make('traResponsable')->label('Responsable'),
+                TextColumn::make('responsable.usu_nombre')->label('Responsable'),
                 TextColumn::make('traColor')->label('Color del Producto'),
                 TextColumn::make('traTextura')->label('Textura del Producto'),
                 TextColumn::make('traOlor')->label('Olor del Producto'),

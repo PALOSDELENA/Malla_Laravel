@@ -72,14 +72,14 @@ class ProduccionesResource extends Resource
                     ->label('Producción'),
                 TextColumn::make('tiempo_min')
                                 ->label('Tiempo de Producción (minutos)'),
-TextColumn::make('materiasPrimas')
-    ->label('Materias Primas')
-    ->getStateUsing(function ($record) {
-        return $record->materiasPrimas
-            ->map(function ($item) {
-                return $item->producto->proNombre . ' (' . $item->cantidad . ')';
-            })
-            ->implode(', ');
+                TextColumn::make('materiasPrimas')
+                    ->label('Materias Primas')
+                    ->getStateUsing(function ($record) {
+                        return $record->materiasPrimas
+                            ->map(function ($item) {
+                                return $item->producto->proNombre . ' (' . $item->cantidad . ')';
+                            })
+                            ->implode(', ');
     }),
             ])
             ->filters([

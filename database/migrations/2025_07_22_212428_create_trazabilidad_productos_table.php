@@ -16,7 +16,7 @@ return new class extends Migration
             $table->date('traFechaMovimiento');
             $table->string('traTipoMovimiento'); // 'entrada' o 'salida'
             $table->unsignedBigInteger('traIdProducto'); // ID del producto relacionado
-            $table->decimal(10,2); // Cantidad del producto
+            $table->decimal('traCantidad',10,2); // Cantidad del producto
             $table->string('traLoteSerie')->nullable(); // Lote o serie del producto
             $table->string('traProveedor')->nullable(); // Ubicación del producto
             $table->string('traDestino', 45)->nullable();
@@ -24,13 +24,13 @@ return new class extends Migration
             $table->string('traColor')->nullable();
             $table->string('traTextura')->nullable();
             $table->string('traOlor')->nullable();
-            $table->string('traDescripcion')->nullable(); // Descripción opcional del movimiento
+            $table->string('traObservaciones')->nullable(); // Descripción opcional del movimiento
 
             $table->foreign('traIdProducto')
                 ->references('id')->on('productos')
                 ->onDelete('cascade'); // Elimina trazabilidad si se elimina el producto
             $table->foreign('traResponsable')
-                ->references('num_doc')->on('usuarios') // Asumiendo que tienes una tabla de usuarios
+                ->references('num_doc')->on('users') // Asumiendo que tienes una tabla de usuarios
                 ->onDelete('cascade'); // Elimina trazabilidad si se elimina el usuario responsable
         });
     }

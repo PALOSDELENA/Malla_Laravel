@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Productos extends Model
 {
-    protected $connection = 'mysql-EC2';
     protected $table = "productos";
 
     protected $guarded = [];

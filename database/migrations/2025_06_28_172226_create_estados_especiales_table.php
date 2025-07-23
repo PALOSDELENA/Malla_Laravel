@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('des_observaciones',200);
 
             // Índices y claves foráneas
-            $table->foreign('des_usuario_id')->references('num_doc')->on('usuarios')->onDelete('restrict');
+            $table->foreign('des_usuario_id')->references('num_doc')->on('users')->onDelete('restrict');
         });
     }
 

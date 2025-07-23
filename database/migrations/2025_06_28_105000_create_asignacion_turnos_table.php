@@ -23,7 +23,7 @@ return new class extends Migration
 
             // Índices y claves foráneas
             $table->foreign('turnos_id')->references('id_turnos')->on('turnos')->onDelete('restrict');
-            $table->foreign('usuarios_num_doc')->references('num_doc')->on('usuarios')->onDelete('restrict');
+            $table->foreign('usuarios_num_doc')->references('num_doc')->on('users')->onDelete('restrict');
         });
     }
 

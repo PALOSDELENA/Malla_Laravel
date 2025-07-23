@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Producciones extends Model
 {
-    protected $connection = 'mysql-EC2';
     protected $table = "producciones";
     protected $guarded = [];
 
@@ -22,5 +21,10 @@ class Producciones extends Model
     public function materiasPrimas()
     {
         return $this->hasMany(ProduccioneProducto::class, 'produccion_id');
+    }
+
+    public function ordenProduccion()
+    {
+        return $this->hasMany(OrdenProduccion::class, 'produccion_id', 'id');
     }
 }

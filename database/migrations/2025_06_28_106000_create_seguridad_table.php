@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('seg_usuario_id', 15);
 
             // Llave foránea
-            $table->foreign('seg_usuario_id')->references('num_doc')->on('usuarios')->onDelete('restrict');
+            $table->foreign('seg_usuario_id')->references('num_doc')->on('users')->onDelete('restrict');
         });
     }
 

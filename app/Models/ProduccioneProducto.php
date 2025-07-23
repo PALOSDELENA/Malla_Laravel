@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProduccioneProducto extends Model
 {
-    protected $connection = 'mysql-EC2';
 
     protected $table = 'produccion_m_prima';
 

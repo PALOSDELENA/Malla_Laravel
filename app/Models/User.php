@@ -16,7 +16,6 @@ class User extends Authenticatable implements HasName
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
-
     public $incrementing = false;
     protected $keyType = "string";
     protected $primaryKey = "num_doc";
@@ -70,6 +69,16 @@ class User extends Authenticatable implements HasName
     public function asignacionTurnos(): HasMany
     {
         return $this->hasMany(Asignacion_Turnos::class, "usuarios_num_doc", "num_doc");
+    }
+
+    public function trazabilidadProductos()
+    {
+        return $this->hasMany(TrazabilidadProducto::class,'traResponsable', 'num_doc');
+    }
+
+    public function ordenProduccion(): HasMany
+    {
+        return $this->hasMany(OrdenProduccion::class, 'responsable', 'num_doc');
     }
 
 

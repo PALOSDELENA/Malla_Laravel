@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class TrazabilidadProducto extends Model
 {
-    protected $connection = 'mysql-EC2';
     protected $table = "trazabilidadProductos";
 
     protected $guarded = [];
@@ -16,5 +15,10 @@ class TrazabilidadProducto extends Model
     public function producto()
     {
         return $this->belongsTo(Productos::class, 'traIdProducto', 'id');
+    }
+
+    public function responsable()
+    {
+        return $this->belongsTo(User::class, 'traResponsable', 'num_doc');
     }
 }
