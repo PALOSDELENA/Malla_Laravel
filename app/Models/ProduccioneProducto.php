@@ -12,17 +12,16 @@ class ProduccioneProducto extends Model
     protected $fillable = [
         'produccion_id',
         'm_prima_id',
-        'cantidad',
     ];
 
     public $timestamps = false;
     public function producto()
     {
-        return $this->belongsTo(Productos::class, 'm_prima_id');
+        return $this->belongsTo(Productos::class, 'm_prima_id', 'id');
     }
 
     public function produccion()
     {
-        return $this->belongsTo(Producciones::class, 'produccion_id');
+        return $this->belongsTo(Producciones::class, 'produccion_id', 'id');
     }
 }

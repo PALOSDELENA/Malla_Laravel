@@ -5,13 +5,64 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    {{ __("You're logged in!") }}
+    <div class="container mt-4 mb-4">
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Productos</h5>
+                        <a href="{{route('productos.index')}}" class="btn btn-info">Ir</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Cargos</h5>
+                        <a href="{{route('cargos.index')}}" class="btn btn-info">Ir</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Puntos</h5>
+                        <a href="{{route('puntos.index')}}" class="btn btn-info">Ir</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Tipo Documentos</h5>
+                        <a href="{{route('tipos-documentos.index')}}" class="btn btn-info">Ir</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Producciones</h5>
+                        <a href="{{route('producciones.index')}}" class="btn btn-info">Ir</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Trazabilidad</h5>
+                        <a href="{{route('trazabilidad.index')}}" class="btn btn-info">Ir</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Orden Producción</h5>
+                        <a href="{{route('ordenProduccion.index')}}" class="btn btn-info">Ir</a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</x-app-layout>
+</div></x-app-layout>

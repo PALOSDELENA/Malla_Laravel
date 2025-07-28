@@ -73,7 +73,8 @@ class ProductosResource extends Resource
                 TextColumn::make('proNombre')->label('Nombre del Producto'),
                 TextColumn::make('proUnidadMedida')->label('Unidad de Medida'),
                 TextColumn::make('proTipo')->label('Tipo de Producto'),
-                TextColumn::make('proListaIngredientes')->label('Ingredientes'),
+                TextColumn::make('proListaIngredientes')
+                    ->label('Ingredientes'),
                 TextColumn::make('proCondicionesConservacion')->label('Condiciones de Conservación'),
                 TextColumn::make('proFabricante')->label('Fabricante'),
             ])

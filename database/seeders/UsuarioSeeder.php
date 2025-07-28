@@ -21,7 +21,7 @@ class UsuarioSeeder extends Seeder
             'usu_nombre' => 'Yonathan',
             'usu_apellido' => 'Nieves',
             'usu_celular' => '3006290689',
-            'usu_email' => 'yonathannieves17@gmail.com',
+            'email' => 'yonathannieves17@gmail.com',
             'usu_comentario' => '',
             'usu_cargo' => 1, // 1: Administrador, 2: Planta, 3: Mesero, 4: Gerente
             'usu_punto' => 1, // 1: Puente Aranda

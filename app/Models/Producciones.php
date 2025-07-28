@@ -12,15 +12,14 @@ class Producciones extends Model
 
     public $timestamps = false;
 
-    // public function productos(): BelongsToMany
+    // public function materiasPrimas()
     // {
-    //     return $this->belongsToMany(Productos::class, 'produccion_m_prima', 'produccion_id', 'id')
-    //                 ->withPivot('cantidad');
+    //     return $this->hasMany(ProduccioneProducto::class, 'produccion_id', 'id');
     // }
 
-    public function materiasPrimas()
+    public function productos()
     {
-        return $this->hasMany(ProduccioneProducto::class, 'produccion_id');
+        return $this->belongsToMany(Productos::class, 'produccion_m_prima', 'produccion_id', 'm_prima_id');
     }
 
     public function ordenProduccion()

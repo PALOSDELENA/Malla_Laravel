@@ -50,12 +50,7 @@ class ProduccionesResource extends Resource
                             ->options(Productos::where('proTipo', 'Materia Prima')->pluck('proNombre', 'id'))
                             ->searchable()
                             ->required(),
-                        TextInput::make('cantidad')
-                            ->label('Cantidad')
-                            ->numeric()
-                            ->required(),
                     ])
-                    ->columns(2)
                     ->defaultItems(1)
                     ->createItemButtonLabel('Agregar Materia Prima')
             ]);
@@ -70,17 +65,17 @@ class ProduccionesResource extends Resource
                     ->sortable(),
                 TextColumn::make('produccion')
                     ->label('Producción'),
-                TextColumn::make('tiempo_min')
-                                ->label('Tiempo de Producción (minutos)'),
                 TextColumn::make('materiasPrimas')
                     ->label('Materias Primas')
                     ->getStateUsing(function ($record) {
                         return $record->materiasPrimas
                             ->map(function ($item) {
-                                return $item->producto->proNombre . ' (' . $item->cantidad . ')';
+                                return $item->producto->proNombre;
                             })
                             ->implode(', ');
-    }),
+                }),
+                TextColumn::make('tiempo_min')
+                                ->label('Tiempo de Producción (minutos)'),
             ])
             ->filters([
                 //

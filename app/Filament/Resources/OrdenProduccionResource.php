@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\OrdenProduccionResource\Pages;
 use App\Filament\Resources\OrdenProduccionResource\RelationManagers;
 use App\Models\OrdenProduccion;
+use App\Models\Producciones;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -30,48 +31,50 @@ class OrdenProduccionResource extends Resource
                     ->relationship('responsable1', 'usu_nombre')
                     ->required()
                     ->searchable()
-                    ->preload()
                     ->placeholder('Seleccione un responsable'),
                 Forms\Components\Select::make('produccion_id')
-                    ->relationship('producciones', 'produccion')
-                    ->label('Producciones')
-                    ->required()
-                    ->searchable()
-                    ->preload()
-                    ->placeholder('Seleccione una Producción'),
+                        ->relationship('producciones', 'produccion')
+                        ->label('Producción')
+                        ->required()
+                        ->searchable()
+                        ->placeholder('Seleccione una Producción')
+                        ->reactive()
+                        ->afterStateUpdated(function (callable $set, $state) {
+                            $produccion = Producciones::with('materiasPrimas.producto')->find($state);
 
-            Forms\Components\Repeater::make('materias_primas')
-                ->label('Materias Primas')
-                ->relationship('producciones') // No guardar directamente, solo mostrar
-                ->schema([
-                    Forms\Components\TextInput::make('nombre')
-                        ->label('Materia Prima')
-                        ->disabled(),
-                    Forms\Components\TextInput::make('unidad')
-                        ->label('Unidad')
-                        ->disabled(),
-                    Forms\Components\TextInput::make('cantidad')
-                        ->label('Cantidad')
-                        ->disabled(),
-                ])
-                ->default(function (callable $get) {
-                    $produccionId = $get('produccion_id');
-                    if (!$produccionId) return [];
+                            if (!$produccion) {
+                                $set('materias_primas', []);
+                                return;
+                            }
 
-                    $produccion = Produccion::with('materiasPrimas')->find($produccionId);
+                            $set('materias_primas', $produccion->materiasPrimas->map(function ($relacion) {
+                                return [
+                                    'producto_id' => $relacion->producto->id,
+                                    'nombre' => $relacion->producto->proNombre,
+                                    'unidad' => $relacion->producto->proUnidadMedida ?? '',
+                                    'cantidad_real' => null,
+                                ];
+                            })->toArray());
+                        }),
 
-                    if (!$produccion) return [];
-
-                    return $produccion->materiasPrimas->map(function ($producto) {
-                        return [
-                            'nombre' => $producto->proNombre,
-                            'unidad' => $producto->proUnidadMedida,
-                            'cantidad' => $producto->pivot->cantidad,
-                        ];
-                    })->toArray();
-                })
-                ->columns(3)
-                ->disabled(), // Opcional: para evitar edición
+                Forms\Components\Repeater::make('materias_primas')
+                    ->label('Consumo de Materias Primas')
+                    ->schema([
+                        Forms\Components\Hidden::make('producto_id'),
+                        Forms\Components\TextInput::make('nombre')
+                            ->label('Nombre')
+                            ->disabled(),
+                        Forms\Components\TextInput::make('unidad')
+                            ->label('Unidad')
+                            ->disabled(),
+                        Forms\Components\TextInput::make('cantidad_real')
+                            ->label('Cantidad Consumida')
+                            ->required()
+                            ->numeric()
+                            ->minValue(0),
+                    ])
+                    ->default([])
+                    ->columns(2),
                 Forms\Components\TextInput::make('cantidad')
                     ->label('Cantidad')
                     ->required()

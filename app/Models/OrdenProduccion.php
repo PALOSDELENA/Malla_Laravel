@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class OrdenProduccion extends Model
 {
     protected $table = "orden_produccion";
+
+    protected $primaryKey = 'id';
     protected $guarded = [];
     public $timestamps = false;
 
@@ -21,8 +23,8 @@ class OrdenProduccion extends Model
     }
 
     // Consumos reales registrados en orden_consumo_m_prima
-    public function consumosMateriaPrima()
+    public function consumoMateriaPrima()
     {
-        return $this->hasMany(OrdenConsumoMateriaPrima::class, 'orden_produccion_id', 'id');
+        return $this->hasMany(TrazabilidadProducto::class, 'orden_produccion_id', 'id');
     }
 }

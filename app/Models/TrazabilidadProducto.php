@@ -21,4 +21,9 @@ class TrazabilidadProducto extends Model
     {
         return $this->belongsTo(User::class, 'traResponsable', 'num_doc');
     }
+
+    public function produccion()
+    {
+        return $this->belongsTo(OrdenProduccion::class, 'orden_produccion_id', 'id');
+    }
 }

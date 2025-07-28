@@ -25,9 +25,13 @@ return new class extends Migration
             $table->string('traTextura')->nullable();
             $table->string('traOlor')->nullable();
             $table->string('traObservaciones')->nullable(); // Descripción opcional del movimiento
+            $table->unsignedBigInteger('orden_produccion_id')->nullable(); // ID de la orden de producción asociada
 
             $table->foreign('traIdProducto')
                 ->references('id')->on('productos')
+                ->onDelete('cascade'); // Elimina trazabilidad si se elimina el producto
+            $table->foreign('orden_produccion_id')
+                ->references('id')->on('orden_produccion')
                 ->onDelete('cascade'); // Elimina trazabilidad si se elimina el producto
             $table->foreign('traResponsable')
                 ->references('num_doc')->on('users') // Asumiendo que tienes una tabla de usuarios

@@ -29,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
                 'reports.index' => 'Reportes',
                 'profile.edit' => 'Profile',
                 // Agrega más según tus rutas
+                'productos.index' => 'Productos',
             ];
 
             $view->with('pageTitle', $titles[$routeName] ?? 'Panel2');

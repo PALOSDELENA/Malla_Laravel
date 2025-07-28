@@ -18,15 +18,13 @@ class Productos extends Model
         return $this->hasMany(TrazabilidadProducto::class, 'traIdProducto', 'id');
     }
 
-    // public function producciones()
+    // public function usosEnProduccion()
     // {
-    //     return $this->belongsToMany(Producciones::class, 'produccion_m_prima', 'm_prima_id','id')
-    //         ->withPivot('cantidad');
+    //     return $this->hasMany(ProduccioneProducto::class, 'm_prima_id', 'id');
     // }
 
-
-    public function usosEnProduccion()
+    public function producciones()
     {
-        return $this->hasMany(ProduccioneProducto::class, 'm_prima_id');
+        return $this->belongsToMany(Producciones::class, 'produccion_m_prima', 'm_prima_id', 'produccion_id');
     }
 }
