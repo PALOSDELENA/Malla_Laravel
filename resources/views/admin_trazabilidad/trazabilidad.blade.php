@@ -21,21 +21,21 @@
             </div>
 
             <div class="bg-white shadow-sm sm:rounded-lg overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 text-sm text-left text-gray-700">
-                    <thead class="bg-gray-100">
+                <table class="table w-100 divide-y divide-gray-200 text-sm text-center text-gray-700">
+                    <thead class="table-warning">
                         <tr>
                             <th class="px-4 py-2">Fecha</th>
                             <th class="px-4 py-2">Tipo</th>
                             <th class="px-4 py-2">Producto</th>
                             <th class="px-4 py-2">Cantidad</th>
                             <th class="px-4 py-2">Lote/Serie</th>
-                            <th class="px-4 py-2">Ubicación</th>
+                            <!-- <th class="px-4 py-2">Ubicación</th> -->
                             <th class="px-4 py-2">Responsable</th>
                             <!-- <th class="px-4 py-2">Color</th>
                             <th class="px-4 py-2">Textura</th>
                             <th class="px-4 py-2">Olor</th> -->
                             <th class="px-4 py-2">Observaciones</th>
-                            <th class="px-4 py-2">Acciones</th>
+                            <th class="px-4 py-2"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -46,7 +46,7 @@
                                 <td class="px-4 py-2">{{ $mov->producto->proNombre ?? '—' }}</td>
                                 <td class="px-4 py-2">{{ $mov->traCantidad }}</td>
                                 <td class="px-4 py-2">{{ $mov->traLoteSerie }}</td>
-                                <td class="px-4 py-2">{{ $mov->traDestino }}</td>
+                                <!-- <td class="px-4 py-2">{{ $mov->traDestino }}</td> -->
                                 <td class="px-4 py-2">{{ $mov->responsable->usu_nombre ?? '—' }}</td>
                                 <!-- <td class="px-4 py-2">{{ $mov->traColor }}</td>
                                 <td class="px-4 py-2">{{ $mov->traTextura }}</td>
@@ -182,7 +182,8 @@
                 </table>
             </div>
 
-            <div class="mt-4">
+            <!-- Paginación -->
+            <div class="d-flex justify-content-center mt-2">
                 {{ $movimientos->links() }}
             </div>
         </div>

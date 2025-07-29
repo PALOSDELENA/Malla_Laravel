@@ -48,3 +48,26 @@
     visibility: visible;
     bottom: -40px;
 }
+
+.icon-hover {
+    color: #F5C02E;
+    transition: transform 0.4s ease-in-out, color 0.3s ease-in-out;
+}
+
+.icon-hover:hover {
+    color: #4b4b4b;
+    transform: scale(1.2);
+}
+
+.btn-hover:hover {
+    background-color: #0a95c9;
+    border-color: #0a95c9;
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+    table.no-vertical-borders td,
+    table.no-vertical-borders th {
+        border-left: none;
+        border-right: none;
+    }

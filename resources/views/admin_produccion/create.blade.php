@@ -13,7 +13,7 @@
                     @enderror
                 </div>
                 <div class="col-md-6 mb-4">
-                    <label for="tiempo_min" class="form-label">Tiempo Estimado (en horas)</label>
+                    <label for="tiempo_min" class="form-label">Tiempo Estimado (en minutos)</label>
                     <input type="number" name="tiempo_min" id="tiempo_min" class="form-control" required min="0" value="{{ old('tiempo_min') }}">
                     @error('tiempo_min')
                         <small class="text-danger">{{ $message }}</small>

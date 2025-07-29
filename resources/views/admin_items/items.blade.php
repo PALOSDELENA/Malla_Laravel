@@ -33,58 +33,61 @@
 
         <!-- Tabla -->
         <div class="table-responsive">
-            <table class="table table-striped table-bordered align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre del Producto</th>
-                        <th>Unidad de Medida</th>
-                        <th>Tipo de Producto</th>
-                        <th>Ingredientes</th>
-                        <th>Condiciones de Conservación</th>
-                        <th>Fabricante</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($productos as $producto)
+            <a href="{{ route('productos.create') }}" class="btn btn-primary mb-3">{{__('New')}}</a>
+            <div class="bg-white shadow-sm sm:rounded-lg overflow-x-auto">
+                <table class="table table-striped align-middle w-100 divide-y divide-gray-200 text-center text-gray-700">
+                    <thead class="table-warning">
                         <tr>
-                            <td>{{ $producto->id }}</td>
-                            <td>{{ $producto->proNombre }}</td>
-                            <td>{{ $producto->proUnidadMedida }}</td>
-                            <td>{{ $producto->proTipo }}</td>
-                            <td>{{ $producto->proListaIngredientes }}</td>
-                            <td>{{ $producto->proCondicionesConservacion }}</td>
-                            <td>{{ $producto->proFabricante }}</td>
-                            <td>
-                                <button type="button"
-                                    class="btn btn-sm btn-warning btn-editar"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#editarProductoModal"
-                                    data-id="{{ $producto->id }}"
-                                    data-nombre="{{ $producto->proNombre }}"
-                                    data-unidad="{{ $producto->proUnidadMedida }}"
-                                    data-tipo="{{ $producto->proTipo }}"
-                                    data-ingredientes="{{ $producto->proListaIngredientes }}"
-                                    data-condiciones="{{ $producto->proCondicionesConservacion }}"
-                                    data-fabricante="{{ $producto->proFabricante }}">
-                                    <i class="fas fa-pen"></i>
-                                </button>
-                                <button type="button"
-                                    class="btn btn-sm btn-danger btn-eliminar"
-                                    data-id="{{ $producto->id }}"
-                                    data-nombre="{{ $producto->proNombre }}" data-url="{{ route('productos.destroy', ['producto' => '__ID__']) }}">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
+                            <th>ID</th>
+                            <th>Nombre del Producto</th>
+                            <th>Unidad de Medida</th>
+                            <th>Tipo de Producto</th>
+                            <th>Ingredientes</th>
+                            <th>Condiciones de Conservación</th>
+                            <th>Fabricante</th>
+                            <th>Acciones</th>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="8" class="text-center">No se encontraron productos.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @forelse ($productos as $producto)
+                            <tr>
+                                <td>{{ $producto->id }}</td>
+                                <td>{{ $producto->proNombre }}</td>
+                                <td>{{ $producto->proUnidadMedida }}</td>
+                                <td>{{ $producto->proTipo }}</td>
+                                <td>{{ $producto->proListaIngredientes }}</td>
+                                <td>{{ $producto->proCondicionesConservacion }}</td>
+                                <td>{{ $producto->proFabricante }}</td>
+                                <td>
+                                    <button type="button"
+                                        class="btn btn-sm btn-warning btn-editar"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editarProductoModal"
+                                        data-id="{{ $producto->id }}"
+                                        data-nombre="{{ $producto->proNombre }}"
+                                        data-unidad="{{ $producto->proUnidadMedida }}"
+                                        data-tipo="{{ $producto->proTipo }}"
+                                        data-ingredientes="{{ $producto->proListaIngredientes }}"
+                                        data-condiciones="{{ $producto->proCondicionesConservacion }}"
+                                        data-fabricante="{{ $producto->proFabricante }}">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+                                    <button type="button"
+                                        class="btn btn-sm btn-danger btn-eliminar"
+                                        data-id="{{ $producto->id }}"
+                                        data-nombre="{{ $producto->proNombre }}" data-url="{{ route('productos.destroy', ['producto' => '__ID__']) }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="text-center">No se encontraron productos.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
             <!-- Formulario oculto para eliminar -->
             <form id="form-eliminar" method="POST" style="display: none;">
                 @csrf
@@ -155,11 +158,10 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Paginación -->
-        <div class="d-flex justify-content-center">
-            {{ $productos->links() }}
+            <!-- Paginación -->
+            <div class="d-flex justify-content-center mt-2">
+                {{ $productos->links() }}
+            </div>
         </div>
     </div>
 </x-app-layout>

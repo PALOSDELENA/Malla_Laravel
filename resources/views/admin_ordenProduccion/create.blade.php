@@ -1,5 +1,10 @@
 <x-app-layout>
     <div class="container py-6 px-4">
+        @if ($errors->has('error'))
+            <div class="alert alert-danger">
+                {{ $errors->first('error') }}
+            </div>
+        @endif
         <form action="{{ route('ordenProduccion.store') }}" method="POST">
             @csrf
 

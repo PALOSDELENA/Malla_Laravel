@@ -7,8 +7,9 @@
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
         
-        <table class="table table-bordered">
-            <thead>
+        <div class="bg-white shadow-sm sm:rounded-lg overflow-x-auto">
+            <table class="table w-100 divide-y divide-gray-200 text-center text-gray-700">
+                <thead class="table-warning">
                 <tr>
                     <th>ID</th>
                     <th>Responsable</th>
@@ -16,7 +17,7 @@
                     <th>Estado</th>
                     <th>Fecha Inicio</th>
                     <th>Fecha Fin</th>
-                    <th>Acciones</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -29,15 +30,20 @@
                         <td>{{ $orden->fecha_inicio }}</td>
                         <td>{{ $orden->fecha_fin ?? '-' }}</td>
                         <td>
-                            <a href="{{ route('ordenProduccion.update', $orden->id) }}" class="btn btn-warning btn-sm">Editar</a>
+                            <a href="{{ route('ordenProduccion.update', $orden->id) }}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
                             <form action="{{ route('ordenProduccion.destroy', $orden->id) }}" method="POST" style="display:inline-block">
                                 @csrf @method('DELETE')
-                                <button class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar esta orden?')">Eliminar</button>
+                                <button class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar esta orden?')"><i class="fas fa-trash"></i></button>
                             </form>
                         </td>
                     </tr>
                 @endforeach
             </tbody>
-        </table>
+            </table>
+        </div>
+        <!-- Paginación -->
+        <div class="d-flex justify-content-center mt-2">
+            {{ $ordenes->links() }}
+        </div>
     </div>
 </x-app-layout>

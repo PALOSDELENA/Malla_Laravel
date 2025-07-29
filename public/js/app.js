@@ -1,3 +1,4 @@
+// Tags con Tagify para el input de ingredientes
 document.addEventListener('DOMContentLoaded', function () {
     // Selecciona el input
     var input = document.querySelector('#proListaIngredientes');
@@ -89,5 +90,5 @@ function confirmDelete(id) {
             document.getElementById(`delete-form-${id}`).submit();
         }
     });
-}
+};
 

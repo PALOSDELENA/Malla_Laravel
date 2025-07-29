@@ -8,6 +8,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PuntosController;
 use App\Http\Controllers\TipoDocumentoController;
 use App\Http\Controllers\TrazabilidadController;
+use App\Http\Controllers\TurnosController;
+use App\Http\Controllers\UsuariosController;
+use App\Models\User;
 use Dom\Document;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -28,6 +31,19 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+//Usuarios
+Route::get('/usuarios', [UsuariosController::class, 'index'])->name('usuarios.index');
+Route::put('/usuarios/{usuario}', [UsuariosController::class, 'update'])->name('usuarios.update');
+Route::post('/usuarios', [UsuariosController::class, 'store'])->name('usuarios.store');
+Route::get('/usuarios/crear', [UsuariosController::class, 'create'])->name('usuarios.create');
+Route::delete('/usarios/{usuario}', [UsuariosController::class, 'destroy'])->name('usuarios.destroy');
+
+//Turnos
+Route::get('/turnos', [TurnosController::class, 'index'])->name('turnos.index');
+Route::post('/turnos', [TurnosController::class, 'store'])->name('turnos.store');
+Route::put('/turnos/{turno}', [TurnosController::class, 'update'])->name('turnos.update');
+Route::delete('/turnos/{turno}', [TurnosController::class, 'destroy'])->name('turnos.destroy');
 
 // Productos
 Route::get('/productos', [ProductoController::class, 'index'])->name('productos.index');
