@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\OrdenProduccion;
 use App\Models\Productos;
 use App\Models\TrazabilidadProducto;
 use App\Models\User;
-use App\Models\Usuarios;
 use Illuminate\Http\Request;
 use App\Models\ProductoStock;
 use Illuminate\Support\Facades\DB;
@@ -33,82 +33,63 @@ class TrazabilidadController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'responsable' => 'required|exists:users,num_doc',
-            'produccion_id' => 'required|exists:producciones,id',
-            'cantidad' => 'required|numeric|min:0',
-            'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
-            'estado' => 'required|string|max:50',
-            'novedadProduccion' => 'nullable|string|max:255',
-
-            'materias_primas' => 'required|array|min:1',
-            'materias_primas.*.producto_id' => 'required|exists:productos,id',
-            'materias_primas.*.cantidad_real' => 'required|numeric|min:0',
+        $request->validate([
+            'traFechaMovimiento' => 'required|date',
+            'traTipoMovimiento'  => 'required|string|in:Ingreso,Egreso,Consumo Interno',
+            'traIdProducto'      => 'required|exists:productos,id',
+            'traCantidad'        => 'required|numeric|min:0.01',
+            'traLoteSerie'       => 'required|string|max:255',
+            'traObservaciones'   => 'nullable|string|max:500',
+            'traDestino'         => 'required|string',
+            'traResponsable'     => 'required|exists:users,num_doc',
+            'traColor'           => 'required|string',
+            'traTextura'         => 'required|string',
+            'traOlor'            => 'required|string',
         ]);
 
         DB::beginTransaction();
 
         try {
-            // Verificar stock suficiente usando ProductoStock
-            foreach ($validated['materias_primas'] as $materia) {
-                $productoId = $materia['producto_id'];
-                $cantidadSolicitada = $materia['cantidad_real'];
+            // Obtener o crear el stock actual
+            $stock = ProductoStock::firstOrCreate(
+                ['producto_id' => $request->traIdProducto],
+                ['stock_actual' => 0]
+            );
 
-                $stock = ProductoStock::where('producto_id', $productoId)->value('stock_actual') ?? 0;
-
-                if ($cantidadSolicitada > $stock) {
+            // Validación y actualización de stock
+            if ($request->traTipoMovimiento === 'Ingreso') {
+                $stock->increment('stock_actual', $request->traCantidad);
+            } elseif (in_array($request->traTipoMovimiento, ['Egreso', 'Consumo Interno'])) {
+                if ($stock->stock_actual < $request->traCantidad) {
+                    DB::rollBack();
                     return redirect()
                         ->back()
                         ->withInput()
-                        ->withErrors([
-                            'materias_primas' => "Stock insuficiente para el producto ID $productoId. Disponible: $stock, requerido: $cantidadSolicitada."
-                        ]);
+                        ->withErrors(['traCantidad' => 'Stock insuficiente para realizar este movimiento.']);
                 }
+
+                $stock->decrement('stock_actual', $request->traCantidad);
             }
 
-            // Crear la orden de producción
-            $orden = OrdenProduccion::create([
-                'responsable' => $validated['responsable'],
-                'produccion_id' => $validated['produccion_id'],
-                'cantidad' => $validated['cantidad'],
-                'fecha_inicio' => $validated['fecha_inicio'],
-                'fecha_fin' => $validated['fecha_fin'] ?? null,
-                'estado' => $validated['estado'],
-                'novedadProduccion' => $validated['novedadProduccion'] ?? null,
-            ]);
-
-            // Registrar cada consumo como trazabilidad
-            foreach ($validated['materias_primas'] as $materia) {
-                TrazabilidadProducto::create([
-                    'traFechaMovimiento'   => now()->toDateString(),
-                    'traTipoMovimiento'    => 'Consumo Interno',
-                    'traIdProducto'        => $materia['producto_id'],
-                    'traCantidad'          => $materia['cantidad_real'],
-                    'traLoteSerie'         => 'N/A',
-                    'traProveedor'         => 'Producción',
-                    'traDestino'           => 'Planta',
-                    'traResponsable'       => $validated['responsable'],
-                    'traColor'             => 'Bueno',
-                    'traTextura'           => 'Bueno',
-                    'traOlor'              => 'Bueno',
-                    'traObservaciones'     => 'Materia prima utilizada en producción',
-                    'orden_produccion_id'  => $orden->id,
-                ]);
-            }
+            // Registrar trazabilidad
+            TrazabilidadProducto::create($request->all());
 
             DB::commit();
 
-            return redirect()->route('ordenProduccion.index')
-                ->with('success', 'Orden de producción registrada correctamente con su trazabilidad.');
-
-        } catch (\Exception $e) {
+            return redirect()
+                ->route('trazabilidad.index')
+                ->with('success', 'Movimiento registrado correctamente.');
+        } catch (\Throwable $e) {
             DB::rollBack();
+
+            \Log::error('Error al registrar movimiento de trazabilidad', [
+                'error' => $e->getMessage(),
+            ]);
 
             return redirect()
                 ->back()
                 ->withInput()
-                ->withErrors(['error' => 'Error al registrar: ' . $e->getMessage()]);
+                ->withErrors(['general' => 'Ocurrió un error al registrar el movimiento.']);
         }
     }
     

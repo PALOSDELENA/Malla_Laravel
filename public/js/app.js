@@ -1,3 +1,30 @@
+function iniciarSortableKanban() {
+    document.querySelectorAll('.kanban-list').forEach(list => {
+        if (list.dataset.sortableAttached) return; // evita duplicados
+
+        new Sortable(list, {
+            group: 'kanban',
+            animation: 150,
+            onEnd: function (evt) {
+                const turnoId = evt.item.dataset.id;
+                const nuevoDia = evt.to.closest('.kanban-column').dataset.day;
+
+                const wireId = evt.to.closest('[wire\\:id]').getAttribute('wire:id');
+                const component = Livewire.find(wireId);
+
+                component.call('moverTurno', turnoId, nuevoDia);
+            }
+        });
+
+        list.dataset.sortableAttached = true;
+    });
+}
+
+document.addEventListener('livewire:load', iniciarSortableKanban);
+document.addEventListener('livewire:navigated', iniciarSortableKanban);
+document.addEventListener('livewire:updated', iniciarSortableKanban);
+
+
 // Tags con Tagify para el input de ingredientes
 document.addEventListener('DOMContentLoaded', function () {
     // Selecciona el input
@@ -91,4 +118,34 @@ function confirmDelete(id) {
         }
     });
 };
+
+// Mover Turnos en Kanban
+// function iniciarSortable() {
+//     document.querySelectorAll('.kanban-list').forEach(list => {
+//         new Sortable(list, {
+//             group: 'kanban',
+//             animation: 150,
+//             onEnd: function (evt) {
+//                 const turnoId = evt.item.dataset.id;
+//                 const nuevoDia = evt.to.closest('.kanban-column').dataset.day;
+
+//                 const component = Livewire.find(evt.from.closest('[wire\\:id]').getAttribute('wire:id'));
+//                 component.call('moverTurno', turnoId, nuevoDia);
+//             },
+//             onStart: function (evt) {
+//                 console.log("Arrastrando", evt.item.dataset.id);
+//             }
+//         });
+//     });
+// }
+
+// Inicial cuando carga la página
+// document.addEventListener('livewire:load', () => {
+//     iniciarSortable();
+// });
+
+// Re-inicializa después de cualquier actualización Livewire
+// document.addEventListener('livewire:update', () => {
+//     iniciarSortable();
+// });
 

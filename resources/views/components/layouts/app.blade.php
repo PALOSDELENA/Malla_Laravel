@@ -14,8 +14,6 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-        @livewireStyles
-
         <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
 
         <!-- Favicon de la página -->
@@ -49,10 +47,7 @@
                 {{ $slot }}
             </main>
         </div>
-        
-        <!-- CDN SortableJS -->
-        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-        
+
         <script src="{{ asset('js/app.js') }}"></script>
         
         <!-- Script Bootstrap -->
@@ -63,7 +58,8 @@
 
         <!-- SweetAlert2 CSS y JS -->
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        
         @livewireScripts
+        @vite('resources/js/app.js')
     </body>
 </html>
+

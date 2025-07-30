@@ -10,7 +10,7 @@ use App\Http\Controllers\TipoDocumentoController;
 use App\Http\Controllers\TrazabilidadController;
 use App\Http\Controllers\TurnosController;
 use App\Http\Controllers\UsuariosController;
-use App\Models\User;
+use App\Livewire\AsignacionTurnosKanban;
 use Dom\Document;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -87,11 +87,20 @@ Route::delete('/trazabilidad/{trazabilidad}', [TrazabilidadController::class, 'd
 // Oreden de Producción
 Route::get('/orden-produccion', [OrdenProduccionController::class, 'index'])->name('ordenProduccion.index');
 Route::get('/orden-produccion/crear', [OrdenProduccionController::class, 'create'])->name('ordenProduccion.create');
+// Route::middleware(['web'])->group(function () {
+//     Route::post('/orden-produccion', [OrdenProduccionController::class, 'store'])->name('ordenProduccion.store');
+// });
 Route::post('/orden-produccion', [OrdenProduccionController::class, 'store'])->name('ordenProduccion.store');
 Route::put('/orden-produccion/{ordenProduccion}', [OrdenProduccionController::class, 'update'])->name('ordenProduccion.update');
 Route::delete('/orden-produccion/{ordenProduccion}', [OrdenProduccionController::class, 'destroy'])->name('ordenProduccion.destroy');
 
 Route::get('/produccion/{id}/materias-primas', [OrdenProduccionController::class, 'getMateriasPrimas']);
 
+// Route::get('/kanban-turnos', AsignacionTurnosKanban::class)->name('kanban.turnos');
+// Route::get('/kanban-form', AsignacionTurnosForm::class)->name('kanban.form');
+
+Route::get('/kanban-turnos', function(){
+    return view('admin_turnosKanban.kanban');
+})->name('kanban.turnos');
 
 require __DIR__.'/auth.php';

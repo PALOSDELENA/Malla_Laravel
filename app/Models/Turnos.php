@@ -14,12 +14,12 @@ class Turnos extends Model
     public $timestamps = false;
 
     // Relacion
-    public function usuarios(): BelongsToMany
-    {
-        return $this->belongsToMany(Usuarios::class,"asignacion_turnos","usuarios_num_doc","turnos_id")
-            ->as("asignacionTurnos")
-            ->withPivot("tur_usu_dia", "tur_usu_fecha");
-    }
+    // public function usuarios(): BelongsToMany
+    // {
+    //     return $this->belongsToMany(User::class,"asignacion_turnos","usuarios_num_doc","turnos_id")
+    //         ->as("asignacionTurnos")
+    //         ->withPivot("tur_usu_dia", "tur_usu_fecha");
+    // }
 
     public function asignacionTurnos()
     {

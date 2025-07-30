@@ -76,21 +76,36 @@ class OrdenProduccionController extends Controller
 
             // Registrar cada consumo como trazabilidad
             foreach ($validated['materias_primas'] as $materia) {
+                $productoId = $materia['producto_id'];
+                $cantidadSolicitada = $materia['cantidad_real'];
+
+                $stock = ProductoStock::where('producto_id', $productoId)->value('stock_actual') ?? 0;
+
+                if ($stock < $cantidadSolicitada) {
+                    return redirect()->back()->withInput()->withErrors([
+                        'materias_primas' => "Stock insuficiente para el producto ID $productoId. Disponible: $stock, requerido: $cantidadSolicitada."
+                    ]);
+                }
+
+                // 1. Registrar el movimiento en trazabilidad
                 TrazabilidadProducto::create([
-                    'traFechaMovimiento'   => now()->toDateString(),
-                    'traTipoMovimiento'    => 'Consumo Interno',
-                    'traIdProducto'        => $materia['producto_id'],
-                    'traCantidad'          => $materia['cantidad_real'],
-                    'traLoteSerie'         => 'N/A',
-                    'traProveedor'         => 'Producción',
-                    'traDestino'           => 'Planta',
-                    'traResponsable'       => $validated['responsable'],
-                    'traColor'             => 'Bueno',
-                    'traTextura'           => 'Bueno',
-                    'traOlor'              => 'Bueno',
-                    'traObservaciones'     => 'Materia prima utilizada en producción',
-                    'orden_produccion_id'  => $orden->id,
+                    'traFechaMovimiento' => now()->toDateString(),
+                    'traTipoMovimiento' => 'Consumo Interno',
+                    'traIdProducto' => $productoId,
+                    'traCantidad' => $cantidadSolicitada,
+                    'traLoteSerie' => 'N/A',
+                    'traProveedor' => 'Producción',
+                    'traDestino' => 'Planta',
+                    'traResponsable' => $validated['responsable'],
+                    'traColor' => 'Bueno',
+                    'traTextura' => 'Bueno',
+                    'traOlor' => 'Bueno',
+                    'traObservaciones' => 'Materia prima utilizada en producción',
+                    'orden_produccion_id' => $orden->id,
                 ]);
+
+                // 2. Descontar del stock actual
+                ProductoStock::where('producto_id', $productoId)->decrement('stock_actual', $cantidadSolicitada);
             }
 
             DB::commit();

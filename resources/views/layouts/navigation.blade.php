@@ -39,7 +39,7 @@
                         <i class="fa-regular fa-circle-user"></i>
                         <span class="tooltip">Ver Lista Cargos</span>
                     </x-nav-link>
-                    <x-nav-link href="{{asset('/admin')}}" class="header-btn">
+                    <x-nav-link href="{{asset('/admin/turnos-kanban-board-page')}}" class="header-btn">
                         <i class="fas fa-piggy-bank"></i>
                         <span class="tooltip">Ir a Formularios</span>
                     </x-nav-link>

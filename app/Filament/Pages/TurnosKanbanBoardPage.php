@@ -8,7 +8,7 @@ use Relaticle\Flowforge\Filament\Pages\KanbanBoardPage;
 use Filament\Actions\Action;
 use Filament\Forms;
 use App\Models\Turnos;
-use App\Models\Usuarios;
+use App\Models\User;
 
 class TurnosKanbanBoardPage extends KanbanBoardPage
 {
@@ -68,7 +68,7 @@ protected function getCardAttributes(): array
                 return $form->schema([
                     Forms\Components\Select::make('usuarios_num_doc')
                         ->label('Empleado')
-                        ->options(Usuarios::all()->pluck('usu_nombre', 'num_doc'))
+                        ->options(User::all()->pluck('usu_nombre', 'num_doc'))
                         ->searchable()
                         ->required(),
 
@@ -124,7 +124,7 @@ protected function getCardAttributes(): array
                     Forms\Components\Select::make('usuarios_num_doc')
                         ->label('Empleado')
                         ->options(
-                            Usuarios::all()->mapWithKeys(fn ($u) => [
+                            User::all()->mapWithKeys(fn ($u) => [
                                 $u->num_doc => "{$u->usu_nombre} {$u->usu_apellido}"
                             ])
                         )

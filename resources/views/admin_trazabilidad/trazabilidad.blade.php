@@ -13,6 +13,11 @@
                     {{ session('success') }}
                 </div>
             @endif
+            @if ($errors->has('error'))
+                <div class="alert alert-danger">
+                    {{ $errors->first('error') }}
+                </div>
+            @endif
 
             <div class="mb-4">
                 <a href="{{ route('trazabilidad.create') }}" class="bg-blue-600 text-black px-4 py-2 rounded hover:bg-blue-700 transition">

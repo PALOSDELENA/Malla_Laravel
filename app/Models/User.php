@@ -56,10 +56,10 @@ class User extends Authenticatable implements HasName
         return $this->hasMany(Asignaciones_Personal::class,"usu_num_doc", "num_doc");
     }
 
-    public function turnos(): BelongsToMany
-    {
-        return $this->belongsToMany(Turnos::class,"asignacion_turnos","turnos_id", "usuarios_num_doc");
-    }
+    // public function turnos(): BelongsToMany
+    // {
+    //     return $this->belongsToMany(Turnos::class,"asignacion_turnos","turnos_id", "usuarios_num_doc");
+    // }
     
     public function punto(): BelongsTo
     {

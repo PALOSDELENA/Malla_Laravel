@@ -82,6 +82,18 @@
             <div class="col-md-3 mb-4">
                 <div class="card text-center">
                     <div class="mt-4 mb-2">
+                        <a href="{{route('kanban.turnos')}}">
+                            <i class="fa-solid fa-calendar-days fa-5x icon-hover"></i>
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Asignación de Turnos</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card text-center">
+                    <div class="mt-4 mb-2">
                         <a href="{{route('producciones.index')}}">
                             <i class="fa-solid fa-industry fa-5x icon-hover" ></i>
                         </a>
