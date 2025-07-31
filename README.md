@@ -64,3 +64,9 @@ http://localhost
     php artisan route:clear
     php artisan config:clear
     php artisan optimize:clear
+
+
+      MYSQL_DATABASE: app
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root

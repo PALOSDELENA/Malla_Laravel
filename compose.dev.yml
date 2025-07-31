@@ -49,9 +49,9 @@ services:
       - ./:/var/www
     networks:
       - laravel-development
-    depends_on:
-      mysql:
-        condition: service_started
+    # depends_on:
+    #   mysql:
+    #     condition: service_started
 
   workspace:
     # For the workspace service, we will also create a custom image to install and setup all the necessary stuff.
@@ -77,19 +77,19 @@ services:
     networks:
       - laravel-development
 
-  mysql:
-    image: mysql:8.3
-    ports:
-      - "${MYSQL_PORT:-3307}:3306"
-    environment:
-      MYSQL_DATABASE: app
-      MYSQL_USER: laravel
-      MYSQL_PASSWORD: secret
-      MYSQL_ROOT_PASSWORD: root
-    volumes:
-      - mysql-data-development:/var/lib/mysql
-    networks:
-      - laravel-development
+  # mysql:
+  #   image: mysql:8.3
+  #   ports:
+  #     - "${MYSQL_PORT:-3307}:3306"
+  #   environment:
+  #     MYSQL_DATABASE: app
+  #     MYSQL_USER: laravel
+  #     MYSQL_PASSWORD: secret
+  #     MYSQL_ROOT_PASSWORD: root
+  #   volumes:
+  #     - mysql-data-development:/var/lib/mysql
+  #   networks:
+  #     - laravel-development
 
   redis:
     image: redis:alpine
@@ -99,5 +99,5 @@ services:
 networks:
   laravel-development:
 
-volumes:
-  mysql-data-development:
+# volumes:
+#   mysql-data-development:
