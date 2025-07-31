@@ -19,30 +19,35 @@
                     <!-- <x-nav-link :href="route('filament.admin.pages.dashboard')">
                         {{ __('Ir a Panel de Administración') }}
                     </x-nav-link> -->
-                    <x-nav-link :href="route('dashboard')" class="header-btn">
-                        <i class="fas fa-chart-line"></i>
-                        <span class="tooltip">Ver Métricas</span>
-                    </x-nav-link>
-                    <x-nav-link :href="route('dashboard')" class="header-btn">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span class="tooltip">Ver Dashboard</span>
-                    </x-nav-link>
-                    <x-nav-link :href="route('dashboard')" class="header-btn">
-                        <i class="fas fa-clipboard-list"></i>
-                        <span class="tooltip">Ir al Paloteo</span>
-                    </x-nav-link>
-                    <x-nav-link :href="route('dashboard')" class="header-btn">
-                        <i class="fas fa-list"></i>
-                        <span class="tooltip">Ver Lista Completa</span>
-                    </x-nav-link>
-                    <x-nav-link :href="route('dashboard')" class="header-btn">
-                        <i class="fa-regular fa-circle-user"></i>
-                        <span class="tooltip">Ver Lista Cargos</span>
-                    </x-nav-link>
-                    <x-nav-link href="{{asset('/admin/turnos-kanban-board-page')}}" class="header-btn">
-                        <i class="fas fa-piggy-bank"></i>
-                        <span class="tooltip">Ir a Formularios</span>
-                    </x-nav-link>
+    @php
+        $perfil = auth()->user()->cargo()->first()->car_nombre ?? 'Sin Cargo';
+    @endphp
+                    @if ($perfil === 'Administrador')
+                        <x-nav-link :href="route('dashboard')" class="header-btn">
+                            <i class="fas fa-chart-line"></i>
+                            <span class="tooltip">Ver Métricas</span>
+                        </x-nav-link>
+                        <x-nav-link :href="route('dashboard')" class="header-btn">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span class="tooltip">Ver Dashboard</span>
+                        </x-nav-link>
+                        <x-nav-link :href="route('dashboard')" class="header-btn">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span class="tooltip">Ir al Paloteo</span>
+                        </x-nav-link>
+                        <x-nav-link :href="route('dashboard')" class="header-btn">
+                            <i class="fas fa-list"></i>
+                            <span class="tooltip">Ver Lista Completa</span>
+                        </x-nav-link>
+                        <x-nav-link :href="route('dashboard')" class="header-btn">
+                            <i class="fa-regular fa-circle-user"></i>
+                            <span class="tooltip">Ver Lista Cargos</span>
+                        </x-nav-link>
+                        <x-nav-link href="{{asset('/admin/turnos-kanban-board-page')}}" class="header-btn">
+                            <i class="fas fa-piggy-bank"></i>
+                            <span class="tooltip">Ir a Formularios</span>
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
