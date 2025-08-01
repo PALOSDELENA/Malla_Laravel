@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="container mt-5 mb-4">
-        <h2 class="mb-4">Gestión de Tipos de Documetos</h2>
+        <h2 class="mb-4">Gestión de Turnos</h2>
 
         {{-- Alerta de éxito --}}
         @if(session('success'))
@@ -8,7 +8,7 @@
         @endif
 
         <button class="btn btn-sm btn-warning mb-4" data-bs-toggle="modal" data-bs-target="#crearTurno">
-            NEW
+            {{__('New')}}
         </button>
 
         <!-- Modal de Creación -->
@@ -34,7 +34,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Registrar</button>
+                        <button type="submit" class="btn btn-warning">Registrar</button>
                     </div>
                 </div>
             </form>
@@ -87,7 +87,7 @@
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                            <button type="submit" class="btn btn-warning">Guardar Cambios</button>
                                         </div>
                                     </div>
                                 </form>

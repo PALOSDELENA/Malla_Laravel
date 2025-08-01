@@ -13,7 +13,7 @@
                         {{ session('success') }}
                     </div>
                 @endif
-                <a href="{{ route('usuarios.create') }}" class="btn btn-primary mb-3">{{__('New')}}</a>
+                <a href="{{ route('usuarios.create') }}" class="btn btn-warning mb-3">{{__('New')}}</a>
                 <table class="w-full table-auto border-collapse border border-gray-300 px-4 text-sm">
                     <thead>
                         <tr class="bg-gray-100 text-left">
@@ -46,7 +46,7 @@
                                 <td class="px-4 py-2 border border-gray-300">{{ $usuario->cargo->car_nombre ?? '-' }}</td>
                                 <td class="px-4 py-2 border border-gray-300">{{ $usuario->punto->nombre ?? '-' }}</td>
                                 <td class="px-4 py-2 border border-gray-300">
-                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editarUsuarioModal{{ $usuario->num_doc }}">
+                                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editarUsuarioModal{{ $usuario->num_doc }}">
                                         <i class="fas fa-edit"></i>
                                     </button>                                    
                                 </td>

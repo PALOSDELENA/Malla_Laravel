@@ -30,6 +30,19 @@ class AppServiceProvider extends ServiceProvider
                 'profile.edit' => 'Profile',
                 // Agrega más según tus rutas
                 'productos.index' => 'Productos',
+                'ordenProduccion.index' => 'Ordenes de Producción',
+                'ordenProduccion.create' => 'Crear Orden de Producción',
+                'cargos.index' => 'Cargos',
+                'turnos.index' => 'Turnos',
+                'usuarios.index' => 'Usuarios',
+                'usuarios.create' => 'Crear Usuario',
+                'puntos.index' => 'Puntos',
+                'tipos-documentos.index' => 'Tipos de Documento',
+                'kanban.turnos' => 'Kanban Turnos',
+                'producciones.index' => 'Producciones',
+                'producciones.create' => 'Crear Producción',
+                'trazabilidad.index' => 'Trazabilidad',
+                'trazabilidad.create' => 'Registrar Movimiento',
             ];
 
             $view->with('pageTitle', $titles[$routeName] ?? 'Panel2');

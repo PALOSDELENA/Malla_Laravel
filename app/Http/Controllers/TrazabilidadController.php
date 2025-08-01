@@ -96,9 +96,6 @@ class TrazabilidadController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'traFechaMovimiento' => 'required|date',
-            'traTipoMovimiento' => 'required|string|in:Ingreso,Egreso,Devolución',
-            'traIdProducto' => 'required|exists:productos,id',
             'traCantidad' => 'required|numeric|min:0',
             'traLoteSerie' => 'required|string|max:255',
             'traDestino' => 'required|string|max:255',
@@ -109,15 +106,67 @@ class TrazabilidadController extends Controller
             'traObservaciones' => 'nullable|string|max:500',
         ]);
 
-        $traza = TrazabilidadProducto::findOrFail($id);
-        $traza->update($request->all());
+        DB::beginTransaction();
 
-        return redirect()->route('trazabilidad.index')->with('success', 'Registro actualizado correctamente.');
+        try {
+            $traza = TrazabilidadProducto::findOrFail($id);
+
+            $cantidadAnterior = $traza->traCantidad;
+            $cantidadNueva = $request->traCantidad;
+
+            $stock = ProductoStock::firstOrCreate(
+                ['producto_id' => $traza->traIdProducto],
+                ['stock_actual' => 0]
+            );
+
+            if ($cantidadAnterior !== $cantidadNueva) {
+                if($cantidadNueva > $cantidadAnterior) {
+                    // Si la nueva cantidad es mayor, se trata de un ingreso
+                    $diferencia = $cantidadNueva - $cantidadAnterior;
+                    $stock->increment('stock_actual', $diferencia);
+                } else {
+                    // Si la nueva cantidad es menor, se trata de un egreso
+                    $diferencia = $cantidadAnterior - $cantidadNueva;
+                    if ($stock->stock_actual < $diferencia) {
+                        return redirect()
+                            ->back()
+                            ->withInput()
+                            ->withErrors(['traCantidad' => 'Stock insuficiente para realizar esta actualización.']);
+                    }
+                    $stock->decrement('stock_actual', $diferencia);
+                }
+            }
+
+            $traza->update($request->all());
+
+            DB::commit();
+
+            return redirect()->route('trazabilidad.index')->with('success', 'Registro actualizado correctamente.');
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            \Log::error('Error al actualizar trazabilidad', [
+                'error' => $e->getMessage(),
+            ]);
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['general' => 'Ocurrió un error al actualizar el registro.']);
+        }
     }
 
     public function destroy($id)
     {
         $traza = TrazabilidadProducto::findOrFail($id);
+        $tipoMovimiento = $traza->traTipoMovimiento;
+        $stock = ProductoStock::where('producto_id', $traza->traIdProducto)->first();
+
+        if ($tipoMovimiento === 'Ingreso') {
+            $stock->decrement('stock_actual', $traza->traCantidad);
+        } elseif (in_array($tipoMovimiento, ['Egreso', 'Consumo Interno'])) {
+            $stock->increment('stock_actual', $traza->traCantidad);
+        }
+        
         $traza->delete();
 
         return redirect()->route('trazabilidad.index')->with('success', 'Registro eliminado correctamente.');

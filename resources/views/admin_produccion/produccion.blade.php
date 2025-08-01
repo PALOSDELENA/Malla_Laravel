@@ -7,7 +7,7 @@
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
-        <a href="{{ route('producciones.create') }}" class="btn btn-info mb-2 mt-2">{{__('New')}}</i></a>
+        <a href="{{ route('producciones.create') }}" class="btn btn-warning mb-2 mt-2">{{__('New')}}</i></a>
 
         {{-- Tabla de cargos --}}
         <div class="bg-white shadow-sm sm:rounded-lg overflow-x-auto">

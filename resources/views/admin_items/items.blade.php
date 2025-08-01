@@ -26,14 +26,14 @@
                        value="{{ request('proUnidadMedida') }}">
             </div>
             <div class="col-md-4 d-flex">
-                <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+                <button type="submit" class="btn btn-warning me-2">Filtrar</button>
                 <a href="{{ route('productos.index') }}" class="btn btn-secondary">Limpiar</a>
             </div>
         </form>
 
         <!-- Tabla -->
         <div class="table-responsive">
-            <a href="{{ route('productos.create') }}" class="btn btn-primary mb-3">{{__('New')}}</a>
+            <a href="{{ route('productos.create') }}" class="btn btn-warning mb-3">{{__('New')}}</a>
             <div class="bg-white shadow-sm sm:rounded-lg overflow-x-auto">
                 <table class="table table-striped align-middle w-100 divide-y divide-gray-200 text-center text-gray-700">
                     <thead class="table-warning">

@@ -37,8 +37,8 @@
                 </div>
             </div>
 
-            <div class="col-md-12">
-                <button type="submit" class="btn btn-primary w-100">Guardar</button>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-warning w-100">Guardar</button>
             </div>
         </form>
     </div>

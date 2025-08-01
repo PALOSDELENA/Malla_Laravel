@@ -71,8 +71,13 @@
                 {{-- Estado --}}
                 <div class="col-md-4 mb-4">
                     <label class="block font-medium">Estado</label>
-                    <input type="text" name="estado" class="w-full border rounded p-2"
+                    <select name="estado" class="form-select"
                         value="{{ old('estado', 'Pendiente') }}" required>
+                        <option value="Pendiente" {{ old('estado') == 'Pendiente' ? 'selected' : '' }}>Pendiente</option>
+                        <option value="En Proceso" {{ old('estado') == 'En Proceso' ? 'selected' : '' }}>En Proceso</option>
+                        <option value="Finalizada" {{ old('estado') == 'Finalizada' ? 'selected' : '' }}>Finalizada</option>
+                        <option value="Cancelada" {{ old('estado') == 'Cancelada' ? 'selected' : '' }}>Cancelada</option>
+                    </select>
                 </div>
 
                 {{-- Novedad --}}
@@ -83,7 +88,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-info">Guardar Orden</button>
+            <button type="submit" class="btn btn-warning">Guardar Orden</button>
         </form>
         </div>
 

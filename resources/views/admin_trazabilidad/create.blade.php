@@ -86,7 +86,7 @@
                     </select>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100">Registrar Movimiento</button>
+                <button type="submit" class="btn btn-warning w-100">Registrar Movimiento</button>
             </div>
         </form>
     </div>

@@ -96,7 +96,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="submit" class="btn btn-warning">Guardar</button>
         </form>
     </div>
 </x-app-layout>

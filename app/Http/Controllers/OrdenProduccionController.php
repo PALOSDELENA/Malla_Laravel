@@ -16,7 +16,8 @@ class OrdenProduccionController extends Controller
     {
         // Aquí puedes implementar la lógica para mostrar la lista de órdenes de producción
         $ordenes = OrdenProduccion::with(['responsable1', 'producciones'])->paginate(10);
-        return view('admin_ordenProduccion.ordenPro', compact('ordenes'));
+        $responsables = User::pluck('usu_nombre', 'num_doc');
+        return view('admin_ordenProduccion.ordenPro', compact('ordenes', 'responsables'));
     }
 
     public function create()
@@ -136,30 +137,34 @@ class OrdenProduccionController extends Controller
     {
         $orden = OrdenProduccion::findOrFail($id);
 
-        $data = $request->validate([
+        $request->validate([
             'responsable' => 'required',
-            'produccion_id' => 'required|exists:producciones,id',
             'cantidad' => 'required|numeric|min:0',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'nullable|date',
             'estado' => 'required|string|max:50',
             'novedadProduccion' => 'nullable|string|max:255',
         ]);
-
-        $orden->update($data);
+        
 
         // Actualizar consumos
-        $orden->consumoMateriaPrima()->delete(); // borrar anteriores
-        if ($request->has('materias_primas')) {
-            foreach ($request->materias_primas as $consumo) {
-                $orden->consumoMateriaPrima()->create([
-                    'traIdProducto' => $consumo['producto_id'],
-                    'traCantidad' => $consumo['cantidad_real'],
-                ]);
-            }
-        }
+        // $orden->consumoMateriaPrima()->delete(); // borrar anteriores
+        // if ($request->has('materias_primas')) {
+        //     foreach ($request->materias_primas as $consumo) {
+        //         $orden->consumoMateriaPrima()->create([
+        //             'traIdProducto' => $consumo['producto_id'],
+        //             'traCantidad' => $consumo['cantidad_real'],
+        //         ]);
+        //     }
+        // }
 
-        return redirect()->route('orden-produccion.index')->with('success', 'Orden actualizada.');
+        
+        $cantidadAnterior = $orden->consumoMateriaPrima()->traCantidad;
+        dd($cantidadAnterior);
+
+        $orden->update(attributes: $request->all());
+
+        return redirect()->route('ordenProduccion.index')->with('success', 'Orden actualizada.');
     }
 
     public function destroy($id)
@@ -183,6 +188,24 @@ class OrdenProduccionController extends Controller
             return [
                 'id' => $producto->id,
                 'nombre' => $producto->proNombre,
+                'unidad' => $producto->proUnidadMedida,
+            ];
+        });
+
+        return response()->json($materias);
+    }
+
+    public function getConsumosMateriasPrimas($ordenId)
+    {
+        $trazas = TrazabilidadProducto::with('producto')
+            ->where('orden_produccion_id', $ordenId)
+            ->get();
+
+        $materias = $trazas->map(function ($traza) {
+            return [
+                'id'       => $traza->traIdProducto,
+                'nombre'   => $traza->producto->proNombre ?? 'N/A',
+                'cantidad' => $traza->traCantidad,
             ];
         });
 

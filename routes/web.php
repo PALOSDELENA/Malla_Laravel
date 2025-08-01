@@ -95,6 +95,8 @@ Route::put('/orden-produccion/{ordenProduccion}', [OrdenProduccionController::cl
 Route::delete('/orden-produccion/{ordenProduccion}', [OrdenProduccionController::class, 'destroy'])->name('ordenProduccion.destroy');
 
 Route::get('/produccion/{id}/materias-primas', [OrdenProduccionController::class, 'getMateriasPrimas']);
+Route::get('/ordenProduccion/{id}/materias-primas-consumo', [OrdenProduccionController::class, 'getConsumosMateriasPrimas']);
+
 
 // Route::get('/kanban-turnos', AsignacionTurnosKanban::class)->name('kanban.turnos');
 // Route::get('/kanban-form', AsignacionTurnosForm::class)->name('kanban.form');

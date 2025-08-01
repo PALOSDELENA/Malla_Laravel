@@ -18,9 +18,14 @@
                     {{ $errors->first('error') }}
                 </div>
             @endif
+            @if ($errors->has('traCantidad'))
+                <div class="alert alert-danger">
+                    {{ $errors->first('traCantidad') }}
+                </div>
+            @endif
 
             <div class="mb-4">
-                <a href="{{ route('trazabilidad.create') }}" class="bg-blue-600 text-black px-4 py-2 rounded hover:bg-blue-700 transition">
+                <a href="{{ route('trazabilidad.create') }}" class="btn btn-warning">
                     + Registrar Nuevo Movimiento
                 </a>
             </div>
@@ -72,110 +77,110 @@
                                         @method('DELETE')
                                     </form>
 
-<!-- Modal -->
-<div class="modal fade" id="editModal{{ $mov->id }}" tabindex="-1" aria-labelledby="editModalLabel{{ $mov->id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <form action="{{ route('trazabilidad.update', $mov->id) }}" method="POST">
-            @csrf
-            @method('PUT')
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Editar Trazabilidad</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+                                <!-- Modal -->
+                                <div class="modal fade" id="editModal{{ $mov->id }}" tabindex="-1" aria-labelledby="editModalLabel{{ $mov->id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                        <form action="{{ route('trazabilidad.update', $mov->id) }}" method="POST">
+                                            @csrf
+                                            @method('PUT')
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Editar Trazabilidad</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
 
-                <div class="modal-body row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Fecha</label>
-                        <input type="date" name="traFechaMovimiento" class="form-control" value="{{ $mov->traFechaMovimiento }}" required>
-                    </div>
+                                                <div class="modal-body row g-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Fecha</label>
+                                                        <input type="date" name="traFechaMovimiento" class="form-control" value="{{ $mov->traFechaMovimiento }}" disabled>
+                                                    </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">Tipo de Movimiento</label>
-                        <select name="traTipoMovimiento" class="form-select" required>
-                            @foreach(['Ingreso', 'Egreso', 'Devolución'] as $tipo)
-                                <option value="{{ $tipo }}" @selected($mov->traTipoMovimiento == $tipo)>{{ $tipo }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Tipo de Movimiento</label>
+                                                        <select name="traTipoMovimiento" class="form-select" disabled>
+                                                            @foreach(['Ingreso', 'Egreso', 'Devolución'] as $tipo)
+                                                                <option value="{{ $tipo }}" @selected($mov->traTipoMovimiento == $tipo)>{{ $tipo }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">Producto</label>
-                        <select name="traIdProducto" class="form-select" required>
-                            @foreach($productos as $producto)
-                                <option value="{{ $producto->id }}" @selected($mov->traIdProducto == $producto->id)>
-                                    {{ $producto->proNombre }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Producto</label>
+                                                        <select name="traIdProducto" class="form-select" disabled>
+                                                            @foreach($productos as $producto)
+                                                                <option value="{{ $producto->id }}" @selected($mov->traIdProducto == $producto->id)>
+                                                                    {{ $producto->proNombre }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">Cantidad</label>
-                        <input type="number" name="traCantidad" class="form-control" step="0.01" value="{{ $mov->traCantidad }}" required>
-                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Cantidad</label>
+                                                        <input type="number" name="traCantidad" class="form-control" step="0.01" value="{{ $mov->traCantidad }}" required>
+                                                    </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">Lote/Serie</label>
-                        <input type="text" name="traLoteSerie" class="form-control" value="{{ $mov->traLoteSerie }}" required>
-                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Lote/Serie</label>
+                                                        <input type="text" name="traLoteSerie" class="form-control" value="{{ $mov->traLoteSerie }}" required>
+                                                    </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">Ubicación</label>
-                        <select name="traDestino" class="form-select" required>
-                            <option value="Puente Aranda" @selected($mov->traDestino == 'Puente Aranda')>Puente Aranda</option>
-                        </select>
-                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Ubicación</label>
+                                                        <select name="traDestino" class="form-select" required>
+                                                            <option value="Puente Aranda" @selected($mov->traDestino == 'Puente Aranda')>Puente Aranda</option>
+                                                        </select>
+                                                    </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">Responsable</label>
-                        <select name="traResponsable" class="form-select" required>
-                            @foreach($usuarios as $user)
-                                <option value="{{ $user->num_doc }}" @selected($mov->traResponsable == $user->num_doc)>
-                                    {{ $user->usu_nombre }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Responsable</label>
+                                                        <select name="traResponsable" class="form-select" required>
+                                                            @foreach($usuarios as $user)
+                                                                <option value="{{ $user->num_doc }}" @selected($mov->traResponsable == $user->num_doc)>
+                                                                    {{ $user->usu_nombre }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">Color</label>
-                        <select name="traColor" class="form-select" required>
-                            <option value="Bueno" @selected($mov->traColor == 'Bueno')>Bueno</option>
-                            <option value="Malo" @selected($mov->traColor == 'Malo')>Malo</option>
-                        </select>
-                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Color</label>
+                                                        <select name="traColor" class="form-select" required>
+                                                            <option value="Bueno" @selected($mov->traColor == 'Bueno')>Bueno</option>
+                                                            <option value="Malo" @selected($mov->traColor == 'Malo')>Malo</option>
+                                                        </select>
+                                                    </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">Textura</label>
-                        <select name="traTextura" class="form-select" required>
-                            <option value="Bueno" @selected($mov->traTextura == 'Bueno')>Bueno</option>
-                            <option value="Malo" @selected($mov->traTextura == 'Malo')>Malo</option>
-                        </select>
-                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Textura</label>
+                                                        <select name="traTextura" class="form-select" required>
+                                                            <option value="Bueno" @selected($mov->traTextura == 'Bueno')>Bueno</option>
+                                                            <option value="Malo" @selected($mov->traTextura == 'Malo')>Malo</option>
+                                                        </select>
+                                                    </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label">Olor</label>
-                        <select name="traOlor" class="form-select" required>
-                            <option value="Bueno" @selected($mov->traOlor == 'Bueno')>Bueno</option>
-                            <option value="Malo" @selected($mov->traOlor == 'Malo')>Malo</option>
-                        </select>
-                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Olor</label>
+                                                        <select name="traOlor" class="form-select" required>
+                                                            <option value="Bueno" @selected($mov->traOlor == 'Bueno')>Bueno</option>
+                                                            <option value="Malo" @selected($mov->traOlor == 'Malo')>Malo</option>
+                                                        </select>
+                                                    </div>
 
-                    <div class="col-12">
-                        <label class="form-label">Observaciones</label>
-                        <textarea name="traObservaciones" class="form-control" rows="2">{{ $mov->traObservaciones }}</textarea>
-                    </div>
-                </div>
+                                                    <div class="col-12">
+                                                        <label class="form-label">Observaciones</label>
+                                                        <textarea name="traObservaciones" class="form-control" rows="2">{{ $mov->traObservaciones }}</textarea>
+                                                    </div>
+                                                </div>
 
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
-                    <button class="btn btn-primary" type="submit">Guardar Cambios</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
+                                                <div class="modal-footer">
+                                                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+                                                    <button class="btn btn-warning" type="submit">Guardar Cambios</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
                                 </td>
                             </tr>
                         @empty
