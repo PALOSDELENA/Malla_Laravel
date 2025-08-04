@@ -56,25 +56,32 @@ public function update(Request $request, $id)
         'produccion' => 'required|string|max:255',
         'materias_primas' => 'nullable|array',
         'materias_primas.*' => 'exists:productos,id',
+        'cantidad' => 'nullable|array',
+        'cantidad.*' => 'numeric|min:0',
     ]);
 
-    // Buscar la producción
     $produccion = Producciones::findOrFail($id);
-
-    // Actualizar nombre de la producción
     $produccion->produccion = $request->input('produccion');
     $produccion->save();
 
-    // Sincronizar materias primas (relación muchos a muchos)
     if ($request->has('materias_primas')) {
-        $produccion->productos()->sync($request->input('materias_primas'));
+        $materiasPrimas = $request->input('materias_primas');
+        $cantidades = $request->input('cantidad');
+
+        $syncData = [];
+        foreach ($materiasPrimas as $index => $productoId) {
+            $cantidad = $cantidades[$index] ?? 0;
+            $syncData[$productoId] = ['cantidad_requerida' => $cantidad];
+        }
+
+        $produccion->productos()->sync($syncData);
     } else {
-        // Si no se envían materias primas, eliminamos todas las relaciones
         $produccion->productos()->sync([]);
     }
 
     return redirect()->route('producciones.index')->with('success', 'Producción actualizada correctamente.');
-}    
+}
+  
     public function destroy($id)
     {
         $produccion = \App\Models\Producciones::findOrFail($id);

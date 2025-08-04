@@ -19,7 +19,8 @@ class Producciones extends Model
 
     public function productos()
     {
-        return $this->belongsToMany(Productos::class, 'produccion_m_prima', 'produccion_id', 'm_prima_id');
+        return $this->belongsToMany(Productos::class, 'produccion_m_prima', 'produccion_id', 'm_prima_id')
+            ->withPivot('cantidad_requerida');
     }
 
     public function ordenProduccion()

@@ -21,8 +21,11 @@
                 </thead>
                 <tbody>
                     @foreach ($producciones as $produccion)
+                        @php
+                            $id = $produccion->id - 4;
+                        @endphp
                         <tr>
-                            <td>{{ $produccion->id }}</td>
+                            <td>{{ $id }}</td>
                             <td>{{ $produccion->produccion }}</td>
                             <td>
                                 {{-- Botones de acción aquí --}}
@@ -64,6 +67,7 @@
                                                                         </option>
                                                                     @endforeach
                                                                 </select>
+                                                                <input type="double" class="form-control" name="cantidad[]" value="{{ $producto->pivot->cantidad_requerida }}">
                                                                 <button type="button" class="btn btn-danger removeSelect"><i class="fas fa-trash"></i></button>
                                                             </div>
                                                         @endforeach
@@ -125,7 +129,7 @@
                     selectHTML += `<option value="${m.id}">${m.proNombre}</option>`;
                 });
                 selectHTML += '</select>';
-
+                selectHTML += `<input type="double" class="form-control" name="cantidad[]">`;
                 div.innerHTML = selectHTML + `<button type="button" class="btn btn-danger removeSelect"><i class="fas fa-trash"></i></button>`;
                 container.appendChild(div);
             });
