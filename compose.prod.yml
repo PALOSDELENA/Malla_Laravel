@@ -1,0 +1,57 @@
+version: "3.8"
+
+services:
+  web:
+    image: nginx:latest
+    container_name: malla-nginx-prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www:ro
+      - ./docker/production/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/ssl/palosdelena:/etc/nginx/ssl:ro  # Asegúrate de que los certificados estén allí en el host
+    depends_on:
+      - php-fpm
+    networks:
+      - laravel-production
+
+  php-fpm:
+    build:
+      context: .
+      dockerfile: ./docker/common/php-fpm/Dockerfile
+      target: production
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    container_name: malla-php-fpm-prod
+    env_file:
+      - .env
+    volumes:
+      - ./:/var/www:ro
+    networks:
+      - laravel-production
+
+  workspace:
+    build:
+      context: .
+      dockerfile: ./docker/production/workspace/Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    container_name: malla-workspace-prod
+    volumes:
+      - ./:/var/www
+    tty: true
+    stdin_open: true
+    networks:
+      - laravel-production
+
+  redis:
+    image: redis:alpine
+    container_name: malla-redis-prod
+    networks:
+      - laravel-production
+
+networks:
+  laravel-production:

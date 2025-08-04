@@ -79,7 +79,6 @@
                                                     <input type="number" name="cantidad" class="form-control" value="{{ $orden->cantidad }}" required>
                                                 </div>
                                                 <div class="col-md-12 mb-3">
-                                                    h
                                                         <div id="materias-container-{{ $orden->id }}" class="row">
                                                             <!-- Aquí se cargan las materias primas consumidas -->
                                                         </div>
