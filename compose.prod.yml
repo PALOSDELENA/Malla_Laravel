@@ -26,7 +26,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./:/var/www:ro
+      - ./:/var/www
     networks:
       - laravel-production
 
