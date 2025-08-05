@@ -25,7 +25,8 @@ class Productos extends Model
 
     public function producciones()
     {
-        return $this->belongsToMany(Producciones::class, 'produccion_m_prima', 'm_prima_id', 'produccion_id');
+        return $this->belongsToMany(Producciones::class, 'produccion_m_prima', 'm_prima_id', 'produccion_id')
+            ->withPivot('cantidad_requerida');
     }
 
     public function stock()

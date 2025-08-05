@@ -22,7 +22,9 @@ class OrdenProduccionController extends Controller
 
     public function create()
     {
-        $responsables = User::pluck('usu_nombre', 'num_doc');
+        $responsables = User::whereHas('cargo', function ($query) {
+            $query->where('id', 2); // el ID del cargo deseado
+        })->pluck('usu_nombre', 'num_doc');
         $producciones = Producciones::with('productos')->get();
         return view('admin_ordenProduccion.create', compact('responsables', 'producciones'));
     }
@@ -41,7 +43,7 @@ class OrdenProduccionController extends Controller
 
             'materias_primas' => 'required|array|min:1',
             'materias_primas.*.producto_id' => 'required|exists:productos,id',
-            'materias_primas.*.cantidad_real' => 'required|numeric|min:0',
+            'materias_primas.*.cantidad_consumida' => 'required|numeric|min:0',
         ]);
 
         DB::beginTransaction();
@@ -50,7 +52,7 @@ class OrdenProduccionController extends Controller
             // Verificar stock suficiente usando ProductoStock
             foreach ($validated['materias_primas'] as $materia) {
                 $productoId = $materia['producto_id'];
-                $cantidadSolicitada = $materia['cantidad_real'];
+                $cantidadSolicitada = $materia['cantidad_consumida'];
 
                 $stock = ProductoStock::where('producto_id', $productoId)->value('stock_actual') ?? 0;
 
@@ -78,15 +80,16 @@ class OrdenProduccionController extends Controller
             // Registrar cada consumo como trazabilidad
             foreach ($validated['materias_primas'] as $materia) {
                 $productoId = $materia['producto_id'];
-                $cantidadSolicitada = $materia['cantidad_real'];
+                $cantidadSolicitada = $materia['cantidad_consumida'];
 
                 $stock = ProductoStock::where('producto_id', $productoId)->value('stock_actual') ?? 0;
 
-                if ($stock < $cantidadSolicitada) {
-                    return redirect()->back()->withInput()->withErrors([
-                        'materias_primas' => "Stock insuficiente para el producto ID $productoId. Disponible: $stock, requerido: $cantidadSolicitada."
-                    ]);
-                }
+                // if ($stock < $cantidadSolicitada) {
+                //     return ('No hay suficiente stock para el producto ID ' . $productoId);
+                    // return (redirect()->back()->withInput()->withErrors([
+                    //     'materias_primas' => "Stock insuficiente para el producto ID $productoId. Disponible: $stock, requerido: $cantidadSolicitada."
+                    // ]));
+                // }
 
                 // 1. Registrar el movimiento en trazabilidad
                 TrazabilidadProducto::create([
@@ -189,6 +192,7 @@ class OrdenProduccionController extends Controller
                 'id' => $producto->id,
                 'nombre' => $producto->proNombre,
                 'unidad' => $producto->proUnidadMedida,
+                'cantidad' => $producto->pivot->cantidad_requerida ?? 0,
             ];
         });
 

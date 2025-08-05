@@ -12,6 +12,7 @@ class ProduccioneProducto extends Model
     protected $fillable = [
         'produccion_id',
         'm_prima_id',
+        'cantidad_requerida',
     ];
 
     public $timestamps = false;
