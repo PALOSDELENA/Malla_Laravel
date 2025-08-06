@@ -43,6 +43,7 @@ class AppServiceProvider extends ServiceProvider
                 'producciones.create' => 'Crear Producción',
                 'trazabilidad.index' => 'Trazabilidad',
                 'trazabilidad.create' => 'Registrar Movimiento',
+                'productos.stockChart' => 'Existencias de Productos',
             ];
 
             $view->with('pageTitle', $titles[$routeName] ?? 'Panel2');

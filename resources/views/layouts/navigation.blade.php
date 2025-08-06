@@ -54,6 +54,10 @@
                             <i class="fa-solid fa-layer-group fa-5x icon-hover-nav" ></i>
                             <span class="tooltip">Productos</span>
                         </x-nav-link>
+                        <x-nav-link :href="route('productos.stockChart')" class="header-btn">
+                            <i class="fa-solid fa-chart-simple fa-5x icon-hover-nav" ></i>
+                            <span class="tooltip">Existencias</span>
+                        </x-nav-link>
                         <x-nav-link :href="route('producciones.index')" class="header-btn">
                             <i class="fa-solid fa-industry fa-5x icon-hover-nav" ></i>
                             <span class="tooltip">Producciones</span>

@@ -52,6 +52,8 @@ Route::post('/productos', [ProductoController::class, 'store'])->name('productos
 Route::put('/productos/{producto}', [ProductoController::class, 'update'])->name('productos.update');
 Route::delete('/productos/{producto}', [ProductoController::class, 'destroy'])->name('productos.destroy');
 
+Route::get('/productos/existencias', [ProductoController::class, 'stockChart'])->name('productos.stockChart');
+
 // Cargos
 Route::get('/cargos', [CargosController::class, 'index'])->name('cargos.index');
 Route::post('/cargos', [CargosController::class, 'store'])->name('cargos.store');

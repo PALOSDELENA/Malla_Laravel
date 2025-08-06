@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Productos;
+use App\Models\ProductoStock;
 use Illuminate\Http\Request;
 
 class ProductoController extends Controller
@@ -118,5 +119,15 @@ class ProductoController extends Controller
 
         return redirect()->route('productos.index')
             ->with('success', 'Producto eliminado correctamente.');
+    }
+
+    public function stockChart()
+    {
+        $stocks = ProductoStock::with('producto')->get();
+
+        $labels = $stocks->pluck('producto.proNombre');
+        $cantidades = $stocks->pluck('stock_actual');
+
+        return view('admin_items.existencias', compact('labels', 'cantidades'));
     }
 }
