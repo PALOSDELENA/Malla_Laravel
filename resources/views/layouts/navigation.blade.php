@@ -19,9 +19,9 @@
                     <!-- <x-nav-link :href="route('filament.admin.pages.dashboard')">
                         {{ __('Ir a Panel de Administración') }}
                     </x-nav-link> -->
-    @php
-        $perfil = auth()->user()->cargo()->first()->car_nombre ?? 'Sin Cargo';
-    @endphp
+                    @php
+                        $perfil = auth()->user()->cargo()->first()->car_nombre ?? 'Sin Cargo';
+                    @endphp
                     @if ($perfil === 'Administrador')
                         <x-nav-link :href="route('dashboard')" class="header-btn">
                             <i class="fas fa-chart-line"></i>
@@ -46,6 +46,25 @@
                         <x-nav-link href="{{asset('/admin/turnos-kanban-board-page')}}" class="header-btn">
                             <i class="fas fa-piggy-bank"></i>
                             <span class="tooltip">Ir a Formularios</span>
+                        </x-nav-link>
+                    @endif
+
+                    @if ($perfil === 'Planta')
+                        <x-nav-link :href="route('productos.index')" class="header-btn">
+                            <i class="fa-solid fa-layer-group fa-5x icon-hover-nav" ></i>
+                            <span class="tooltip">Productos</span>
+                        </x-nav-link>
+                        <x-nav-link :href="route('producciones.index')" class="header-btn">
+                            <i class="fa-solid fa-industry fa-5x icon-hover-nav" ></i>
+                            <span class="tooltip">Producciones</span>
+                        </x-nav-link>
+                        <x-nav-link :href="route('trazabilidad.index')" class="header-btn">
+                            <i class="fa-solid fa-route fa-5x icon-hover-nav" ></i>
+                            <span class="tooltip">Trazabilidad</span>
+                        </x-nav-link>
+                        <x-nav-link :href="route('ordenProduccion.index')" class="header-btn">
+                            <i class="fa-solid fa-file-circle-plus fa-5x icon-hover-nav" ></i>
+                            <span class="tooltip">Orden Producción</span>
                         </x-nav-link>
                     @endif
                 </div>

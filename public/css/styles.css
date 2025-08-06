@@ -49,9 +49,18 @@
     bottom: -40px;
 }
 
+.icon-hover-nav {
+    color: #000000;
+    transition: transform 0.4s ease-in-out, color 0.3s ease-in-out;
+}
 .icon-hover {
     color: #F5C02E;
     transition: transform 0.4s ease-in-out, color 0.3s ease-in-out;
+}
+
+.icon-hover-nav:hover {
+    color: #F5C02E;
+    transform: scale(1.2);
 }
 
 .icon-hover:hover {
@@ -66,8 +75,8 @@
     transition: all 0.3s ease;
 }
 
-    table.no-vertical-borders td,
-    table.no-vertical-borders th {
-        border-left: none;
-        border-right: none;
-    }
+table.no-vertical-borders td,
+table.no-vertical-borders th {
+    border-left: none;
+    border-right: none;
+}
