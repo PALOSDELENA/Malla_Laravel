@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('traOlor')->nullable();
             $table->string('traObservaciones')->nullable(); // Descripción opcional del movimiento
             $table->unsignedBigInteger('orden_produccion_id')->nullable(); // ID de la orden de producción asociada
+            $table->unsignedBigInteger('traPunto')->nullable();
 
             $table->foreign('traIdProducto')
                 ->references('id')->on('productos')
@@ -36,6 +37,9 @@ return new class extends Migration
             $table->foreign('traResponsable')
                 ->references('num_doc')->on('users') // Asumiendo que tienes una tabla de usuarios
                 ->onDelete('cascade'); // Elimina trazabilidad si se elimina el usuario responsable
+            $table->foreign('traPunto')
+                ->references('id')->on('puntos')
+                ->onDelete('cascade');
         });
     }
 

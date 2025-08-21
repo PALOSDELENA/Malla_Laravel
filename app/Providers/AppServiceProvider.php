@@ -49,6 +49,7 @@ class AppServiceProvider extends ServiceProvider
                 'trazabilidad.index' => 'Trazabilidad',
                 'trazabilidad.create' => 'Registrar Movimiento',
                 'productos.stockChart' => 'Existencias de Productos',
+                'dashboardAdmin' => 'Dashboard Palos de Leña',
             ];
 
             $view->with('pageTitle', $titles[$routeName] ?? 'Panel2');

@@ -10,10 +10,13 @@ use App\Http\Controllers\TipoDocumentoController;
 use App\Http\Controllers\TrazabilidadController;
 use App\Http\Controllers\TurnosController;
 use App\Http\Controllers\UsuariosController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Middleware\PuntoMiddleware;
 use App\Livewire\AsignacionTurnosKanban;
 use Dom\Document;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\PaloteoController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -106,5 +109,58 @@ Route::get('/ordenProduccion/{id}/materias-primas-consumo', [OrdenProduccionCont
 Route::get('/kanban-turnos', function(){
     return view('admin_turnosKanban.kanban');
 })->name('kanban.turnos');
+
+// Rutas para el Dashboard
+Route::get('/dashboard/admin', [DashboardController::class, 'indexAdmin'])
+    ->middleware(PuntoMiddleware::class . ':Administrativo')
+    ->name('dashboardAdmin');
+Route::get('/dashboard/puente', [DashboardController::class, 'indexPuente'])
+    ->middleware(PuntoMiddleware::class . ':Punte Aranda')
+    ->name('dashboardPuente');
+Route::get('/dashboard/cafam', [DashboardController::class, 'indexCafam'])
+    ->middleware(PuntoMiddleware::class . ':Cafam')
+    ->name('dashboardCafam');
+Route::get('/dashboard/centro', [DashboardController::class, 'indexCentro'])
+    ->middleware(PuntoMiddleware::class . ':Centro')
+    ->name('dashboardCentro');
+Route::get('/dashboard/cocina', [DashboardController::class, 'indexCocina'])
+    ->middleware(PuntoMiddleware::class . ':Cocina')
+    ->name('dashboardCocina');
+Route::get('/dashboard/fontibon', [DashboardController::class, 'indexFon'])
+    ->middleware(PuntoMiddleware::class . ':Fontibón')
+    ->name('dashboardFon');
+Route::get('/dashboard/jimenez', [DashboardController::class, 'indexJim'])
+    ->middleware(PuntoMiddleware::class . ':Jiménez')
+    ->name('dashboardJim');
+Route::get('/dashboard/mall-plaza', [DashboardController::class, 'indexMall'])
+    ->middleware(PuntoMiddleware::class . ':Mall Plaza')
+    ->name('dashboardMall');
+Route::get('/dashboard/multi-plaza', [DashboardController::class, 'indexMulti'])
+    ->middleware(PuntoMiddleware::class . ':Multi Plaza')
+    ->name('dashboardMulti');
+Route::get('/dashboard/nuestro-bogota', [DashboardController::class, 'indexNuestro'])
+    ->middleware(PuntoMiddleware::class . ':Nuestro Bogotá')
+    ->name('dashboardNuestro');
+Route::get('/dashboard/parrilla', [DashboardController::class, 'indexParrilla'])
+    ->middleware(PuntoMiddleware::class . ':Parrilla')
+    ->name('dashboardParrilla');
+Route::get('/dashboard/quinta-paredes', [DashboardController::class, 'indexQuinta'])
+    ->middleware(PuntoMiddleware::class . ':Quinta Paredes')
+    ->name('dashboardQuinta');
+Route::get('/dashboard/salitre-plaza', [DashboardController::class, 'indexSalitre'])
+    ->middleware(PuntoMiddleware::class . ':Salitre Plaza')
+    ->name('dashboardNuestro');
+
+
+// Rutas Paloteo
+Route::get('/paloteo', [PaloteoController::class, 'index'])->name('paloteo');
+Route::get('/paloteo/puntos', [PaloteoController::class, 'obtenerPuntos']);
+Route::get('/paloteo/gerente/{punto}', [PaloteoController::class, 'obtenerGerente']);
+Route::get('/paloteo/reporte/semanal/{punto}/{seccion}', [PaloteoController::class, 'reporteSemanal']);
+Route::get('/paloteo/productos', [PaloteoController::class, 'obtenerProductos']);
+Route::post('/guardar-inventario', [PaloteoController::class, 'guardarInventario']);
+Route::get('/paloteo/historico/{punto}', [PaloteoController::class, 'obtenerHistorico']);
+Route::post('/guardar-historico', [PaloteoController::class, 'guardarHistorico']);
+
 
 require __DIR__.'/auth.php';

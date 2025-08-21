@@ -21,17 +21,74 @@
                     </x-nav-link> -->
                     @php
                         $perfil = auth()->user()->cargo()->first()->car_nombre ?? 'Sin Cargo';
+                        $punto = auth()->user()->punto()->first()->nombre ?? 'Sin Punto';
                     @endphp
+                    @switch($punto)
+                        @case('Administrativo')
+                            @php $route = route('dashboardAdmin'); @endphp
+                            @break
+
+                        @case('Puente Aranda')
+                            @php $route = route('dashboardPuente'); @endphp
+                            @break
+
+                        @case('Cafam')
+                            @php $route = route('dashboardCafam'); @endphp
+                            @break
+
+                        @case('Centro')
+                            @php $route = route('dashboardCentro'); @endphp
+                            @break
+
+                        @case('Cocina')
+                            @php $route = route('dashboardCocina'); @endphp
+                            @break
+
+                        @case('Fontibón')
+                            @php $route = route('dashboardFon'); @endphp
+                            @break
+
+                        @case('Jiménez')
+                            @php $route = route('dashboardJim'); @endphp
+                            @break
+
+                        @case('Mall Plaza')
+                            @php $route = route('dashboardMall'); @endphp
+                            @break
+
+                        @case('Multi Plaza')
+                            @php $route = route('dashboardPMulti'); @endphp
+                            @break
+
+                        @case('Nuestro Bogotá')
+                            @php $route = route('dashboardNuestro'); @endphp
+                            @break
+
+                        @case('Parrilla')
+                            @php $route = route('dashboardNuestro'); @endphp
+                            @break
+
+                        @case('Quinta Paredes')
+                            @php $route = route('dashboardNuestro'); @endphp
+                            @break
+
+                        @case('Salitre Plaza')
+                            @php $route = route('dashboardNuestro'); @endphp
+                            @break
+
+                        @default
+                            @php $route = "#" @endphp
+                    @endswitch
+                        <x-nav-link :href="$route" class="header-btn">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span class="tooltip">Ver Dashboard</span>
+                        </x-nav-link>
                     @if ($perfil === 'Administrador')
                         <x-nav-link :href="route('dashboard')" class="header-btn">
                             <i class="fas fa-chart-line"></i>
                             <span class="tooltip">Ver Métricas</span>
                         </x-nav-link>
-                        <x-nav-link :href="route('dashboard')" class="header-btn">
-                            <i class="fas fa-tachometer-alt"></i>
-                            <span class="tooltip">Ver Dashboard</span>
-                        </x-nav-link>
-                        <x-nav-link :href="route('dashboard')" class="header-btn">
+                        <x-nav-link :href="route('paloteo')" class="header-btn">
                             <i class="fas fa-clipboard-list"></i>
                             <span class="tooltip">Ir al Paloteo</span>
                         </x-nav-link>
