@@ -356,7 +356,7 @@ function inicializarControlSemanas() {
 }
 
 function cargarSemanasHistoricas(puntoId) {
-    fetch(URL_GERENTE + puntoId)
+    fetch(URL_HISTORICO + puntoId)
         .then(response => response.json())
         .then(data => {
             const select = document.getElementById('semanaHistorica');
@@ -391,7 +391,7 @@ function cargarSemanaSeleccionada() {
     }
     
     showLoading();
-    fetch(`obtener_historico.php?id=${historicoId}`)
+    fetch(URL_CARGAR_HISTORICO + historicoId)
         .then(response => response.json())
         .then(data => {
             if (data.error) {

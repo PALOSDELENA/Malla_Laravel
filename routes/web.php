@@ -36,51 +36,51 @@ Route::middleware('auth')->group(function () {
 });
 
 //Usuarios
-Route::get('/usuarios', [UsuariosController::class, 'index'])->name('usuarios.index');
-Route::put('/usuarios/{usuario}', [UsuariosController::class, 'update'])->name('usuarios.update');
-Route::post('/usuarios', [UsuariosController::class, 'store'])->name('usuarios.store');
-Route::get('/usuarios/crear', [UsuariosController::class, 'create'])->name('usuarios.create');
-Route::delete('/usarios/{usuario}', [UsuariosController::class, 'destroy'])->name('usuarios.destroy');
+Route::get('/usuarios', [UsuariosController::class, 'index'])->middleware(['auth', 'verified'])->name('usuarios.index');
+Route::put('/usuarios/{usuario}', [UsuariosController::class, 'update'])->middleware(['auth', 'verified'])->name('usuarios.update');
+Route::post('/usuarios', [UsuariosController::class, 'store'])->middleware(['auth', 'verified'])->name('usuarios.store');
+Route::get('/usuarios/crear', [UsuariosController::class, 'create'])->middleware(['auth', 'verified'])->name('usuarios.create');
+Route::delete('/usarios/{usuario}', [UsuariosController::class, 'destroy'])->middleware(['auth', 'verified'])->name('usuarios.destroy');
 
 //Turnos
-Route::get('/turnos', [TurnosController::class, 'index'])->name('turnos.index');
-Route::post('/turnos', [TurnosController::class, 'store'])->name('turnos.store');
-Route::put('/turnos/{turno}', [TurnosController::class, 'update'])->name('turnos.update');
-Route::delete('/turnos/{turno}', [TurnosController::class, 'destroy'])->name('turnos.destroy');
+Route::get('/turnos', [TurnosController::class, 'index'])->middleware(['auth', 'verified'])->name('turnos.index');
+Route::post('/turnos', [TurnosController::class, 'store'])->middleware(['auth', 'verified'])->name('turnos.store');
+Route::put('/turnos/{turno}', [TurnosController::class, 'update'])->middleware(['auth', 'verified'])->name('turnos.update');
+Route::delete('/turnos/{turno}', [TurnosController::class, 'destroy'])->middleware(['auth', 'verified'])->name('turnos.destroy');
 
 // Productos
-Route::get('/productos', [ProductoController::class, 'index'])->name('productos.index');
-Route::get('/productos/crear', [ProductoController::class, 'create'])->name('productos.create');
-Route::post('/productos', [ProductoController::class, 'store'])->name('productos.store');
-Route::put('/productos/{producto}', [ProductoController::class, 'update'])->name('productos.update');
-Route::delete('/productos/{producto}', [ProductoController::class, 'destroy'])->name('productos.destroy');
+Route::get('/productos', [ProductoController::class, 'index'])->middleware(['auth', 'verified'])->name('productos.index');
+Route::get('/productos/crear', [ProductoController::class, 'create'])->middleware(['auth', 'verified'])->name('productos.create');
+Route::post('/productos', [ProductoController::class, 'store'])->middleware(['auth', 'verified'])->name('productos.store');
+Route::put('/productos/{producto}', [ProductoController::class, 'update'])->middleware(['auth', 'verified'])->name('productos.update');
+Route::delete('/productos/{producto}', [ProductoController::class, 'destroy'])->middleware(['auth', 'verified'])->name('productos.destroy');
 
-Route::get('/productos/existencias', [ProductoController::class, 'stockChart'])->name('productos.stockChart');
+Route::get('/productos/existencias', [ProductoController::class, 'stockChart'])->middleware(['auth', 'verified'])->name('productos.stockChart');
 
 // Cargos
-Route::get('/cargos', [CargosController::class, 'index'])->name('cargos.index');
-Route::post('/cargos', [CargosController::class, 'store'])->name('cargos.store');
-Route::put('/cargos/{cargo}', [CargosController::class, 'update'])->name('cargos.update');
-Route::delete('/cargos/{cargo}', [CargosController::class, 'destroy'])->name('cargos.destroy');
+Route::get('/cargos', [CargosController::class, 'index'])->middleware(['auth', 'verified'])->name('cargos.index');
+Route::post('/cargos', [CargosController::class, 'store'])->middleware(['auth', 'verified'])->name('cargos.store');
+Route::put('/cargos/{cargo}', [CargosController::class, 'update'])->middleware(['auth', 'verified'])->name('cargos.update');
+Route::delete('/cargos/{cargo}', [CargosController::class, 'destroy'])->middleware(['auth', 'verified'])->name('cargos.destroy');
 
 // Puntos
-Route::get('/puntos', [PuntosController::class, 'index'])->name('puntos.index');
-Route::post('/puntos', [PuntosController::class, 'store'])->name('puntos.store');
-Route::put('/puntos/{punto}', [PuntosController::class, 'update'])->name('puntos.update');
-Route::delete('/puntos/{punto}', [PuntosController::class, 'destroy'])->name('puntos.destroy');
+Route::get('/puntos', [PuntosController::class, 'index'])->middleware(['auth', 'verified'])->name('puntos.index');
+Route::post('/puntos', [PuntosController::class, 'store'])->middleware(['auth', 'verified'])->name('puntos.store');
+Route::put('/puntos/{punto}', [PuntosController::class, 'update'])->middleware(['auth', 'verified'])->name('puntos.update');
+Route::delete('/puntos/{punto}', [PuntosController::class, 'destroy'])->middleware(['auth', 'verified'])->name('puntos.destroy');
 
 // Tipos de Documentos
-Route::get('/tipos-documentos', [TipoDocumentoController::class, 'index'])->name('tipos-documentos.index');
-Route::post('/tipos-documentos', [TipoDocumentoController::class, 'store'])->name('tipos-documentos.store');
-Route::put('/tipos-documentos/{tipoDocumento}', [TipoDocumentoController::class, 'update'])->name('tipos-documentos.update');
-Route::delete('/tipos-documentos/{tipoDocumento}', [TipoDocumentoController::class, 'destroy'])->name('tipos-documentos.destroy');
+Route::get('/tipos-documentos', [TipoDocumentoController::class, 'index'])->middleware(['auth', 'verified'])->name('tipos-documentos.index');
+Route::post('/tipos-documentos', [TipoDocumentoController::class, 'store'])->middleware(['auth', 'verified'])->name('tipos-documentos.store');
+Route::put('/tipos-documentos/{tipoDocumento}', [TipoDocumentoController::class, 'update'])->middleware(['auth', 'verified'])->name('tipos-documentos.update');
+Route::delete('/tipos-documentos/{tipoDocumento}', [TipoDocumentoController::class, 'destroy'])->middleware(['auth', 'verified'])->name('tipos-documentos.destroy');
 
 // Producciones
-Route::get('/producciones', [ProduccionController::class, 'index'])->name('producciones.index');
-Route::get('/producciones/crear', [ProduccionController::class, 'create'])->name('producciones.create');
-Route::post('/producciones', [ProduccionController::class, 'store'])->name('producciones.store');
-Route::put('/producciones/{produccion}', [ProduccionController::class, 'update'])->name('producciones.update');
-Route::delete('/producciones/{produccion}', [ProduccionController::class, 'destroy'])->name('producciones.destroy');
+Route::get('/producciones', [ProduccionController::class, 'index'])->middleware(['auth', 'verified'])->name('producciones.index');
+Route::get('/producciones/crear', [ProduccionController::class, 'create'])->middleware(['auth', 'verified'])->name('producciones.create');
+Route::post('/producciones', [ProduccionController::class, 'store'])->middleware(['auth', 'verified'])->name('producciones.store');
+Route::put('/producciones/{produccion}', [ProduccionController::class, 'update'])->middleware(['auth', 'verified'])->name('producciones.update');
+Route::delete('/producciones/{produccion}', [ProduccionController::class, 'destroy'])->middleware(['auth', 'verified'])->name('producciones.destroy');
 
 // Trazabildiad
 Route::get('/trazabilidad', [TrazabilidadController::class, 'index'])->name('trazabilidad.index');
@@ -153,7 +153,7 @@ Route::get('/dashboard/salitre-plaza', [DashboardController::class, 'indexSalitr
 
 
 // Rutas Paloteo
-Route::get('/paloteo', [PaloteoController::class, 'index'])->name('paloteo');
+Route::get('/paloteo', [PaloteoController::class, 'index'])->middleware(['auth', 'verified'])->name('paloteo');
 Route::get('/paloteo/puntos', [PaloteoController::class, 'obtenerPuntos']);
 Route::get('/paloteo/gerente/{punto}', [PaloteoController::class, 'obtenerGerente']);
 Route::get('/paloteo/reporte/semanal/{punto}/{seccion}', [PaloteoController::class, 'reporteSemanal']);
@@ -161,6 +161,9 @@ Route::get('/paloteo/productos', [PaloteoController::class, 'obtenerProductos'])
 Route::post('/guardar-inventario', [PaloteoController::class, 'guardarInventario']);
 Route::get('/paloteo/historico/{punto}', [PaloteoController::class, 'obtenerHistorico']);
 Route::post('/guardar-historico', [PaloteoController::class, 'guardarHistorico']);
+Route::get('/paloteo/cargar-historico/{id}', [PaloteoController::class, 'cargarHistorico'])
+    ->middleware('auth');
+
 
 
 require __DIR__.'/auth.php';

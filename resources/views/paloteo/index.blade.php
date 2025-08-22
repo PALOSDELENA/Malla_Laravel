@@ -135,7 +135,8 @@
         const BASE_URL = "{{ config('app.url') }}";
         const URL = "{{ url('/paloteo/productos') }}";
         const URL_GUARDAR = "{{ url('/guardar-inventario') }}";
-        const URL_HISTORICO = "{{ url('/paloteo/historico') }}";
+        const URL_HISTORICO = "{{ url('/paloteo/historico') }}/";
         const URL_SAVE_HISTORICO = "{{ url('/guardar-historico') }}";
+        const URL_CARGAR_HISTORICO = "{{ url('paloteo/cargar-historico') }}/";
     </script>
 </x-app-layout>

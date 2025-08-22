@@ -264,4 +264,61 @@ class PaloteoController extends Controller
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
-    }}
+    }
+
+    public function cargarHistorico($id)
+    {
+        try {
+            if ($id <= 0) {
+                throw new \Exception('ID inválido');
+            }
+
+            // Obtener el histórico
+            $historico = DB::table('inventario_historico')
+                ->select('fecha_inicio', 'fecha_fin', 'punto_id', 'datos')
+                ->where('id', $id)
+                ->first();
+
+            if (!$historico) {
+                throw new \Exception('Histórico no encontrado');
+            }
+
+            // Obtener todos los productos
+            $productos = DB::table('productos')
+                ->select('id', 'proNombre', 'proSeccion')
+                ->orderBy('proSeccion')
+                ->orderBy('proNombre')
+                ->get();
+
+            // Decodificar datos históricos
+            $datosHistoricos = json_decode($historico->datos, true) ?? [];
+
+            // Crear mapa para búsqueda rápida
+            $mapaHistorico = [];
+            foreach ($datosHistoricos as $dato) {
+                $mapaHistorico[$dato['id']] = $dato;
+            }
+
+            // Combinar productos con datos históricos
+            $datosCompletos = [];
+            foreach ($productos as $producto) {
+                $datosCompletos[] = [
+                    'id' => $producto->id,
+                    'nombre' => $producto->proNombre,
+                    'seccion_id' => $producto->proSeccion,
+                    'registros' => $mapaHistorico[$producto->id]['registros'] ?? []
+                ];
+            }
+
+            return response()->json([
+                'fecha_inicio' => date('d/m/Y', strtotime($historico->fecha_inicio)),
+                'fecha_fin' => date('d/m/Y', strtotime($historico->fecha_fin)),
+                'punto_id' => $historico->punto_id,
+                'datos' => $datosCompletos
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
+}
