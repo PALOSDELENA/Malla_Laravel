@@ -149,15 +149,19 @@ Route::get('/dashboard/quinta-paredes', [DashboardController::class, 'indexQuint
     ->name('dashboardQuinta');
 Route::get('/dashboard/salitre-plaza', [DashboardController::class, 'indexSalitre'])
     ->middleware(PuntoMiddleware::class . ':Salitre Plaza')
-    ->name('dashboardNuestro');
+    ->name('dashboardSalitre');
 
 
 // Rutas Paloteo
 Route::get('/paloteo', [PaloteoController::class, 'index'])->middleware(['auth', 'verified'])->name('paloteo');
 Route::get('/paloteo/puntos', [PaloteoController::class, 'obtenerPuntos']);
-Route::get('/paloteo/gerente/{punto}', [PaloteoController::class, 'obtenerGerente']);
+// Route::get('/paloteo/gerente/{punto}/{fechaInicio}/{fechaFin}', [PaloteoController::class, 'obtenerGerente']);
+Route::get('/paloteo/gerente', [PaloteoController::class, 'obtenerGerente']);
 Route::get('/paloteo/reporte/semanal/{punto}/{seccion}', [PaloteoController::class, 'reporteSemanal']);
 Route::get('/paloteo/productos', [PaloteoController::class, 'obtenerProductos']);
+Route::get('/paloteo/get/productos', [PaloteoController::class, 'getProductos']);
+Route::put('/paloteo/{id}/productos', [PaloteoController::class, 'asignarSeccion']);
+Route::put('/productos/{id}', [PaloteoController::class, 'quitarSeccion']);
 Route::post('/guardar-inventario', [PaloteoController::class, 'guardarInventario']);
 Route::get('/paloteo/historico/{punto}', [PaloteoController::class, 'obtenerHistorico']);
 Route::post('/guardar-historico', [PaloteoController::class, 'guardarHistorico']);

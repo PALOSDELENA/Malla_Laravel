@@ -60,12 +60,26 @@ function cargarPuntos() {
         });
 }
 
+function formatFecha(fechaTexto) {
+    const partes = fechaTexto.split('/');
+    const dia = partes[0].padStart(2, '0');
+    const mes = partes[1].padStart(2, '0');
+    const anio = partes[2];
+    return `${anio}-${mes}-${dia}`;
+}
+
 function cargarTodasLasSecciones() {
     const punto = document.getElementById('punto').value;
     if (!punto) return;
 
+    const fechaInicioRaw = document.getElementById('fechaInicio').textContent;
+    const fechaFinRaw = document.getElementById('fechaFin').textContent;
+
+    const fechaInicio = formatFecha(fechaInicioRaw);
+    const fechaFin = formatFecha(fechaFinRaw);
+
     showLoading();
-    cargarEncargado(punto);
+    cargarEncargado(punto, fechaInicio, fechaFin);
     cargarSemanasHistoricas(punto);
     
     Promise.all([
@@ -96,12 +110,27 @@ function renderizarTablaInventario(data, seccion) {
     data.forEach(producto => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${producto.nombre}</td>
+            <td class="text-center delete-btn">
+                <button type="button" onclick="eliminarProducto(${producto.id})" class="btn">
+                    ${producto.nombre}
+                </button>
+            </td>
             ${generarCeldasDias(producto, seccion)}
         `;
         tbody.appendChild(tr);
     });
 
+    // Fila extra con botón para agregar productos
+    const trAdd = document.createElement('tr');
+    trAdd.innerHTML = `
+        <td colspan="8" class="text-center">
+            <button type="button" class="btn btn-sm btn-success" onclick="agregarProducto(${seccion})">
+                + Agregar producto
+            </button>
+        </td>
+    `;
+    tbody.appendChild(trAdd);
+        
     document.querySelectorAll(`#inventarioBody-${seccion} input`).forEach(input => {
         let timeout;
         input.addEventListener('input', function(e) {
@@ -162,6 +191,126 @@ function renderizarTablaInventario(data, seccion) {
                     break;
             }
         });
+    });
+}
+
+function agregarProducto(seccionId) {
+    // Guardamos la sección en un atributo del modal
+    const modal = document.getElementById("modalProductos");
+    modal.setAttribute("data-seccion-id", seccionId);
+
+    showLoading();
+    // Cargar productos (puedes traerlos por AJAX o tenerlos en memoria)
+    fetch(BASE_URL + '/paloteo/get/productos') // tu endpoint PHP que devuelve JSON
+        .then(res => res.json())
+        .then(productos => {
+            const tbody = document.getElementById("listaProductos");
+            tbody.innerHTML = "";
+
+            productos.forEach(p => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td class="text-center">${p.nombre}</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-warning" onclick="seleccionarProducto(${p.id})">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Mostrar modal (Bootstrap 5)
+            const modalBootstrap = new bootstrap.Modal(modal);
+            hideLoading();
+            modalBootstrap.show();
+        })
+        .catch(err => console.error("Error cargando productos:", err));
+}
+
+function seleccionarProducto(productoId) {
+    const modal = document.getElementById("modalProductos");
+    const seccionId = modal.getAttribute("data-seccion-id");
+    const punto = document.getElementById('punto').value;
+
+
+    fetch(BASE_URL + '/paloteo/' + productoId + '/productos', {
+        method: "PUT",
+        headers: { 
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ 
+            producto_id: productoId, 
+            seccion_id: seccionId 
+        })
+    })
+    .then(res => res.json())
+    .then(resp => {
+        if (resp.success) {
+            Swal.fire({
+                icon: "success",
+                title: resp.message,
+                timer: 1500,
+                showConfirmButton: false
+            });
+
+            // Recargar tabla de inventario de esa sección
+            cargarSeccion(punto, seccionId);
+        }
+    })
+    .catch(err => console.error(err));
+
+    // Cerrar modal
+    const modalBootstrap = bootstrap.Modal.getInstance(modal);
+    modalBootstrap.hide();
+}
+
+function eliminarProducto(id) {
+    const punto = document.getElementById('punto').value;
+
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "¡No podrás revertir esta acción!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(BASE_URL + '/api/productos/' + id, {
+                method: 'PUT',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire(
+                        'Eliminado',
+                        data.message,
+                        'success'
+                    ).then(() => {
+                        // location.reload();
+                        cargarSeccion(punto, seccionId);
+                    });
+                } else {
+                    Swal.fire(
+                        'Error',
+                        data.message || 'No se pudo eliminar el producto.',
+                        'error'
+                    );
+                }
+            })
+            .catch(() => {
+                Swal.fire(
+                    'Error',
+                    'Ocurrió un error en el servidor.',
+                    'error'
+                );
+            });
+        }
     });
 }
 
@@ -251,10 +400,10 @@ function actualizarFechasSemana() {
     document.getElementById('fechaInicio').textContent = monday.toLocaleDateString();
     document.getElementById('fechaFin').textContent = sunday.toLocaleDateString();
 }
-function cargarEncargado(puntoId) {
+function cargarEncargado(puntoId, fechaInicio, fechaFin) {
     if (!puntoId) return;
     
-    fetch(URL_GERENTE + '/' + puntoId)
+    fetch(URL_GERENTE + `?punto=${puntoId}&fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`)
         .then(response => response.json())
         .then(data => {
             const encargadoInput = document.getElementById('encargadoInput');
@@ -432,45 +581,87 @@ function cargarSemanaSeleccionada() {
 function guardarHistorico() {
     const puntoId = document.getElementById('punto').value;
     if (!puntoId) {
-        alert('Por favor seleccione un punto antes de guardar el histórico');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Atención',
+            text: 'Por favor seleccione un punto antes de guardar el histórico',
+            confirmButtonText: 'Entendido'
+        });
         return;
     }
 
-    if (!confirm('¿Está seguro de guardar el histórico de esta semana?')) {
+    const nombreEncargado = document.getElementById('encargadoInput').value.trim();
+    if (!nombreEncargado) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Campo vacío',
+            text: 'Por favor, ingrese el nombre del encargado',
+            confirmButtonText: 'Ok'
+        });
         return;
     }
+
+    // if (!confirm('¿Está seguro de guardar el histórico de esta semana?')) {
+    //     return;
+    // }
 
     const fechaInicio = document.getElementById('fechaInicio').textContent;
     const fechaFin = document.getElementById('fechaFin').textContent;
 
-    showLoading();
-    fetch(URL_SAVE_HISTORICO, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-        },
-        body: JSON.stringify({
-            punto_id: puntoId,
-            fecha_inicio: fechaInicio,
-            fecha_fin: fechaFin
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showSavedIndicator();
-            cargarSemanasHistoricas(puntoId);
-        } else {
-            throw new Error(data.error || 'Error al guardar histórico');
+    Swal.fire({
+        title: '¿Está seguro?',
+        text: "Se guardará el histórico de esta semana",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, guardar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            showLoading();
+
+            fetch(URL_SAVE_HISTORICO, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({
+                    punto_id: puntoId,
+                    fecha_inicio: fechaInicio,
+                    fecha_fin: fechaFin,
+                    encargado: nombreEncargado
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Guardado',
+                        text: 'El histórico se guardó correctamente',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    showSavedIndicator();
+                    cargarSemanasHistoricas(puntoId);
+                } else {
+                    throw new Error(data.error || 'Error al guardar histórico');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error al guardar histórico: ' + error.message,
+                });
+            })
+            .finally(() => {
+                hideLoading();
+            });
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error al guardar histórico: ' + error.message);
-    })
-    .finally(() => {
-        hideLoading();
     });
 }
 
@@ -504,7 +695,7 @@ function procesarRegistrosProducto(registros) {
             if (registro.fecha) {
                 const fecha = new Date(registro.fecha);
                 const diaSemana = fecha.getDay();
-                const dia = dias[diaSemana === 0 ? 6 : diaSemana - 1];
+                const dia = dias[diaSemana];
                 cantidades[dia] = parseFloat(registro.cantidad) || 0;
             }
         });

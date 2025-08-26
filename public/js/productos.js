@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // cargarProductos();
+    cargarProductos();
     
     const productoModal = document.getElementById('productoModal');
     const deleteModal = document.getElementById('deleteModal');
@@ -54,57 +54,57 @@ function showSavedIndicator(mensaje = 'Operación completada exitosamente') {
     }, 2000);
 }
 
-// function cargarProductos() {
-//     showLoading();
-//     fetch(`${URL}`)
-//         .then(response => {
-//             console.log("Status:", response.status);
-//             return response.json(); // ✅ parsear directamente como JSON
-//         })
-//         .then(data => {
-//             console.log("Respuesta JSON:", data);
-//             renderizarProductos(data); // ✅ aquí ya recibes un array de objetos
-//         })
-//         .catch(error => {
-//             console.error("Error al cargar productos:", error);
-//             document.getElementsByClassName('productosBody').innerHTML = 
-//                 `<tr><td colspan="4" style="text-align:center; color:red;">
-//                     Error al cargar la lista de productos: ${error.message}
-//                 </td></tr>`;
-//         })
-//         .finally(() => {
-//             hideLoading();
-//         });
-// }
-// function renderizarProductos(productos) {
-//     const tbody = document.getElementsByClassName('productosBody');
-//     tbody.innerHTML = '';
+function cargarProductos() {
+    showLoading();
+    fetch(`${URL}`)
+        .then(response => {
+            console.log("Status:", response.status);
+            return response.json(); // ✅ parsear directamente como JSON
+        })
+        .then(data => {
+            console.log("Respuesta JSON:", data);
+            renderizarProductos(data); // ✅ aquí ya recibes un array de objetos
+        })
+        .catch(error => {
+            console.error("Error al cargar productos:", error);
+            document.getElementsByClassName('productosBody').innerHTML = 
+                `<tr><td colspan="4" style="text-align:center; color:red;">
+                    Error al cargar la lista de productos: ${error.message}
+                </td></tr>`;
+        })
+        .finally(() => {
+            hideLoading();
+        });
+}
+function renderizarProductos(productos) {
+    const tbody = document.getElementsByClassName('productosBody');
+    tbody.innerHTML = '';
     
-//     if (!productos || productos.length === 0) {
-//         tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; font-style:italic;">
-//             No hay productos registrados. Use el botón "Nuevo Producto" para añadir uno.
-//         </td></tr>`;
-//         return;
-//     }
+    if (!productos || productos.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; font-style:italic;">
+            No hay productos registrados. Use el botón "Nuevo Producto" para añadir uno.
+        </td></tr>`;
+        return;
+    }
     
-//     productos.forEach(producto => {
-//         const tr = document.createElement('tr');
-//         tr.innerHTML = `
-//             <td style="text-align:center;">${producto.id}</td>
-//             <td>${producto.nombre}</td>
-//             <td>${producto.seccion_nombre || ''}</td>
-//             <td class="action-buttons">
-//                 <button class="btn-warning" title="Editar ${producto.nombre}" onclick="editarProducto(${producto.id})">
-//                     <i class="fas fa-edit"></i>
-//                 </button>
-//                 <button class="btn-danger" title="Eliminar ${producto.nombre}" onclick="confirmarEliminar(${producto.id})">
-//                     <i class="fas fa-trash-alt"></i>
-//                 </button>
-//             </td>
-//         `;
-//         tbody.appendChild(tr);
-//     });
-// }
+    productos.forEach(producto => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="text-align:center;">${producto.id}</td>
+            <td>${producto.nombre}</td>
+            <td>${producto.seccion_nombre || ''}</td>
+            <td class="action-buttons">
+                <button class="btn-warning" title="Editar ${producto.nombre}" onclick="editarProducto(${producto.id})">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-danger" title="Eliminar ${producto.nombre}" onclick="confirmarEliminar(${producto.id})">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
 
 function editarProducto(id) {
     showLoading();

@@ -2,8 +2,8 @@
     <div class="inventory-container">
         <div class="controls-section">
             <div class="semana-info">
-                <div class="fecha-selector">
-                    <select id="semanaHistorica" class="form-control">
+                <div class="fecha-selector d-flex justify-content-center">
+                    <select id="semanaHistorica" class="form-select">
                         <option value="">Semana actual</option>
                     </select>
                 </div>
@@ -15,7 +15,7 @@
                 </div>
             </div>
             <div class="select-container">
-                <select id="punto" class="form-control">
+                <select id="punto" class="form-select">
                     <option value="">Seleccione un punto</option>
                 </select>
                 
@@ -28,9 +28,9 @@
                     <h4>Encargado del punto:</h4>
                     <div class="encargado-content">
                         <input type="text" id="encargadoInput" class="form-control" placeholder="Nombre del encargado">
-                        <button onclick="guardarEncargado()" class="btn-save">
+                        <!-- <button onclick="guardarEncargado()" class="btn-save">
                             <i class="fas fa-save"></i> Guardar
-                        </button>
+                        </button> -->
                     </div>
                 </div>
             </div>
@@ -42,18 +42,42 @@
                     <table class="inventory-table" id="table-almuerzos">
                         <thead>
                             <tr>
-                                <th>Producto</th>
-                                <th>Lunes</th>
-                                <th>Martes</th>
-                                <th>Miércoles</th>
-                                <th>Jueves</th>
-                                <th>Viernes</th>
-                                <th>Sábado</th>
-                                <th>Domingo</th>
+                                <th class="text-center">Producto</th>
+                                <th class="text-center">Lunes</th>
+                                <th class="text-center">Martes</th>
+                                <th class="text-center">Miércoles</th>
+                                <th class="text-center">Jueves</th>
+                                <th class="text-center">Viernes</th>
+                                <th class="text-center">Sábado</th>
+                                <th class="text-center">Domingo</th>
                             </tr>
                         </thead>
                         <tbody id="inventarioBody-4"  class="productosBody"></tbody>
                     </table>
+                    <!-- Modal seleccionar producto -->
+                    <div class="modal fade" id="modalProductos" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-md">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Seleccionar producto</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">Producto</th>
+                                    <th class="text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaProductos">
+                                <!-- Aquí se cargan los productos dinámicamente -->
+                            </tbody>
+                            </table>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
                 </div>
             </div>
             <div class="inventory-section">
@@ -62,14 +86,14 @@
                     <table class="inventory-table" id="table-parrilla">
                         <thead>
                             <tr>
-                                <th>Producto</th>
-                                <th>Lunes</th>
-                                <th>Martes</th>
-                                <th>Miércoles</th>
-                                <th>Jueves</th>
-                                <th>Viernes</th>
-                                <th>Sábado</th>
-                                <th>Domingo</th>
+                                <th class="text-center">Producto</th>
+                                <th class="text-center">Lunes</th>
+                                <th class="text-center">Martes</th>
+                                <th class="text-center">Miércoles</th>
+                                <th class="text-center">Jueves</th>
+                                <th class="text-center">Viernes</th>
+                                <th class="text-center">Sábado</th>
+                                <th class="text-center">Domingo</th>
                             </tr>
                         </thead>
                         <tbody id="inventarioBody-1"  class="productosBody"></tbody>
@@ -83,14 +107,14 @@
                     <table class="inventory-table" id="table-cocina">
                         <thead>
                             <tr>
-                                <th>Producto</th>
-                                <th>Lunes</th>
-                                <th>Martes</th>
-                                <th>Miércoles</th>
-                                <th>Jueves</th>
-                                <th>Viernes</th>
-                                <th>Sábado</th>
-                                <th>Domingo</th>
+                                <th class="text-center">Producto</th>
+                                <th class="text-center">Lunes</th>
+                                <th class="text-center">Martes</th>
+                                <th class="text-center">Miércoles</th>
+                                <th class="text-center">Jueves</th>
+                                <th class="text-center">Viernes</th>
+                                <th class="text-center">Sábado</th>
+                                <th class="text-center">Domingo</th>
                             </tr>
                         </thead>
                         <tbody id="inventarioBody-2" class="productosBody"></tbody>
@@ -104,14 +128,14 @@
                     <table class="inventory-table" id="table-bar">
                         <thead>
                             <tr>
-                                <th>Producto</th>
-                                <th>Lunes</th>
-                                <th>Martes</th>
-                                <th>Miércoles</th>
-                                <th>Jueves</th>
-                                <th>Viernes</th>
-                                <th>Sábado</th>
-                                <th>Domingo</th>
+                                <th class="text-center">Producto</th>
+                                <th class="text-center">Lunes</th>
+                                <th class="text-center">Martes</th>
+                                <th class="text-center">Miércoles</th>
+                                <th class="text-center">Jueves</th>
+                                <th class="text-center">Viernes</th>
+                                <th class="text-center">Sábado</th>
+                                <th class="text-center">Domingo</th>
                             </tr>
                         </thead>
                         <tbody id="inventarioBody-3"  class="productosBody"></tbody>

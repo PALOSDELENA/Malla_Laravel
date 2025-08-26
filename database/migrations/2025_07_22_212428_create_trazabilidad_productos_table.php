@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('traLoteSerie')->nullable(); // Lote o serie del producto
             $table->string('traProveedor')->nullable(); // Ubicación del producto
             $table->string('traDestino', 45)->nullable();
-            $table->string('traResponsable', 15);
+            $table->string('traResponsable', 15)->nullable();
             $table->string('traColor')->nullable();
             $table->string('traTextura')->nullable();
             $table->string('traOlor')->nullable();
