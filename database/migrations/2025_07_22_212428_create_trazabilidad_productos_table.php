@@ -20,12 +20,13 @@ return new class extends Migration
             $table->string('traLoteSerie')->nullable(); // Lote o serie del producto
             $table->string('traProveedor')->nullable(); // Ubicación del producto
             $table->string('traDestino', 45)->nullable();
-            $table->string('traResponsable', 15);
+            $table->string('traResponsable', 15)->nullable();
             $table->string('traColor')->nullable();
             $table->string('traTextura')->nullable();
             $table->string('traOlor')->nullable();
             $table->string('traObservaciones')->nullable(); // Descripción opcional del movimiento
             $table->unsignedBigInteger('orden_produccion_id')->nullable(); // ID de la orden de producción asociada
+            $table->unsignedBigInteger('traPunto')->nullable();
 
             $table->foreign('traIdProducto')
                 ->references('id')->on('productos')
@@ -36,6 +37,9 @@ return new class extends Migration
             $table->foreign('traResponsable')
                 ->references('num_doc')->on('users') // Asumiendo que tienes una tabla de usuarios
                 ->onDelete('cascade'); // Elimina trazabilidad si se elimina el usuario responsable
+            $table->foreign('traPunto')
+                ->references('id')->on('puntos')
+                ->onDelete('cascade');
         });
     }
 

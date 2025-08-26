@@ -16,8 +16,9 @@ return new class extends Migration
             $table->unsignedBigInteger('punto_id');
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
+            $table->string('encargado', 45);
             $table->json('datos');
-            $table->timestamp('creado_en');
+            $table->timestamp('creado_en')->useCurrent();
 
             // Llave foránea
             $table->foreign('punto_id')->references('id')->on('puntos')->onDelete('restrict');

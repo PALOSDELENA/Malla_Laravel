@@ -32,13 +32,6 @@
 
             <div class="login-box">
                 <h2 class="title-welcome">{{ __('Welcome') }}</h2>
-                <form method="post" action="" class="guest-form">
-                    <input type="hidden" name="access_type" value="guest"> <!-- Campo oculto para identificar el tipo de acceso -->
-                    <button type="submit" class="guest-button">
-                        <i class="fas fa-user"></i>            <!-- Icono de usuario -->
-                        {{ __('Display Mode')}}
-                    </button>
-                </form>
                 {{ $slot }}
             </div>
         </div>

@@ -21,33 +21,90 @@
                     </x-nav-link> -->
                     @php
                         $perfil = auth()->user()->cargo()->first()->car_nombre ?? 'Sin Cargo';
+                        $punto = auth()->user()->punto()->first()->nombre ?? 'Sin Punto';
                     @endphp
-                    @if ($perfil === 'Administrador')
-                        <x-nav-link :href="route('dashboard')" class="header-btn">
-                            <i class="fas fa-chart-line"></i>
-                            <span class="tooltip">Ver Métricas</span>
-                        </x-nav-link>
-                        <x-nav-link :href="route('dashboard')" class="header-btn">
+                    @switch($punto)
+                        @case('Administrativo')
+                            @php $route = route('dashboardAdmin'); @endphp
+                            @break
+
+                        @case('Puente Aranda')
+                            @php $route = route('dashboardPuente'); @endphp
+                            @break
+
+                        @case('Cafam')
+                            @php $route = route('dashboardCafam'); @endphp
+                            @break
+
+                        @case('Centro')
+                            @php $route = route('dashboardCentro'); @endphp
+                            @break
+
+                        @case('Cocina')
+                            @php $route = route('dashboardCocina'); @endphp
+                            @break
+
+                        @case('Fontibón')
+                            @php $route = route('dashboardFon'); @endphp
+                            @break
+
+                        @case('Jiménez')
+                            @php $route = route('dashboardJim'); @endphp
+                            @break
+
+                        @case('Mall Plaza')
+                            @php $route = route('dashboardMall'); @endphp
+                            @break
+
+                        @case('Multi Plaza')
+                            @php $route = route('dashboardPMulti'); @endphp
+                            @break
+
+                        @case('Nuestro Bogotá')
+                            @php $route = route('dashboardNuestro'); @endphp
+                            @break
+
+                        @case('Parrilla')
+                            @php $route = route('dashboardParrilla'); @endphp
+                            @break
+
+                        @case('Quinta Paredes')
+                            @php $route = route('dashboardQuinta'); @endphp
+                            @break
+
+                        @case('Salitre Plaza')
+                            @php $route = route('dashboardSalitre'); @endphp
+                            @break
+
+                        @default
+                            @php $route = "#" @endphp
+                    @endswitch
+                        <x-nav-link :href="$route" class="header-btn">
                             <i class="fas fa-tachometer-alt"></i>
                             <span class="tooltip">Ver Dashboard</span>
                         </x-nav-link>
-                        <x-nav-link :href="route('dashboard')" class="header-btn">
+                    @if ($perfil === 'Administrador')
+                        <!-- <x-nav-link :href="route('dashboard')" class="header-btn">
+                            <i class="fas fa-chart-line"></i>
+                            <span class="tooltip">Ver Métricas</span>
+                        </x-nav-link> -->
+                        <x-nav-link :href="route('paloteo')" class="header-btn">
                             <i class="fas fa-clipboard-list"></i>
                             <span class="tooltip">Ir al Paloteo</span>
                         </x-nav-link>
-                        <x-nav-link :href="route('dashboard')" class="header-btn">
+                        <!-- <x-nav-link :href="route('dashboard')" class="header-btn">
                             <i class="fas fa-list"></i>
                             <span class="tooltip">Ver Lista Completa</span>
+                        </x-nav-link> -->
+                        <x-nav-link :href="route('usuarios.index')" class="header-btn">
+                            <i class="fa-solid fa-users fa-5x" ></i>
+                            <span class="tooltip">Usuarios</span>
                         </x-nav-link>
-                        <x-nav-link :href="route('dashboard')" class="header-btn">
-                            <i class="fa-regular fa-circle-user"></i>
-                            <span class="tooltip">Ver Lista Cargos</span>
-                        </x-nav-link>
-                        <x-nav-link href="{{asset('/admin/turnos-kanban-board-page')}}" class="header-btn">
+                        <!-- <x-nav-link href="{{asset('/admin/turnos-kanban-board-page')}}" class="header-btn">
                             <i class="fas fa-piggy-bank"></i>
                             <span class="tooltip">Ir a Formularios</span>
                         </x-nav-link>
-                    @endif
+                    @endif -->
 
                     @if ($perfil === 'Planta')
                         <x-nav-link :href="route('productos.index')" class="header-btn">
@@ -90,9 +147,9 @@
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
+                        <!-- <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
-                        </x-dropdown-link>
+                        </x-dropdown-link> -->
 
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
@@ -136,9 +193,9 @@
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
+                <!-- <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
-                </x-responsive-nav-link>
+                </x-responsive-nav-link> -->
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">

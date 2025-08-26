@@ -16,6 +16,7 @@ class ProductoController extends Controller
         // Filtros desde el formulario
         $nombre = $request->input('proNombre');
         $unidad = $request->input('proUnidadMedida');
+        // $secciones = ;
 
         // Consulta con filtros y paginación
         $productos = Productos::query()
@@ -95,6 +96,7 @@ class ProductoController extends Controller
             'proListaIngredientes' => 'nullable|string',
             'proCondicionesConservacion' => 'nullable|string',
             'proFabricante' => 'nullable|string',
+            'proSeccion' => 'nullable',
         ]);
 
         // Asignación uno por uno
@@ -104,6 +106,7 @@ class ProductoController extends Controller
         $producto->proListaIngredientes = $request->input('proListaIngredientes');
         $producto->proCondicionesConservacion = $request->input('proCondicionesConservacion');
         $producto->proFabricante = $request->input('proFabricante');
+        $producto->proSeccion = $request->input('proSeccion');
 
         $producto->save();
         

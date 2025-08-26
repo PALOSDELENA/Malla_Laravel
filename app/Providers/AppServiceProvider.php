@@ -50,6 +50,20 @@ class AppServiceProvider extends ServiceProvider
                 'trazabilidad.index' => 'Trazabilidad',
                 'trazabilidad.create' => 'Registrar Movimiento',
                 'productos.stockChart' => 'Existencias de Productos',
+                'dashboardAdmin' => 'Dashboard Palos de Leña',
+                'dashboardPuente' => 'Dashboard Puente Aranda',
+                'dashboardCafam' => 'Dashboard Cafam',
+                'dashboardCentro' => 'Dashboard Centro',
+                'dashboardCocina' => 'Dashboard Cocina',
+                'dashboardFon' => 'Dashboard Fontibón',
+                'dashboardJim' => 'Dashboard Jimenénez',
+                'dashboardMall' => 'Dashboard Mall Plaza',
+                'dashboardMulti' => 'Dashboard Multi Plaza',
+                'dashboardNuestro' => 'Dashboard Nuestro Bogotá',
+                'dashboardParrilla' => 'Dashboard Parrilla',
+                'dashboardQuinta' => 'Dashboard Quinta Paredes',
+                'dashboardSalitre' => 'Dashboard Salitre',
+                'paloteo' => 'Paloteo',
             ];
 
             $view->with('pageTitle', $titles[$routeName] ?? 'Panel2');

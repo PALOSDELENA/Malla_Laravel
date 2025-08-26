@@ -6,7 +6,7 @@
                     Swal.fire({
                         icon: 'success',
                         title: '¡Éxito!',
-                        text: '{{ session('success') }}',
+                        text: "{{ session('success') }}",
                         confirmButtonColor: '#3085d6',
                         confirmButtonText: 'OK'
                     });
@@ -139,11 +139,22 @@
                                     <input type="text" name="proFabricante" id="modal_proFabricante" class="form-control">
                                 </div>
 
-                                <div class="col-md-12">
+                                <div class="col-md-6">
                                     <label for="proListaIngredientes" class="form-label">Ingredientes (separados por coma)</label>
                                     <input type="text" name="proListaIngredientes" id="modal_proListaIngredientes" class="form-control">
                                 </div>
 
+                                <div class="col-md-6">
+                                    <label for="proSeccion" class="form-label">Sección</label>
+                                    <select name="proSeccion" id="modal_proSeccion" class="form-select">
+                                        <option value="">Seleccione una unidad</option>
+                                        <option value="1">Parrilla</option>
+                                        <option value="2">Cocina</option>
+                                        <option value="3">Bar</option>
+                                        <option value="4">Almuerzos</option>
+                                    </select>
+                                </div>
+                                
                                 <div class="col-md-12">
                                     <label for="proCondicionesConservacion" class="form-label">Condiciones de Conservación</label>
                                     <input type="text" name="proCondicionesConservacion" id="modal_proCondicionesConservacion" class="form-control">

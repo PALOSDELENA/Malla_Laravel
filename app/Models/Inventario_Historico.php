@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Inventario_Historico extends Model
 {
+    protected $table = 'inventario_historico';
     // Permitir la asignación masiva de todos los campos
     protected $guarded = [];
 
