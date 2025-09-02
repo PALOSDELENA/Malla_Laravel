@@ -490,7 +490,7 @@ function descargarExcel() {
         })
         .catch(error => {
             console.error('Error al descargar el Excel:', error);
-            alert('Error al descargar el archivo Excel: ' + error.message);
+            alert('Error al realizar descarga del archivo Excel: ' + error.message);
         })
         .finally(() => {
             hideLoading();
