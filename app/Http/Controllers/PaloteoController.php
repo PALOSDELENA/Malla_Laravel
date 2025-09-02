@@ -12,6 +12,13 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Exception;
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
 use function Laravel\Prompts\select;
 
 class PaloteoController extends Controller
@@ -393,4 +400,160 @@ class PaloteoController extends Controller
         }
     }
 
+    public function exportExcel(Request $request)
+    {
+        try {
+            $spreadsheet = new Spreadsheet();
+
+            // 🔹 Puntos
+            $puntos = DB::table('puntos')
+                ->select('id', 'nombre')
+                ->orderBy('nombre')
+                ->get();
+
+            // 🔹 Secciones
+            $secciones = DB::table('inventario_secciones')
+                ->select('id', 'nombre')
+                ->orderBy('id')
+                ->get();
+
+            $monday = date('Y-m-d', strtotime('monday this week'));
+            $sunday = date('Y-m-d', strtotime('sunday this week'));
+
+            foreach ($puntos as $index => $punto) {
+                $sheet = $index === 0
+                    ? $spreadsheet->getActiveSheet()
+                    : $spreadsheet->createSheet();
+
+                $sheet->setTitle($punto->nombre);
+
+                // Títulos
+                $sheet->setCellValue('A1', 'PALOTEO SEMANAL - ' . $punto->nombre);
+                $sheet->mergeCells('A1:I1');
+
+                $sheet->setCellValue('A2', 'Semana del ' . date('d/m/Y', strtotime($monday)) . ' al ' . date('d/m/Y', strtotime($sunday)));
+                $sheet->mergeCells('A2:I2');
+
+                // Encargado
+                $encargado = DB::table('inventario_historico')
+                    ->where('punto_id', $punto->id)
+                    ->whereRaw('? BETWEEN fecha_inicio AND fecha_fin', [$monday])
+                    ->orderByDesc('id')
+                    ->limit(1)
+                    ->value('encargado') ?? 'No asignado';
+
+                $sheet->setCellValue('A3', 'Encargado: ' . $encargado);
+                $sheet->mergeCells('A3:I3');
+
+                // Estilos encabezado
+                $headerStyle = [
+                    'font' => ['bold' => true, 'size' => 14],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['rgb' => 'F5C02E']]
+                ];
+
+                $sheet->getStyle('A1:I1')->applyFromArray($headerStyle);
+                $sheet->getStyle('A2:I3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                $currentRow = 5;
+
+                foreach ($secciones as $seccion) {
+                    // Nombre de la sección
+                    $sheet->setCellValue('A' . $currentRow, strtoupper($seccion->nombre));
+                    $sheet->mergeCells('A' . $currentRow . ':I' . $currentRow);
+
+                    $sectionStyle = [
+                        'font' => ['bold' => true, 'size' => 12],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['rgb' => 'DDDDDD']]
+                    ];
+                    $sheet->getStyle('A' . $currentRow . ':I' . $currentRow)->applyFromArray($sectionStyle);
+
+                    $currentRow++;
+
+                    // Cabecera de tabla
+                    $sheet->fromArray(
+                        ['Producto', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Total'],
+                        null,
+                        'A' . $currentRow
+                    );
+
+                    $tableHeaderStyle = [
+                        'font' => ['bold' => true],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['rgb' => 'F5C02E']],
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                    ];
+                    $sheet->getStyle('A' . $currentRow . ':I' . $currentRow)->applyFromArray($tableHeaderStyle);
+
+                    $currentRow++;
+
+                    // Productos y registros de la semana
+                    $productos = DB::select("
+                        SELECT p.id, p.proNombre as nombre, 
+                            COALESCE(MAX(CASE WHEN DAYOFWEEK(r.traFechaMovimiento) = 2 THEN r.traCantidad END), 0) as lunes,
+                            COALESCE(MAX(CASE WHEN DAYOFWEEK(r.traFechaMovimiento) = 3 THEN r.traCantidad END), 0) as martes,
+                            COALESCE(MAX(CASE WHEN DAYOFWEEK(r.traFechaMovimiento) = 4 THEN r.traCantidad END), 0) as miercoles,
+                            COALESCE(MAX(CASE WHEN DAYOFWEEK(r.traFechaMovimiento) = 5 THEN r.traCantidad END), 0) as jueves,
+                            COALESCE(MAX(CASE WHEN DAYOFWEEK(r.traFechaMovimiento) = 6 THEN r.traCantidad END), 0) as viernes,
+                            COALESCE(MAX(CASE WHEN DAYOFWEEK(r.traFechaMovimiento) = 7 THEN r.traCantidad END), 0) as sabado,
+                            COALESCE(MAX(CASE WHEN DAYOFWEEK(r.traFechaMovimiento) = 1 THEN r.traCantidad END), 0) as domingo
+                        FROM productos p
+                        LEFT JOIN trazabilidadProductos r ON p.id = r.traIdProducto 
+                            AND r.traPunto = ? 
+                            AND YEARWEEK(r.traFechaMovimiento, 1) = YEARWEEK(CURRENT_DATE, 1)
+                        WHERE p.proSeccion = ?
+                        GROUP BY p.id, p.proNombre
+                        ORDER BY p.proNombre
+                    ", [$punto->id, $seccion->id]);
+
+                    $startDataRow = $currentRow;
+
+                    foreach ($productos as $producto) {
+                        $sheet->setCellValue('A' . $currentRow, $producto->nombre);
+                        $sheet->setCellValue('B' . $currentRow, $producto->lunes);
+                        $sheet->setCellValue('C' . $currentRow, $producto->martes);
+                        $sheet->setCellValue('D' . $currentRow, $producto->miercoles);
+                        $sheet->setCellValue('E' . $currentRow, $producto->jueves);
+                        $sheet->setCellValue('F' . $currentRow, $producto->viernes);
+                        $sheet->setCellValue('G' . $currentRow, $producto->sabado);
+                        $sheet->setCellValue('H' . $currentRow, $producto->domingo);
+                        $sheet->setCellValue('I' . $currentRow, '=SUM(B' . $currentRow . ':H' . $currentRow . ')');
+
+                        $currentRow++;
+                    }
+
+                    if ($currentRow > $startDataRow) {
+                        $dataCellStyle = [
+                            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+                            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+                        ];
+                        $sheet->getStyle('A' . $startDataRow . ':I' . ($currentRow - 1))->applyFromArray($dataCellStyle);
+                        $sheet->getStyle('A' . $startDataRow . ':A' . ($currentRow - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    }
+
+                    $currentRow += 2;
+                }
+
+                foreach (range('A', 'I') as $col) {
+                    $sheet->getColumnDimension($col)->setAutoSize(true);
+                }
+            }
+
+            // 📤 Responder con el archivo Excel como descarga
+            $writer = new Xlsx($spreadsheet);
+            $fileName = 'Paloteo_Semanal.xlsx';
+
+            return new StreamedResponse(function () use ($writer) {
+                $writer->save('php://output');
+            }, 200, [
+                "Content-Type" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "Content-Disposition" => "attachment; filename=\"$fileName\"",
+                "Cache-Control" => "max-age=0",
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }
