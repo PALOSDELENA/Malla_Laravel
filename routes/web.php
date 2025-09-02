@@ -161,11 +161,14 @@ Route::get('/paloteo/reporte/semanal/{punto}/{seccion}', [PaloteoController::cla
 Route::get('/paloteo/productos', [PaloteoController::class, 'obtenerProductos']);
 Route::get('/paloteo/get/productos', [PaloteoController::class, 'getProductos']);
 Route::put('/paloteo/{id}/productos', [PaloteoController::class, 'asignarSeccion']);
-Route::put('/productos/{id}', [PaloteoController::class, 'quitarSeccion']);
+                                                                                                                            Route::put('/productos/{id}', [PaloteoController::class, 'quitarSeccion']);
 Route::post('/guardar-inventario', [PaloteoController::class, 'guardarInventario']);
 Route::get('/paloteo/historico/{punto}', [PaloteoController::class, 'obtenerHistorico']);
 Route::post('/guardar-historico', [PaloteoController::class, 'guardarHistorico']);
 Route::get('/paloteo/cargar-historico/{id}', [PaloteoController::class, 'cargarHistorico'])
+    ->middleware('auth');
+
+Route::get('/paloteo/export', [PaloteoController::class, 'exportExcel'])
     ->middleware('auth');
 
 

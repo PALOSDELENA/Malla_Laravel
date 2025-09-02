@@ -464,7 +464,7 @@ function descargarExcel() {
     const fechaInicio = document.getElementById('fechaInicio').textContent;
     const fechaFin = document.getElementById('fechaFin').textContent;
     
-    fetch('generar_excel.php?fechaInicio=' + fechaInicio + '&fechaFin=' + fechaFin)
+    fetch(BASE_URL + '/paloteo/export')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Error en la respuesta del servidor');
