@@ -464,45 +464,45 @@ function descargarExcel() {
     const fechaInicio = document.getElementById('fechaInicio').textContent;
     const fechaFin = document.getElementById('fechaFin').textContent;
     
-    fetch(BASE_URL + '/paloteo/export')
-        .then(async response => {
-            if (!response.ok) {
-                // Aquí intentamos leer el mensaje de error real del servidor
-                let serverMessage = '';
-                try {
-                    // Si el backend devuelve JSON
-                    const data = await response.json();
-                    serverMessage = data.message || JSON.stringify(data);
-                } catch {
-                    // Si no es JSON, lo leemos como texto
-                    serverMessage = await response.text();
-                }
-                throw new Error(serverMessage || `Error HTTP ${response.status}`);
+fetch(BASE_URL + '/paloteo/export')
+    .then(async response => {
+        if (!response.ok) {
+            // Solo leemos el body aquí si hubo error
+            let serverMessage = '';
+            try {
+                const data = await response.json(); // intenta JSON
+                serverMessage = data.message || JSON.stringify(data);
+            } catch {
+                serverMessage = await response.text(); // fallback a texto
             }
-            return response.blob();
-        })
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
+            throw new Error(serverMessage || `Error HTTP ${response.status}`);
+        }
 
-            const currentDate = new Date().toISOString().slice(0, 10);
-            a.download = `Paloteo_Semana_${currentDate}.xlsx`;
+        // Aquí solo se llega si todo fue OK, y recién leemos el blob
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
 
-            document.body.appendChild(a);
-            a.click();
+        const currentDate = new Date().toISOString().slice(0, 10);
+        a.download = `Paloteo_Semana_${currentDate}.xlsx`;
 
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        })
-        .catch(error => {
-            console.error('Error al descargar el Excel:', error);
-            alert('Error exacto del servidor:\n' + error.message);
-        })
-        .finally(() => {
-            hideLoading();
-        });
+        document.body.appendChild(a);
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    })
+    .catch(error => {
+        console.error('Error al descargar el Excel:', error);
+        alert('Error exacto del servidor:\n' + error.message);
+    })
+    .finally(() => {
+        hideLoading();
+    });
 }
 
 function inicializarControlSemanas() {
