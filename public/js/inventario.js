@@ -467,18 +467,17 @@ function descargarExcel() {
 fetch(BASE_URL + '/paloteo/export')
     .then(async response => {
         if (!response.ok) {
-            // Solo leemos el body aquí si hubo error
             let serverMessage = '';
             try {
-                const data = await response.json(); // intenta JSON
-                serverMessage = data.message || JSON.stringify(data);
+                const data = await response.json();
+                serverMessage = data.error || data.message || JSON.stringify(data);
             } catch {
-                serverMessage = await response.text(); // fallback a texto
+                serverMessage = await response.text();
             }
             throw new Error(serverMessage || `Error HTTP ${response.status}`);
         }
 
-        // Aquí solo se llega si todo fue OK, y recién leemos el blob
+        // Solo si fue OK, lo tratamos como Excel
         return response.blob();
     })
     .then(blob => {
@@ -498,7 +497,7 @@ fetch(BASE_URL + '/paloteo/export')
     })
     .catch(error => {
         console.error('Error al descargar el Excel:', error);
-        alert('Error exacto del servidor:\n' + error.message);
+        alert('❌ Error en servidor:\n' + error.message);
     })
     .finally(() => {
         hideLoading();

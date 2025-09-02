@@ -553,7 +553,14 @@ class PaloteoController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json([
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+                // ⚠️ Solo en desarrollo, no en producción
+                'trace' => $e->getTraceAsString()
+            ], 500);
         }
+
     }
 }
