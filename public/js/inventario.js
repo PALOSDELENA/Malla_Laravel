@@ -465,32 +465,40 @@ function descargarExcel() {
     const fechaFin = document.getElementById('fechaFin').textContent;
     
     fetch(BASE_URL + '/paloteo/export')
-        .then(response => {
+        .then(async response => {
             if (!response.ok) {
-                throw new Error('Error en la respuesta del servidor');
+                // Aquí intentamos leer el mensaje de error real del servidor
+                let serverMessage = '';
+                try {
+                    // Si el backend devuelve JSON
+                    const data = await response.json();
+                    serverMessage = data.message || JSON.stringify(data);
+                } catch {
+                    // Si no es JSON, lo leemos como texto
+                    serverMessage = await response.text();
+                }
+                throw new Error(serverMessage || `Error HTTP ${response.status}`);
             }
             return response.blob();
         })
         .then(blob => {
             const url = window.URL.createObjectURL(blob);
-            
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = url;
-            
+
             const currentDate = new Date().toISOString().slice(0, 10);
             a.download = `Paloteo_Semana_${currentDate}.xlsx`;
-            
+
             document.body.appendChild(a);
             a.click();
-            
-             
+
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
         })
         .catch(error => {
             console.error('Error al descargar el Excel:', error);
-            alert('Error al realizar descarga del archivo Excel: ' + error.message);
+            alert('Error exacto del servidor:\n' + error.message);
         })
         .finally(() => {
             hideLoading();
