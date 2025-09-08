@@ -211,7 +211,7 @@
                 <div class="col-md-3 mb-4">
                     <div class="card text-center">
                         <div class="mt-4 mb-2">
-                            <a href="route('paloteo')">
+                            <a href="{{route('paloteo')}}">
                                 <i class="fa-solid fa-layer-group fa-5x icon-hover" ></i>
                             </a>
                         </div>
