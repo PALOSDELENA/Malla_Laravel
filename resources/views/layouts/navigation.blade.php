@@ -83,7 +83,7 @@
                             <i class="fas fa-tachometer-alt"></i>
                             <span class="tooltip">Ver Dashboard</span>
                         </x-nav-link>
-                    @if ($perfil === 'Administrador')
+                    @if ($perfil === 'Administrador' || $perfil === 'Punto')
                         <!-- <x-nav-link :href="route('dashboard')" class="header-btn">
                             <i class="fas fa-chart-line"></i>
                             <span class="tooltip">Ver Métricas</span>
@@ -96,15 +96,18 @@
                             <i class="fas fa-list"></i>
                             <span class="tooltip">Ver Lista Completa</span>
                         </x-nav-link> -->
+                        <!-- <x-nav-link href="{{asset('/admin/turnos-kanban-board-page')}}" class="header-btn">
+                            <i class="fas fa-piggy-bank"></i>
+                            <span class="tooltip">Ir a Formularios</span>
+                        </x-nav-link>-->
+                    @endif 
+
+                    @if ($perfil === 'Administrador')
                         <x-nav-link :href="route('usuarios.index')" class="header-btn">
                             <i class="fa-solid fa-users fa-5x" ></i>
                             <span class="tooltip">Usuarios</span>
                         </x-nav-link>
-                        <!-- <x-nav-link href="{{asset('/admin/turnos-kanban-board-page')}}" class="header-btn">
-                            <i class="fas fa-piggy-bank"></i>
-                            <span class="tooltip">Ir a Formularios</span>
-                        </x-nav-link>
-                    @endif -->
+                    @endif 
 
                     @if ($perfil === 'Planta')
                         <x-nav-link :href="route('productos.index')" class="header-btn">

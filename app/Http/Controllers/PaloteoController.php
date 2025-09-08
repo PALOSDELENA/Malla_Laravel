@@ -403,8 +403,6 @@ class PaloteoController extends Controller
     public function exportExcel(Request $request)
     {
         try {
-            set_time_limit(300); // 5 minutos
-            ini_set('memory_limit', '512M'); // o más, según necesidad            
             $spreadsheet = new Spreadsheet();
 
             // 🔹 Puntos

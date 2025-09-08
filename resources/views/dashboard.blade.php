@@ -147,6 +147,92 @@
                     </div>
                 </div>
             @endif
+            @if ($perfil === 'Punto')
+                @php
+                    $perfil = auth()->user()->cargo()->first()->car_nombre ?? 'Sin Cargo';
+                    $punto = auth()->user()->punto()->first()->nombre ?? 'Sin Punto';
+                @endphp
+                @switch($punto)
+                    @case('Administrativo')
+                        @php $route = route('dashboardAdmin'); @endphp
+                        @break
+
+                    @case('Puente Aranda')
+                        @php $route = route('dashboardPuente'); @endphp
+                        @break
+
+                    @case('Cafam')
+                        @php $route = route('dashboardCafam'); @endphp
+                        @break
+
+                    @case('Centro')
+                        @php $route = route('dashboardCentro'); @endphp
+                        @break
+
+                    @case('Cocina')
+                        @php $route = route('dashboardCocina'); @endphp
+                        @break
+
+                    @case('Fontibón')
+                        @php $route = route('dashboardFon'); @endphp
+                        @break
+
+                    @case('Jiménez')
+                        @php $route = route('dashboardJim'); @endphp
+                        @break
+
+                    @case('Mall Plaza')
+                        @php $route = route('dashboardMall'); @endphp
+                        @break
+
+                    @case('Multi Plaza')
+                        @php $route = route('dashboardPMulti'); @endphp
+                        @break
+
+                    @case('Nuestro Bogotá')
+                        @php $route = route('dashboardNuestro'); @endphp
+                        @break
+
+                    @case('Parrilla')
+                        @php $route = route('dashboardParrilla'); @endphp
+                        @break
+
+                    @case('Quinta Paredes')
+                        @php $route = route('dashboardQuinta'); @endphp
+                        @break
+
+                    @case('Salitre Plaza')
+                        @php $route = route('dashboardSalitre'); @endphp
+                        @break
+
+                    @default
+                        @php $route = "#" @endphp
+                @endswitch
+                <div class="col-md-3 mb-4">
+                    <div class="card text-center">
+                        <div class="mt-4 mb-2">
+                            <a href="route('paloteo')">
+                                <i class="fa-solid fa-layer-group fa-5x icon-hover" ></i>
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Paloteo</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card text-center">
+                        <div class="mt-4 mb-2">
+                            <a href="{{$route}}">
+                                <i class="fas fa-tachometer-alt fa-5x icon-hover" ></i>
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Dashboard</h5>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 </div></x-app-layout>

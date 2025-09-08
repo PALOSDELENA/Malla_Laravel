@@ -115,7 +115,7 @@ Route::get('/dashboard/admin', [DashboardController::class, 'indexAdmin'])
     ->middleware(PuntoMiddleware::class . ':Administrativo')
     ->name('dashboardAdmin');
 Route::get('/dashboard/puente', [DashboardController::class, 'indexPuente'])
-    ->middleware(PuntoMiddleware::class . ':Punte Aranda')
+    ->middleware(PuntoMiddleware::class . ':Puente Aranda')
     ->name('dashboardPuente');
 Route::get('/dashboard/cafam', [DashboardController::class, 'indexCafam'])
     ->middleware(PuntoMiddleware::class . ':Cafam')
