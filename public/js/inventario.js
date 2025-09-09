@@ -460,48 +460,24 @@ function guardarEncargado() {
 
 function descargarExcel() {
     showLoading();
-    
-    const fechaInicio = document.getElementById('fechaInicio').textContent;
-    const fechaFin = document.getElementById('fechaFin').textContent;
-    
-fetch(BASE_URL + '/paloteo/export')
-    .then(async response => {
-        if (!response.ok) {
-            let serverMessage = '';
-            try {
-                const data = await response.json();
-                serverMessage = data.error || data.message || JSON.stringify(data);
-            } catch {
-                serverMessage = await response.text();
-            }
-            throw new Error(serverMessage || `Error HTTP ${response.status}`);
-        }
 
-        // Solo si fue OK, lo tratamos como Excel
-        return response.blob();
-    })
-    .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
+    const currentDate = new Date().toISOString().slice(0, 10);
 
-        const currentDate = new Date().toISOString().slice(0, 10);
-        a.download = `Paloteo_Semana_${currentDate}.xlsx`;
+    // 🔹 Genera el link directamente a la ruta del backend
+    const url = BASE_URL + '/paloteo/export';
 
-        document.body.appendChild(a);
-        a.click();
+    // 🔹 Creas un <a> oculto para forzar la descarga
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Paloteo_Semana_${currentDate}.xlsx`; // nombre sugerido
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-    })
-    .catch(error => {
-        console.error('Error al descargar el Excel:', error);
-        alert('❌ Error en servidor:\n' + error.message);
-    })
-    .finally(() => {
+    // ⏳ Dar un pequeño margen para que el loader sea visible
+    setTimeout(() => {
         hideLoading();
-    });
+    }, 15000); // 15 segundos o lo que prefieras
 }
 
 function inicializarControlSemanas() {
