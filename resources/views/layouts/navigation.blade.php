@@ -57,7 +57,7 @@
                             @break
 
                         @case('Multi Plaza')
-                            @php $route = route('dashboardPMulti'); @endphp
+                            @php $route = route('dashboardMulti'); @endphp
                             @break
 
                         @case('Nuestro Bogotá')
