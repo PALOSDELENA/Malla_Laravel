@@ -477,7 +477,7 @@ function descargarExcel() {
     // ⏳ Dar un pequeño margen para que el loader sea visible
     setTimeout(() => {
         hideLoading();
-    }, 15000); // 15 segundos o lo que prefieras
+    }, 30000);
 }
 
 function inicializarControlSemanas() {
