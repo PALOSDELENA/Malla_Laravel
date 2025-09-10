@@ -61,7 +61,7 @@ class AuthenticatedSessionController extends Controller
         }
 
         $request->session()->regenerate();
-        Auth::login($usuario);
+        Auth::login($usuario, $request->boolean('remember'));
 
         return redirect()->intended(route('dashboard'));
     }
