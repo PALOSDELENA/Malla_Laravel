@@ -30,4 +30,8 @@ class Puntos extends Model
     {
         return $this->hasMany(Inventario_Registros::class,"punto_id");
     }
+    public function ordenCompra()
+    {
+        return $this->hasMany(OrdenCompra::class, "punto_id");
+    }
 }

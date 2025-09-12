@@ -17,6 +17,7 @@
         @livewireStyles
 
         <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/stylesOrden.css') }}">
         <link rel="stylesheet" href="{{ asset('css/inventario.css') }}?v={{ time() }}">
 
         <!-- Favicon de la página -->
@@ -54,7 +55,7 @@
         <!-- CDN SortableJS -->
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
         
-        <script src="{{ asset('js/app.js') }}"></script>
+        <script src="{{ asset('js/app.js') }}?v={{ time() }}"></script>
         <script src="{{ asset('js/inventario.js') }}?v={{ time() }}"></script>
         
         <!-- Script Bootstrap -->

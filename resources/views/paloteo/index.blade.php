@@ -1,6 +1,10 @@
 <x-app-layout>
     <div class="inventory-container">
+        
         <div class="controls-section">
+            <a href="{{route('ordenCompra')}}" class="btn btn-warning mb-4">
+                <i class="fa-solid fa-money-check-dollar"></i>Orden de Compra
+            </a>
             <div class="semana-info">
                 <div class="fecha-selector d-flex justify-content-center">
                     <select id="semanaHistorica" class="form-select">

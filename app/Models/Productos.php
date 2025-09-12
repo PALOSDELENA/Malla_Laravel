@@ -38,4 +38,11 @@ class Productos extends Model
     {
         return $this->belongsTo(Seccion::class, 'proSeccion', 'id');
     }
+
+    public function ordenCompra()
+    {
+        return $this->belongsToMany(OrdenCompra::class, 'orden_producto', 'producto_id', 'orden_id')
+            ->withPivot('inventario', 'sugerido', 'pedido_1', 'pedido_2', 'precio_total', 'observaciones', 'cantidad_bodega', 'stock_minimo')
+            ->withTimestamps();
+    }
 }

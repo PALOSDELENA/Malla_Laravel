@@ -49,6 +49,7 @@ class ProductoController extends Controller
             'proListaIngredientes' => 'nullable|string',
             'proCondicionesConservacion' => 'nullable|string|max:255',
             'proFabricante' => 'nullable|string|max:255',
+            'proPrecio' => 'nullable',
         ]);
 
         // Procesar ingredientes (opcional: guardarlos como JSON o string)
@@ -62,6 +63,7 @@ class ProductoController extends Controller
             'proListaIngredientes' => $ingredientes,
             'proCondicionesConservacion' => $validated['proCondicionesConservacion'] ?? null,
             'proFabricante' => $validated['proFabricante'] ?? null,
+            'proPrecio' => $validated['proPrecio'] ?? null,
         ]);
 
         // Redirecciona o responde
@@ -96,6 +98,7 @@ class ProductoController extends Controller
             'proListaIngredientes' => 'nullable|string',
             'proCondicionesConservacion' => 'nullable|string',
             'proFabricante' => 'nullable|string',
+            'proPrecio' => 'nullable',
             'proSeccion' => 'nullable',
         ]);
 
@@ -106,6 +109,7 @@ class ProductoController extends Controller
         $producto->proListaIngredientes = $request->input('proListaIngredientes');
         $producto->proCondicionesConservacion = $request->input('proCondicionesConservacion');
         $producto->proFabricante = $request->input('proFabricante');
+        $producto->proPrecio = $request->input('proPrecio');
         $producto->proSeccion = $request->input('proSeccion');
 
         $producto->save();

@@ -67,9 +67,13 @@
 
             <div class="row">
                 <!-- Condiciones de Conservación -->
-                <div class="col-12 mb-4">
+                <div class="col-6 mb-4">
                     <label for="proCondicionesConservacion" class="form-label">Condiciones de Conservación</label>
                     <input type="text" class="form-control" id="proCondicionesConservacion" name="proCondicionesConservacion" maxlength="255">
+                </div>
+                <div class="col-6 mb-4">
+                    <label for="proPrecio" class="form-label">Precio</label>
+                    <input type="number" class="form-control" id="proPrecio" name="proPrecio" maxlength="255">
                 </div>
             </div>
 

@@ -16,6 +16,7 @@ use App\Livewire\AsignacionTurnosKanban;
 use Dom\Document;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\OrdenCompraController;
 use App\Http\Controllers\PaloteoController;
 
 // Route::get('/', function () {
@@ -172,5 +173,8 @@ Route::get('/paloteo/export', [PaloteoController::class, 'exportExcel'])
     ->middleware('auth');
 
 
-
+//Rutas Orden de Compra
+Route::get('/orden-compra', [OrdenCompraController::class, 'index'])->name('ordenCompra');
+Route::get('/crear-orden-compra', [OrdenCompraController::class, 'create'])->name('crearOrden');
+Route::post('/registrar-orden', [OrdenCompraController::class, 'store'])->name('registrarOrden');
 require __DIR__.'/auth.php';

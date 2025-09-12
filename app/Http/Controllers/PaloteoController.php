@@ -563,4 +563,5 @@ class PaloteoController extends Controller
         }
 
     }
+
 }
