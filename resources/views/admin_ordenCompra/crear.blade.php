@@ -3,18 +3,13 @@
         $proveedor_seleccionado = request('proveedor'); 
     @endphp
 
-    <div class="container">
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="fa fa-check-circle"></i> {{ session('success') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
-    
-        <a href="{{ url('/') }}" class="button">Volver al Inicio</a>
-        <button type="button" class="button" onclick="limpiarDatosGuardados()">Limpiar Datos Guardados</button>
-
-        <h1>Generar Orden de Compra</h1>
+    <div class="container mt-2">
 
         {{-- Filtro de proveedores --}}
         <form method="GET" class="form filter-container">
@@ -35,22 +30,31 @@
         {{-- Formulario de Orden de Compra --}}
         <form method="POST" action="{{ route('registrarOrden') }}" class="form">
             @csrf
-            <label>Responsable:</label>
-            <input type="text" name="responsable" required><br>
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Responsable:</label>
+                    <input type="text" name="responsable" required><br>
+                </div>
+                <div class="col-md-6">
+                    <label>Punto:</label>
+                    <input type="hidden" name="punto_id" value="{{ $id_punto }}">
+                    <input type="text" name="punto" value="{{$punto}}" readonly><br>
+                </div>
+                <div class="col-md-6">
+                    <label>Fecha Entrega 1:</label>
+                    <input type="date" name="fecha_entrega_1" required><br>
+                </div>
+                <div class="col-md-6">
+                    <label>Fecha Entrega 2:</label>
+                    <input type="date" name="fecha_entrega_2" required><br>
+                </div>
+                <div class="col-md-12">
+                    <label>Correo Electrónico:</label>
+                    <input type="email" name="correo" required><br>
+                </div>
+            </div>
 
-            <label>Punto:</label>
-            <input type="hidden" name="punto_id" value="{{ $id_punto }}">
-            <input type="text" name="punto" value="{{$punto}}" readonly><br>
-
-            <label>Correo Electrónico:</label>
-            <input type="email" name="correo" required><br>
-
-            <label>Fecha Entrega 1:</label>
-            <input type="date" name="fecha_entrega_1" required><br>
-
-            <label>Fecha Entrega 2:</label>
-            <input type="date" name="fecha_entrega_2" required><br>
-
+            <button type="button" class="button" onclick="limpiarDatosGuardados()">Limpiar Datos Guardados</button>
             <h2>Productos Solicitados</h2>
             
             @if ($productos->isEmpty())
@@ -115,7 +119,7 @@
                 </table>
 
                 {{-- Paginación de Laravel --}}
-                {{ $productos->links() }}
+                {{ $productos->appends(['proveedor' => request('proveedor')])->links() }}
             @endif
 
             <button type="submit" class="button">Guardar Orden</button>

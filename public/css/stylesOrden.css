@@ -1,17 +1,17 @@
 /* Reset básico */
-* {
+/* * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
     font-family: "Segoe UI", sans-serif;
-}
+} */
 
 /* Fondo general */
-body {
+/* body {
     background-color: #FFFFFF;
     padding: 40px;
     color: #5B2D18;
-}
+} */
 
 /* Título */
 h1, h2 {
@@ -52,7 +52,7 @@ td .button,
     background-color: #F5C02E !important;
     color: #333 !important;
     margin: 2px 4px;
-    min-width: 100px;
+    min-width: 4em;
 }
 
 td .button:hover,
@@ -217,7 +217,7 @@ td a.button:last-child {
 }
 
 /* Estados de órdenes */
-.estado-pendiente,
+.estado-Pendiente,
 .estado-aprobada,
 .estado-denegada {
     background-color: #f0f0f0;

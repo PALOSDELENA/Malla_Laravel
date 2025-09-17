@@ -360,10 +360,45 @@ function guardarInventario(event) {
             cantidad
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("text/html")) {
+            Swal.fire({
+                icon: 'warning',
+                title: '⚠️ Sesión expirada',
+                text: 'Por favor, inicia sesión nuevamente.',
+                confirmButtonText: 'Ir al login',
+                confirmButtonColor: '#3085d6'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/login';
+                }
+            });
+
+            return;
+        }
+        if (response.status === 401) {
+            Swal.fire({
+                icon: 'warning',
+                title: '⚠️ Sesión expirada',
+                text: 'Por favor, inicia sesión nuevamente.',
+                confirmButtonText: 'Ir al login',
+                confirmButtonColor: '#3085d6'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/login';
+                }
+            });
+
+            return;
+        }
+        return response.json();
+    })
     .then(data => {
+        if (!data) return;
+
         if (data.error) {
-            input.style.backgroundColor = '#ffe6e6';
+            input.style.backgroundColor = '#ff2828ff';
             console.error('Error al guardar:', data.error);
         } else {
             input.style.backgroundColor = '#e6ffe6';
@@ -373,7 +408,7 @@ function guardarInventario(event) {
         }
     })
     .catch(error => {
-        input.style.backgroundColor = '#ffe6e6';
+        input.style.backgroundColor = '#b98513ff';
         console.error('Error:', error);
     });
 }

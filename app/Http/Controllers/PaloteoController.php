@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Exception;
-
+use Illuminate\Support\Facades\Auth;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -167,6 +167,9 @@ class PaloteoController extends Controller
 
     public function guardarInventario(Request $request)
     {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Sesión expirada. Por favor inicie sesión nuevamente.'], 401);
+        }
         try {
             $data = $request->validate([
                 'producto_id' => 'required|integer',

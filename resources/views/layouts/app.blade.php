@@ -16,8 +16,8 @@
 
         @livewireStyles
 
-        <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-        <link rel="stylesheet" href="{{ asset('css/stylesOrden.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/styles.css') }}?v={{ time() }}">
+        <link rel="stylesheet" href="{{ asset('css/stylesOrden.css') }}?v={{ time() }}">
         <link rel="stylesheet" href="{{ asset('css/inventario.css') }}?v={{ time() }}">
 
         <!-- Favicon de la página -->

@@ -177,4 +177,13 @@ Route::get('/paloteo/export', [PaloteoController::class, 'exportExcel'])
 Route::get('/orden-compra', [OrdenCompraController::class, 'index'])->name('ordenCompra');
 Route::get('/crear-orden-compra', [OrdenCompraController::class, 'create'])->name('crearOrden');
 Route::post('/registrar-orden', [OrdenCompraController::class, 'store'])->name('registrarOrden');
+
+Route::get('/ordenes/{id}/pdf', [OrdenCompraController::class, 'verPDF'])->name('ordenes.ver.pdf');
+Route::get('/ordenes/{id}', [OrdenCompraController::class, 'show'])->name('ordenes.show');
+Route::delete('/eliminar/{id}', [OrdenCompraController::class, 'destroy'])->name('ordenes.destroy');
+
+Route::post('/ordenes/{id}/revision', [OrdenCompraController::class, 'revision'])
+    ->name('ordenes.revision');
+
+
 require __DIR__.'/auth.php';
