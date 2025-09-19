@@ -62,7 +62,7 @@ td .button:hover,
 }
 
 /* Tablas */
-.table {
+.tabla {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 30px;
@@ -72,8 +72,8 @@ td .button:hover,
     overflow: hidden;
 }
 
-.table th,
-.table td {
+.tabla th,
+.tabla td {
     padding: 12px 10px;
     text-align: left;
     border-bottom: 1px solid #eee;
@@ -81,13 +81,13 @@ td .button:hover,
     color: #5B2D18;
 }
 
-.table th {
+.tabla th {
     background-color: #F5C02E;
     color: #5B2D18;
     font-weight: bold;
 }
 
-.table tr:hover {
+.tabla tr:hover {
     background-color: #fff8e1;
 }
 
@@ -105,8 +105,8 @@ td .button:hover,
 }
 
 /* Inputs en la tabla */
-.table input[type="number"],
-.table input[type="text"] {
+.tabla input[type="number"],
+.tabla input[type="text"] {
     width: 100%;
     padding: 6px;
     border: 1px solid #ccc;

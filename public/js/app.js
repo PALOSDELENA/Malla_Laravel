@@ -152,41 +152,64 @@ function confirmDelete(id) {
 // });
 
 document.addEventListener('DOMContentLoaded', () => {
-    const rows = document.querySelectorAll('tbody tr');
+  const rows = document.querySelectorAll('tbody tr');
 
-    rows.forEach(row => {
+    function calcular(row) {
         const inventario = row.querySelector('[name*="[inventario]"]');
-        const cantidadBodega = row.querySelector('td:nth-child(4)');
+        const cantidadBodega = row.querySelector('[name*="[cantidad_bodega]"]');
         const sugerido = row.querySelector('[name*="[sugerido]"]');
         const pedido1 = row.querySelector('[name*="[pedido_1]"]');
         const pedido2 = row.querySelector('[name*="[pedido_2]"]');
         const totalPedido = row.querySelector('[name*="[total_pedido]"]');
         const precioTotal = row.querySelector('[name*="[precio_total]"]');
-        const costoUnitario = parseFloat(row.querySelector('td:nth-child(10)').textContent.trim());
-        const selectProducto = row.querySelector('select[name*="[producto_id]"]');
+        const costoUnitario = parseFloat(row.querySelector('[name*="[proPrecio]"]').value) || 0;
 
-        function calcular() {
-            const inv = parseFloat(inventario.value) || 0;
-            const bodega = parseFloat(cantidadBodega.textContent) || 0;
-            const p1 = parseFloat(pedido1.value) || 0;
-            const p2 = parseFloat(pedido2.value) || 0;
+        const inv = parseFloat(inventario.value) || 0;
+        const bodega = parseFloat(cantidadBodega.value) || 0;
+        const p1 = parseFloat(pedido1.value) || 0;
+        const p2 = parseFloat(pedido2.value) || 0;
 
-            const sug = Math.max(0, bodega - inv);
-            const total = p1 + p2;
-            const totalPrecio = total * costoUnitario;
+        const sug = Math.max(0, bodega - inv);
+        const total = p1 + p2;
+        let totalPrecio = total * costoUnitario;
 
-            sugerido.value = sug;
-            totalPedido.value = total;
-            precioTotal.value = totalPrecio.toFixed(2);
+        if (isNaN(totalPrecio)) totalPrecio = 0;
+
+        sugerido.value = sug;
+        totalPedido.value = total;
+        precioTotal.value = totalPrecio.toFixed(2);
+
+        // 🔥 Guardar también en localStorage
+        const productId = row.querySelector('.producto-id').value;
+        let savedData = JSON.parse(localStorage.getItem('ordenCompraData')) || {};
+
+        if (!savedData[productId]) {
+            savedData[productId] = { id: productId };
         }
 
+        savedData[productId]['inventario'] = inventario.value;
+        savedData[productId]['cantidad_bodega'] = bodega;
+        savedData[productId]['pedido_1'] = pedido1.value;
+        savedData[productId]['pedido_2'] = pedido2.value;
+        savedData[productId]['sugerido'] = sug;
+        savedData[productId]['total_pedido'] = total;
+        savedData[productId]['precio_total'] = totalPrecio.toFixed(2);
+
+        localStorage.setItem('ordenCompraData', JSON.stringify(savedData));
+    }
+
+    // Recorremos todas las filas
+    rows.forEach(row => {
+        const inventario = row.querySelector('[name*="[inventario]"]');
+        const pedido1 = row.querySelector('[name*="[pedido_1]"]');
+        const pedido2 = row.querySelector('[name*="[pedido_2]"]');
+
         [inventario, pedido1, pedido2].forEach(input => {
-            input.addEventListener('input', calcular);
+            input.addEventListener('input', () => calcular(row));
         });
 
-        calcular(); // Cálculo inicial
+        calcular(row); // cálculo inicial
     });
-
     // Evitar enviar productos vacíos
     // Evitar enviar productos vacíos
     const form = document.querySelector('form[method="POST"]');

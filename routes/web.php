@@ -185,5 +185,8 @@ Route::delete('/eliminar/{id}', [OrdenCompraController::class, 'destroy'])->name
 Route::post('/ordenes/{id}/revision', [OrdenCompraController::class, 'revision'])
     ->name('ordenes.revision');
 
+Route::get('/edit/orden/{id}', [OrdenCompraController::class, 'edit'])->name('editOrden');
+Route::post('/editar/{id}', [OrdenCompraController::class, 'update'])->name('ordenes.update');
 
+Route::post('/registrar-orden-ajax', [OrdenCompraController::class, 'storeAjax'])->name('registrarOrdenAjax');
 require __DIR__.'/auth.php';

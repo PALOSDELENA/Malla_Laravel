@@ -2,6 +2,19 @@
     @php
         $perfil = auth()->user()->cargo()->first()->car_nombre ?? 'Sin Cargo';
     @endphp
+    @if(session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: "{{ session('success') }}",
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            });
+        </script>
+    @endif
     @if(session('error'))
         <div class="alert alert-danger">
             {{ session('error') }}
@@ -38,7 +51,7 @@
     @if ($ordenes->isEmpty())
         <p class="no-results">No se encontraron órdenes para el período seleccionado.</p>
     @else
-        <table class="table">
+        <table class="tabla">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -76,7 +89,7 @@
                                         Revisar Orden
                                     </button>
                                 @endif
-                                <a href="#" class="button button-edit">
+                                <a href="{{ route('editOrden', $orden->id) }}" class="button button-edit">
                                     <i class="fas fa-pen"></i> <!-- Icono de 'Editar' -->
                                 </a>
                             @endif
@@ -122,30 +135,29 @@
                     </div>
                     </div>
 
-<form method="POST" action="{{ route('ordenes.revision', $orden->id) }}" class="mt-3">
-    @csrf
+                    <form method="POST" action="{{ route('ordenes.revision', $orden->id) }}" class="mt-3">
+                        @csrf
 
-    <div class="mb-3">
-        <label class="form-label">Estado de la Orden:</label>
-        <select name="estado" class="form-select" required>
-            <option>Seleccionar</option>
-            <option value="aprobada">Aprobar Orden</option>
-            <option value="denegada">Denegar Orden</option>
-        </select>
-    </div>
+                        <div class="mb-3">
+                            <label class="form-label">Estado de la Orden:</label>
+                            <select name="estado" class="form-select" required>
+                                <option>Seleccionar</option>
+                                <option value="aprobada">Aprobar Orden</option>
+                                <option value="denegada">Denegar Orden</option>
+                            </select>
+                        </div>
 
-    <div class="mb-3">
-        <label class="form-label">Comentarios:</label>
-        <textarea name="comentario" class="form-control" required 
-                  placeholder="Ingrese sus comentarios sobre la orden..."></textarea>
-    </div>
+                        <div class="mb-3">
+                            <label class="form-label">Comentarios:</label>
+                            <textarea name="comentario" class="form-control" required 
+                                    placeholder="Ingrese sus comentarios sobre la orden..."></textarea>
+                        </div>
 
-    <div class="d-flex justify-content-between">
-        <a href="{{ route('ordenCompra') }}" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</a>
-        <button type="submit" class="btn btn-primary">Guardar Decisión</button>
-    </div>
-</form>
-
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ route('ordenCompra') }}" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">Guardar Decisión</button>
+                        </div>
+                    </form>
                 </div>
                 </div>
             </div>

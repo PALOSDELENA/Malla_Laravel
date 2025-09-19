@@ -65,7 +65,8 @@ class AppServiceProvider extends ServiceProvider
                 'dashboardSalitre' => 'Dashboard Salitre',
                 'paloteo' => 'Paloteo',
                 'ordenCompra' => 'Órdenes de Compra',
-                'crearOrden' => 'Generar Orden de Compra'
+                'crearOrden' => 'Generar Orden de Compra',
+                'editOrden' => 'Editar Orden'
             ];
 
             $view->with('pageTitle', $titles[$routeName] ?? 'Panel2');

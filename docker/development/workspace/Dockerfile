@@ -2,7 +2,6 @@
 # Use the official PHP CLI image as the base
 FROM php:8.4-cli
 
-# Set environment variables for user and group ID
 ARG UID=1000
 ARG GID=1000
 ARG NODE_VERSION=22.0.0
@@ -13,7 +12,7 @@ ARG XDEBUG_IDE_KEY
 ARG XDEBUG_LOG
 ARG XDEBUG_LOG_LEVEL
 
-# Install system dependencies and build libraries
+# Instalar dependencias del sistema y librerías
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     unzip \
@@ -24,7 +23,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libcurl4-openssl-dev \
     libicu-dev \
     libzip-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
+    gd \
     pdo_mysql \
     pdo_pgsql \
     pgsql \
@@ -33,10 +37,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     zip \
     bcmath \
     soap \
-    # && pecl install redis xdebug \
     && pecl install redis \
     && docker-php-ext-enable redis \
-    # && docker-php-ext-enable redis xdebug\
     && if [ "$XDEBUG_ENABLED" = "true" ]; then \
         pecl install xdebug && \
         docker-php-ext-enable xdebug && \

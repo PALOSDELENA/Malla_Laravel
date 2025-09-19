@@ -16,6 +16,7 @@ class TrazabilidadController extends Controller
     {
         $movimientos = TrazabilidadProducto::with(['producto', 'responsable'])
             ->orderBy('traFechaMovimiento', 'desc')
+            ->where('traTipoMovimiento', '!=', 'Ajuste Paloteo')
             ->paginate(10);
         $productos = Productos::orderBy('proNombre')->get();
         $usuarios = User::orderBy('usu_nombre')->get();
