@@ -78,3 +78,15 @@ USER www-data
 # Expose port 9000 and start php-fpm server
 EXPOSE 9000
 CMD ["php-fpm"]
+
+# --- Etapa para producción ---
+FROM base as production
+
+USER root
+
+# Configurar límites de PHP
+RUN echo "max_execution_time=600" > /usr/local/etc/php/conf.d/99-overrides.ini \
+    && echo "memory_limit=1024M" >> /usr/local/etc/php/conf.d/99-overrides.ini \
+    && echo "post_max_size=100M" >> /usr/local/etc/php/conf.d/99-overrides.ini \
+    && echo "upload_max_filesize=100M" >> /usr/local/etc/php/conf.d/99-overrides.ini
+
