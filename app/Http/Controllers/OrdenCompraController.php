@@ -18,7 +18,18 @@ class OrdenCompraController extends Controller
      */
     public function index(Request $request)
     {
+        // Usuario logueado
+        $user = Auth::user();
+        $punto = $user->punto->nombre ?? null;
+        $id_punto = $user->usu_punto ?? null;
+
         $query = OrdenCompra::query();
+
+        // Filtrar por punto del usuario
+        if ($punto != 'Planta' && $punto != 'Administrativo')
+        {
+            $query->where('punto_id', $id_punto);
+        }
 
         // Si vienen ambas fechas, usamos whereBetween
         if ($request->filled('fecha_inicio') && $request->filled('fecha_fin')) {
@@ -38,7 +49,7 @@ class OrdenCompraController extends Controller
         // Mantener filtros en paginación
         $ordenes->appends($request->all());
 
-        return view('admin_ordenCompra.index', compact('ordenes'));
+        return view('admin_ordenCompra.index', compact('ordenes', 'punto'));
     }
 
     /**
