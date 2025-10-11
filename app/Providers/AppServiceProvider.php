@@ -39,11 +39,11 @@ class AppServiceProvider extends ServiceProvider
                 'ordenProduccion.index' => 'Ordenes de Producción',
                 'ordenProduccion.create' => 'Crear Orden de Producción',
                 'cargos.index' => 'Cargos',
-                    'puntos.index' => 'Puntos',
-          'turnos.index' => 'Turnos',
+                'puntos.index' => 'Puntos',
+                'turnos.index' => 'Turnos',
                 'usuarios.index' => 'Usuarios',
                 'usuarios.create' => 'Crear Usuario',
-                  'tipos-documentos.index' => 'Tipos de Documento',
+                'tipos-documentos.index' => 'Tipos de Documento',
                 'kanban.turnos' => 'Kanban Turnos',
                 'producciones.index' => 'Producciones',
                 'producciones.create' => 'Crear Producción',
@@ -66,7 +66,8 @@ class AppServiceProvider extends ServiceProvider
                 'paloteo' => 'Paloteo',
                 'ordenCompra' => 'Órdenes de Compra',
                 'crearOrden' => 'Generar Orden de Compra',
-                'editOrden' => 'Editar Orden'
+                'editOrden' => 'Editar Orden',
+                'informe.index' => 'Informes'
             ];
 
             $view->with('pageTitle', $titles[$routeName] ?? 'Panel2');

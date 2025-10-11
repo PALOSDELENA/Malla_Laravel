@@ -16,6 +16,7 @@ use App\Livewire\AsignacionTurnosKanban;
 use Dom\Document;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\InformeController;
 use App\Http\Controllers\OrdenCompraController;
 use App\Http\Controllers\PaloteoController;
 
@@ -189,4 +190,16 @@ Route::get('/edit/orden/{id}', [OrdenCompraController::class, 'edit'])->name('ed
 Route::post('/editar/{id}', [OrdenCompraController::class, 'update'])->name('ordenes.update');
 
 Route::post('/registrar-orden-ajax', [OrdenCompraController::class, 'storeAjax'])->name('registrarOrdenAjax');
+
+//Informes
+Route::get('/informes', [InformeController::class, 'index'])->name('informe.index');
+Route::get('/informes/test', [InformeController::class, 'obtenerConsumo']);
+Route::get('/informes/exportarCompraInsumos', [InformeController::class,  'exportarCompraInsumos'])->name('exportar.insumos');
+Route::get('/informes/exportarConsumoInsumos', [InformeController::class,  'exportarConsumoInsumos'])->name('exportar.consumo');
+Route::get('/informes/exportarFacturasPro', [InformeController::class,  'exportarFacturasPro'])->name('exportar.facturas.proveedor');
+Route::get('/informes/exportarFacturasSer', [InformeController::class,  'exportarFacturasSer'])->name('exportar.facturas.servicios');
+Route::get('/informes/exportarRecetas', [InformeController::class,  'exportarRecetas'])->name('exportar.recetas');
+Route::get('/informes/exportarEncuesta', [InformeController::class,  'exportarEncuesta'])->name('exportar.encuesta');
+
+
 require __DIR__.'/auth.php';
