@@ -14,6 +14,6 @@
         }
     </style>
     <div class="iframe-container">
-        <iframe title="Dashboard Jimenez" width="1024" height="1060" src="https://app.powerbi.com/view?r=eyJrIjoiODY5MzMzNGEtZmUwOS00OTRkLTg4NmItMmUxOWY2Yjk4NDYzIiwidCI6ImY2YzEyZjA0LWI5MzItNGFlMS05NmYzLTIyNzEwZGNhNDcwNCIsImMiOjR9&pageName=41f33ea0935db3e4ea42" frameborder="0" allowFullScreen="true"></iframe>
+        <iframe title="Dashboard Jimenez" width="1024" height="373.5" src="https://app.powerbi.com/view?r=eyJrIjoiMDlmMTJkN2QtMDJhZi00MjVlLWFhY2QtY2RiNmVmM2IyYzUzIiwidCI6ImY2YzEyZjA0LWI5MzItNGFlMS05NmYzLTIyNzEwZGNhNDcwNCIsImMiOjR9" frameborder="0" allowFullScreen="true"></iframe>
     </div>
 </x-app-layout>

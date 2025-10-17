@@ -7,6 +7,8 @@ use App\Models\ConsumoInsumo;
 use App\Models\Encuesta;
 use App\Models\FacturasPro;
 use App\Models\FacturasSer;
+use App\Models\PuntoInfo;
+use App\Models\Puntos;
 use App\Models\Recetas;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -127,55 +129,66 @@ class InformeController extends Controller
         $fechaInicio = $fechaInicio . ' 00:00:00';
         $fechaFin = $fechaFin . ' 23:59:59';        
 
-        // Consultar los datos
-        $insumos = ConsumoInsumo::whereBetween('fecha_insercion', [$fechaInicio, $fechaFin])->get();
-
+        $puntos = PuntoInfo::all();
+        
         // Crear el archivo Excel
         $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
 
-        // Título
-        $sheet->setCellValue('A1', 'Reporte de Consumo de Insumos');
-        $sheet->mergeCells('A1:E1');
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        foreach ($puntos as $index => $punto) {
+            // Consultar los datos
+            $insumos = ConsumoInsumo::whereBetween('fecha_insercion', [$fechaInicio, $fechaFin])
+                ->where('punto', 'like', "%{$punto->nombre}%")
+                ->orderby('insumo')
+                ->get();
+            
+            $sheet = $index === 0
+                ? $spreadsheet->getActiveSheet()
+                : $spreadsheet->createSheet();
 
-        // Encabezados
-        $sheet->fromArray(['ID', 'PUNTO', 'INSUMO', 'CANTIDAD', 'FECHA'], NULL, 'A3');
+            $sheet->setTitle($punto->nombre);
 
-        // Contenido
-        $fila = 4;
-        foreach ($insumos as $item) {
-            $sheet->setCellValue("A{$fila}", $item->id_consumo);
-            $sheet->setCellValue("B{$fila}", $item->punto ?? '—');
-            $sheet->setCellValue("C{$fila}", $item->insumo);
-            $sheet->setCellValue("D{$fila}", $item->cantidad_usada);
-            $sheet->setCellValue("E{$fila}", $item->fecha_insercion ? date('d/m/Y H:i:s', strtotime($item->fecha)) : '');
-            $fila++;
-        }
+            // Título
+            $sheet->setCellValue('A1', 'Reporte de Consumo de Insumos - ' . $punto->nombre);
+            $sheet->mergeCells('A1:D1');
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
 
-        // Autoajustar columnas
-        foreach (range('A', 'E') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
+            // Encabezados
+            $sheet->fromArray(['ID', 'INSUMO', 'CANTIDAD', 'FECHA'], NULL, 'A3');
 
-        // Centrar el título
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            // Contenido
+            $fila = 4;
+            foreach ($insumos as $item) {
+                $sheet->setCellValue("A{$fila}", $item->id_consumo);
+                $sheet->setCellValue("B{$fila}", $item->insumo);
+                $sheet->setCellValue("C{$fila}", $item->cantidad_usada);
+                $sheet->setCellValue("D{$fila}", $item->fecha_insercion ? date('d/m/Y H:i:s', strtotime($item->fecha)) : '');
+                $fila++;
+            }
 
-        // Centrar y poner en negrita los encabezados
-        $sheet->getStyle('A3:E3')->applyFromArray([
-            'font' => [
-                'bold' => true,
-            ],
-            'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
-            ],
-            'borders' => [
-                'bottom' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+            // Autoajustar columnas
+            foreach (range('A', 'D') as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+
+            // Centrar el título
+            $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+            // Centrar y poner en negrita los encabezados
+            $sheet->getStyle('A3:D3')->applyFromArray([
+                'font' => [
+                    'bold' => true,
                 ],
-            ],
-        ]);
+                'alignment' => [
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                ],
+                'borders' => [
+                    'bottom' => [
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    ],
+                ],
+            ]);
+        }
 
         // Crear nombre del archivo
         $fileName = "Reporte_Consumo_Insumos_{$fechaInicio}_a_{$fechaFin}.xlsx";
