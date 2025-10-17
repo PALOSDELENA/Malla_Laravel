@@ -58,4 +58,8 @@ class DashboardController extends Controller
     {
         return view('dashboard.salitre');
     }
+    public function indexHayuelos() 
+    {
+        return view('dashboard.hayuelos');
+    }
 }

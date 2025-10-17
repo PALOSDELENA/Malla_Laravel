@@ -152,6 +152,9 @@ Route::get('/dashboard/quinta-paredes', [DashboardController::class, 'indexQuint
 Route::get('/dashboard/salitre-plaza', [DashboardController::class, 'indexSalitre'])
     ->middleware(PuntoMiddleware::class . ':Salitre Plaza')
     ->name('dashboardSalitre');
+Route::get('/dashboard/hayuelos', [DashboardController::class, 'indexHayuelos'])
+    ->middleware(PuntoMiddleware::class . ':Hayuelos')
+    ->name('dashboardHayuelos');
 
 
 // Rutas Paloteo

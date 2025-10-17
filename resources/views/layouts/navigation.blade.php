@@ -76,6 +76,10 @@
                             @php $route = route('dashboardSalitre'); @endphp
                             @break
 
+                        @case('Hayuelos')
+                            @php $route = route('dashboardHayuelos'); @endphp
+                            @break
+
                         @default
                             @php $route = "#" @endphp
                     @endswitch

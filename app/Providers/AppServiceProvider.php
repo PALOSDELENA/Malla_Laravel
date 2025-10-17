@@ -63,6 +63,7 @@ class AppServiceProvider extends ServiceProvider
                 'dashboardParrilla' => 'Dashboard Parrilla',
                 'dashboardQuinta' => 'Dashboard Quinta Paredes',
                 'dashboardSalitre' => 'Dashboard Salitre',
+                'dashboardHayuelos' => 'Dashboard Hayuelos',
                 'paloteo' => 'Paloteo',
                 'ordenCompra' => 'Órdenes de Compra',
                 'crearOrden' => 'Generar Orden de Compra',
