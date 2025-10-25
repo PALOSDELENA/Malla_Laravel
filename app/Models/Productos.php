@@ -45,4 +45,9 @@ class Productos extends Model
             ->withPivot('inventario', 'sugerido', 'pedido_1', 'pedido_2', 'precio_total', 'observaciones', 'cantidad_bodega', 'stock_minimo')
             ->withTimestamps();
     }
+
+    public function novedadPaloteo()
+    {
+        return $this->hasMany(NovedadPaloteo::class, 'id_producto', 'id');
+    }
 }

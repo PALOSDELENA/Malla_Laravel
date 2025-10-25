@@ -5,6 +5,9 @@
             <a href="{{route('ordenCompra')}}" class="btn btn-warning mb-4">
                 <i class="fa-solid fa-money-check-dollar"></i>Orden de Compra
             </a>
+            <a href="{{ route('novedad.index') }}" class="btn btn-warning mb-4">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i> Novedades
+            </a>
             <div class="semana-info">
                 <div class="fecha-selector d-flex justify-content-center">
                     <select id="semanaHistorica" class="form-select">

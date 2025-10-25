@@ -81,6 +81,10 @@ class User extends Authenticatable implements HasName
         return $this->hasMany(OrdenProduccion::class, 'responsable', 'num_doc');
     }
 
+    public function novedadPaloteo()
+    {
+        return $this->hasMany(NovedadPaloteo::class, 'id_usuario', 'num_doc');
+    }
 
     /**
      * The attributes that should be hidden for serialization.

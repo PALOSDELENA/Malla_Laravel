@@ -34,4 +34,8 @@ class Puntos extends Model
     {
         return $this->hasMany(OrdenCompra::class, "punto_id");
     }
+    public function novedadPaloteo()
+    {
+        return $this->hasMany(NovedadPaloteo::class, 'id_punto');
+    }
 }

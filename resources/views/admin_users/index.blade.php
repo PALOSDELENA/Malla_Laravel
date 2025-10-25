@@ -21,7 +21,6 @@
                             <th class="px-4 py-2 border border-gray-300"># Doc.</th>
                             <th class="px-4 py-2 border border-gray-300">Nombre</th>
                             <th class="px-4 py-2 border border-gray-300">Apellido</th>
-                            <th class="px-4 py-2 border border-gray-300">Teléfono</th>
                             <th class="px-4 py-2 border border-gray-300">Email</th>
                             <th class="px-4 py-2 border border-gray-300">Cargo</th>
                             <th class="px-4 py-2 border border-gray-300">Punto</th>
@@ -41,7 +40,6 @@
                                 <td class="px-4 py-2 border border-gray-300">{{ $usuario->num_doc }}</td>
                                 <td class="px-4 py-2 border border-gray-300">{{ $usuario->usu_nombre }}</td>
                                 <td class="px-4 py-2 border border-gray-300">{{ $usuario->usu_apellido }}</td>
-                                <td class="px-4 py-2 border border-gray-300">{{ $usuario->usu_celular }}</td>
                                 <td class="px-4 py-2 border border-gray-300">{{ $usuario->email }}</td>
                                 <td class="px-4 py-2 border border-gray-300">{{ $usuario->cargo->car_nombre ?? '-' }}</td>
                                 <td class="px-4 py-2 border border-gray-300">{{ $usuario->punto->nombre ?? '-' }}</td>

@@ -47,6 +47,7 @@ services:
     volumes:
       # Mount the application code for live updates
       - ./:/var/www
+      - ./docker/php/conf.d/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     networks:
       - laravel-development
     # depends_on:
@@ -74,6 +75,7 @@ services:
       - .env
     volumes:
       - ./:/var/www
+      - ./docker/php/conf.d/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     networks:
       - laravel-development
 

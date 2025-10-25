@@ -60,7 +60,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 mb-4">
+                <!-- <div class="col-md-3 mb-4">
                     <div class="card text-center">
                         <div class="mt-4 mb-2">
                             <a href="{{route('turnos.index')}}">
@@ -83,7 +83,7 @@
                             <h5 class="card-title">Asignación de Turnos</h5>
                         </div>
                     </div>
-                </div>
+                </div> -->
             @endif
             @if ($perfil === 'Planta' || $perfil === 'Administrador')
                 <div class="col-md-3 mb-4">

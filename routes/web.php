@@ -17,6 +17,7 @@ use Dom\Document;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\InformeController;
+use App\Http\Controllers\NovedadPaloteoController;
 use App\Http\Controllers\OrdenCompraController;
 use App\Http\Controllers\PaloteoController;
 
@@ -156,7 +157,6 @@ Route::get('/dashboard/hayuelos', [DashboardController::class, 'indexHayuelos'])
     ->middleware(PuntoMiddleware::class . ':Hayuelos')
     ->name('dashboardHayuelos');
 
-
 // Rutas Paloteo
 Route::get('/paloteo', [PaloteoController::class, 'index'])->middleware(['auth', 'verified'])->name('paloteo');
 Route::get('/paloteo/puntos', [PaloteoController::class, 'obtenerPuntos']);
@@ -165,14 +165,12 @@ Route::get('/paloteo/gerente', [PaloteoController::class, 'obtenerGerente']);
 Route::get('/paloteo/reporte/semanal/{punto}/{seccion}', [PaloteoController::class, 'reporteSemanal']);
 Route::get('/paloteo/productos', [PaloteoController::class, 'obtenerProductos']);
 Route::get('/paloteo/get/productos', [PaloteoController::class, 'getProductos']);
-Route::put('/paloteo/{id}/productos', [PaloteoController::class, 'asignarSeccion']);
-                                                                                                                            Route::put('/productos/{id}', [PaloteoController::class, 'quitarSeccion']);
+Route::put('/paloteo/{id}/productos', [PaloteoController::class, 'asignarSeccion']);                                                                                                                         Route::put('/productos/{id}', [PaloteoController::class, 'quitarSeccion']);
 Route::post('/guardar-inventario', [PaloteoController::class, 'guardarInventario']);
 Route::get('/paloteo/historico/{punto}', [PaloteoController::class, 'obtenerHistorico']);
 Route::post('/guardar-historico', [PaloteoController::class, 'guardarHistorico']);
 Route::get('/paloteo/cargar-historico/{id}', [PaloteoController::class, 'cargarHistorico'])
     ->middleware('auth');
-
 Route::get('/paloteo/export', [PaloteoController::class, 'exportExcel'])
     ->middleware('auth');
 
@@ -181,17 +179,12 @@ Route::get('/paloteo/export', [PaloteoController::class, 'exportExcel'])
 Route::get('/orden-compra', [OrdenCompraController::class, 'index'])->name('ordenCompra');
 Route::get('/crear-orden-compra', [OrdenCompraController::class, 'create'])->name('crearOrden');
 Route::post('/registrar-orden', [OrdenCompraController::class, 'store'])->name('registrarOrden');
-
 Route::get('/ordenes/{id}/pdf', [OrdenCompraController::class, 'verPDF'])->name('ordenes.ver.pdf');
 Route::get('/ordenes/{id}', [OrdenCompraController::class, 'show'])->name('ordenes.show');
 Route::delete('/eliminar/{id}', [OrdenCompraController::class, 'destroy'])->name('ordenes.destroy');
-
-Route::post('/ordenes/{id}/revision', [OrdenCompraController::class, 'revision'])
-    ->name('ordenes.revision');
-
+Route::post('/ordenes/{id}/revision', [OrdenCompraController::class, 'revision'])->name('ordenes.revision');
 Route::get('/edit/orden/{id}', [OrdenCompraController::class, 'edit'])->name('editOrden');
 Route::post('/editar/{id}', [OrdenCompraController::class, 'update'])->name('ordenes.update');
-
 Route::post('/registrar-orden-ajax', [OrdenCompraController::class, 'storeAjax'])->name('registrarOrdenAjax');
 
 //Informes
@@ -204,5 +197,9 @@ Route::get('/informes/exportarFacturasSer', [InformeController::class,  'exporta
 Route::get('/informes/exportarRecetas', [InformeController::class,  'exportarRecetas'])->name('exportar.recetas');
 Route::get('/informes/exportarEncuesta', [InformeController::class,  'exportarEncuesta'])->name('exportar.encuesta');
 
+//Novedades Paloteo
+Route::get('/novedades', [NovedadPaloteoController::class, 'index'])->name('novedad.index');
+Route::post('/novedades/create', [NovedadPaloteoController::class, 'store'])->name('novedad.store');
+Route::put('/novedades/update/{id}', [NovedadPaloteoController::class, 'update'])->name('novedad.update');
 
 require __DIR__.'/auth.php';

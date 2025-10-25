@@ -68,7 +68,8 @@ class AppServiceProvider extends ServiceProvider
                 'ordenCompra' => 'Órdenes de Compra',
                 'crearOrden' => 'Generar Orden de Compra',
                 'editOrden' => 'Editar Orden',
-                'informe.index' => 'Informes'
+                'informe.index' => 'Informes',
+                'novedad.index' => 'Reporte de Novedades'
             ];
 
             $view->with('pageTitle', $titles[$routeName] ?? 'Panel2');

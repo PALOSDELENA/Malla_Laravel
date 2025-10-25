@@ -2,10 +2,14 @@
 # Etapa base común
 FROM php:8.4-fpm as base
 
+# Instala dependencias necesarias y GD con soporte para JPEG y FreeType
 RUN apt-get update && apt-get install -y \
     git zip unzip curl libzip-dev libpq-dev libonig-dev libicu-dev \
-    && docker-php-ext-install pdo_mysql zip intl
-
+    libfreetype6-dev libjpeg62-turbo-dev libpng-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd pdo_mysql zip intl \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    
 WORKDIR /var/www
 
 # Etapa para desarrollo (con Xdebug)
