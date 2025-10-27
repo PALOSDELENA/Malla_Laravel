@@ -145,9 +145,12 @@
             </div>
             
             <div class="bg-white shadow-sm sm:rounded-lg overflow-x-auto">
-                <div id="loading" class="hidden fixed inset-0 flex items-center justify-center bg-white/80 z-50">
-                    <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-orange-500"></div>
-                </div>
+                @if (session('warning'))
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        {{ session('warning') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
                 <table class="table w-100 divide-y divide-gray-200 text-sm text-center text-gray-700">
                     <thead class="table-warning">
                         <tr>

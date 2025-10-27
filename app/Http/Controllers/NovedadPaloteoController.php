@@ -155,17 +155,41 @@ class NovedadPaloteoController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Novedades');
 
+        // Títulos
+        $sheet->setCellValue('A1', 'Reporte de Novedades');
+        $sheet->mergeCells('A1:G1');
+        
+        // Aplicar estilo al título
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'size' => 14, // Tamaño de letra más grande
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+        ]);
+
+        // Ajustar altura de fila para mejor apariencia
+        $sheet->getRowDimension(1)->setRowHeight(25);
+
         // Encabezados
         $headers = ['Insumo', 'Comentario Operario', 'Comentario Admin', 'Fecha Novedad', 'Estado', 'Punto', 'Imágenes'];
         $col = 'A';
         foreach ($headers as $header) {
-            $sheet->setCellValue($col . '1', $header);
-            $sheet->getStyle($col . '1')->getFont()->setBold(true);
+            $sheet->setCellValue($col . '2', $header);
+            $sheet->getStyle($col . '2')->getFont()->setBold(true);
             $sheet->getColumnDimension($col)->setWidth(25);
+
+            // Centrar el texto horizontal y verticalmente
+            $sheet->getStyle($col . '2')->getAlignment()->setHorizontal('center');
+            $sheet->getStyle($col . '2')->getAlignment()->setVertical('center');
+            
             $col++;
         }
 
-        $fila = 2;
+        $fila = 3;
         foreach ($novedades as $nov) {
             $sheet->setCellValue("A{$fila}", $nov->producto->proNombre ?? '—');
             $sheet->setCellValue("B{$fila}", $nov->comentario_operario ?? '—');
