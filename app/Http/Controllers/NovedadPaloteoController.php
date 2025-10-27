@@ -35,6 +35,19 @@ class NovedadPaloteoController extends Controller
 
         $novedades = $query->paginate(10);
 
+        foreach ($novedades as $nov) {
+            if (is_string($nov->imagenes)) {
+                $decoded = json_decode($nov->imagenes, true);
+
+                // Si aún sigue siendo un string (doble encode), lo decodificamos otra vez
+                if (is_string($decoded)) {
+                    $decoded = json_decode($decoded, true);
+                }
+
+                $nov->imagenes = $decoded;
+            }
+        }
+
         return view('admin_novedades.index', compact('novedades', 'insumos', 'punto'));
     }
 

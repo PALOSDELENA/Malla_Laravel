@@ -70,39 +70,39 @@
                         <form id="formNovedad" action="{{ route('novedad.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="modal-body">
-                            <div class="mb-3">
-                                <label for="id_producto" class="form-label fw-semibold">Insumo</label>
-                                <select name="id_producto" id="id_producto" class="form-select" required>
-                                <option value="">Seleccione un insumo...</option>
-                                @foreach ($insumos as $insumo)
-                                    <option value="{{ $insumo->id }}">{{ $insumo->proNombre }}</option>
-                                @endforeach
-                                </select>
-                            </div>
+                                <div class="mb-3">
+                                    <label for="id_producto" class="form-label fw-semibold">Insumo</label>
+                                    <select name="id_producto" id="id_producto" class="form-select" required>
+                                    <option value="">Seleccione un insumo...</option>
+                                    @foreach ($insumos as $insumo)
+                                        <option value="{{ $insumo->id }}">{{ $insumo->proNombre }}</option>
+                                    @endforeach
+                                    </select>
+                                </div>
 
-                            <div class="mb-3">
-                                <label for="comentario_operario" class="form-label fw-semibold">Comentario del operario</label>
-                                <textarea name="comentario_operario" id="comentario_operario" class="form-control" rows="3" required></textarea>
-                            </div>
+                                <div class="mb-3">
+                                    <label for="comentario_operario" class="form-label fw-semibold">Comentario del operario</label>
+                                    <textarea name="comentario_operario" id="comentario_operario" class="form-control" rows="3" required></textarea>
+                                </div>
 
-                            <div class="mb-3">
-                                <label for="fecha_novedad" class="form-label fw-semibold">Fecha de la novedad</label>
-                                <input type="date" name="fecha_novedad" id="fecha_novedad" class="form-control" required>
-                            </div>
+                                <div class="mb-3">
+                                    <label for="fecha_novedad" class="form-label fw-semibold">Fecha de la novedad</label>
+                                    <input type="date" name="fecha_novedad" id="fecha_novedad" class="form-control" required>
+                                </div>
 
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Imágenes (máximo 5)</label>
-                                <input type="file" name="imagenes[]" id="imagenes" class="form-control" accept="image/*" multiple required>
-                                <small class="text-muted">Puede seleccionar hasta 5 imágenes (JPG, PNG, GIF).</small>
-                            </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Imágenes (máximo 5)</label>
+                                    <input type="file" name="imagenes[]" id="imagenes" class="form-control" accept="image/*" multiple required>
+                                    <small class="text-muted">Puede seleccionar hasta 5 imágenes (JPG, PNG, GIF).</small>
+                                </div>
 
-                            <!-- Previsualización -->
-                            <div id="preview" class="d-flex flex-wrap gap-2 mt-3"></div>
+                                <!-- Previsualización -->
+                                <div id="preview" class="d-flex flex-wrap gap-2 mt-3"></div>
                             </div>
 
                             <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-warning fw-bold">Guardar Novedad</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-warning fw-bold">Guardar Novedad</button>
                             </div>
                         </form>
 
@@ -134,7 +134,8 @@
                                 data-id="{{ $nov->id }}"
                                 data-insumo="{{ $nov->producto->proNombre ?? 'N/A' }}"
                                 data-comentario="{{ $nov->comentario_operario ?? 'Sin comentario' }}"
-                                data-punto="{{ $nov->punto->nombre}}"
+                                data-punto="{{ $nov->punto->nombre }}"
+                                data-imagenes='@json($nov->imagenes)'
                                 style="cursor: pointer;">
                                 <td class="px-4 py-2">{{ $nov->producto->proNombre }}</td>
                                 <td class="px-4 py-2">{{ $nov->comentario_operario }}</td>
@@ -210,52 +211,57 @@
 
                 <!-- Modal Agregar Comentario -->
                 <div class="modal fade" id="modalComentario" tabindex="-1" aria-labelledby="modalComentarioLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-centered">
-                    <div class="modal-content">
-                    <div class="modal-header bg-info text-dark">
-                        <h5 class="modal-title fw-bold" id="modalComentarioLabel">
-                        <i class="fa-solid fa-comments me-2"></i> Agregar Comentario
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header bg-info text-dark">
+                                <h5 class="modal-title fw-bold" id="modalComentarioLabel">
+                                    <i class="fa-solid fa-comments me-2"></i> Agregar Comentario
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                            </div>
+
+                            <form id="formComentario" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <div class="modal-body">
+
+                                    <input type="hidden" name="id_novedad" id="id_novedad">
+
+                                    <div class="row">
+                                        <div class="col-sm-12 col-md-6 mb-3">
+                                            <label class="form-label fw-semibold">Insumo</label>
+                                            <input type="text" id="insumo_nombre" class="form-control" readonly>
+                                        </div>
+
+                                        <div class="col-sm-12 col-md-6 mb-3">
+                                            <label class="form-label fw-semibold">Punto</label>
+                                            <input type="text" id="punto" class="form-control" readonly>
+                                        </div>
+
+                                        <div class="col-sm-12 col-md-12 mb-3">
+                                            <label class="form-label fw-semibold">Comentario del Operario</label>
+                                            <textarea id="com_operario" class="form-control" rows="3" readonly></textarea>
+                                        </div>
+
+                                        <div class="col-sm-12 col-md-12 mb-3">
+                                            <label class="form-label fw-semibold">Comentario del Administrador</label>
+                                            <textarea name="comentario_admin" id="comentario_admin" class="form-control" rows="3" required></textarea>
+                                        </div>
+
+                                        <!-- Previsualización -->
+                                        <div id="preview-2" class="col-sm-12 col-md-12 mb-3"></div>
+                                    </div>
+
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-info fw-bold">Guardar Comentario</button>
+                                </div>
+                            </form>
+
+                        </div>
                     </div>
-
-                    <form id="formComentario" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <div class="modal-body">
-
-                        <input type="hidden" name="id_novedad" id="id_novedad">
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Insumo</label>
-                            <input type="text" id="insumo_nombre" class="form-control" readonly>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Punto</label>
-                            <input type="text" id="punto" class="form-control" readonly>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Comentario del Operario</label>
-                            <textarea id="com_operario" class="form-control" rows="3" readonly></textarea>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Comentario del Administrador</label>
-                            <textarea name="comentario_admin" id="comentario_admin" class="form-control" rows="3" required></textarea>
-                        </div>
-
-                        </div>
-
-                        <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-info fw-bold">Guardar Comentario</button>
-                        </div>
-                    </form>
-
-                    </div>
-                </div>
                 </div>
             </div>
 
@@ -266,7 +272,12 @@
         </div>
     </div>
 
-
+<!-- Overlay de carga -->
+<div id="loading-overlay">
+  <div class="spinner-border text-warning" role="status">
+    <span class="visually-hidden">Cargando...</span>
+  </div>
+</div>
 </x-app-layout>
 
 <script>
@@ -321,29 +332,75 @@
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('formComentario');
     const rows = document.querySelectorAll('.clickable-row');
     const modal = new bootstrap.Modal(document.getElementById('modalComentario'));
+    const previewContainer = document.getElementById('preview-2');
 
     rows.forEach(row => {
-        row.addEventListener('click', () => {
-        // Obtener datos de la fila
-        const id = row.dataset.id;
-        const insumo = row.dataset.insumo;
-        const punto = row.dataset.punto;
-        const comentario = row.dataset.comentario;
+        row.addEventListener('click', (event) => {
+            // Evita conflicto si el clic fue en un icono de imagen
+            if (event.target.closest('a, i')) return;
 
-        // Asignar al modal
-        document.getElementById('id_novedad').value = id;
-        document.getElementById('insumo_nombre').value = insumo;
-        document.getElementById('punto').value = punto;
-        document.getElementById('com_operario').value = comentario;
+            // Obtener datos de la fila
+            const id = row.dataset.id;
+            const insumo = row.dataset.insumo;
+            const punto = row.dataset.punto;
+            const comentario = row.dataset.comentario;
+            const imagenes = JSON.parse(row.dataset.imagenes || '[]');
 
-        form.action = `/novedades/update/${id}`;
-        // Mostrar modal
-        modal.show();
+            // Asignar al modal
+            document.getElementById('id_novedad').value = id;
+            document.getElementById('insumo_nombre').value = insumo;
+            document.getElementById('punto').value = punto;
+            document.getElementById('com_operario').value = comentario;
+
+            // Limpiar previsualización anterior
+            previewContainer.innerHTML = '';
+
+            // Crear previsualización de imágenes
+            imagenes.forEach(img => {
+                const imgElement = document.createElement('img');
+                imgElement.src = `/storage/${img}`;
+                imgElement.alt = "Imagen de novedad";
+                imgElement.classList.add('rounded', 'border', 'p-1');
+                imgElement.style.width = '100px';
+                imgElement.style.height = '100px';
+                imgElement.style.objectFit = 'cover';
+                previewContainer.appendChild(imgElement);
+            });
+
+            // Actualizar acción del formulario
+            form.action = `/novedades/update/${id}`;
+
+            // Mostrar modal
+            modal.show();
         });
     });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const overlay = document.getElementById('loading-overlay');
+
+    // Detecta envío de este formulario específico
+    const formNovedad = document.getElementById('formNovedad');
+    formNovedad.addEventListener('submit', () => {
+        overlay.style.display = 'flex';
     });
+
+    // Detecta envío de este formulario específico
+    const formComentario = document.getElementById('formComentario');
+    formComentario.addEventListener('submit', () => {
+        overlay.style.display = 'flex';
+    });
+
+
+    // Por seguridad, oculta el overlay si se cancela o hay error
+    window.addEventListener('pageshow', () => {
+        overlay.style.display = 'none';
+    });
+});
 </script>
