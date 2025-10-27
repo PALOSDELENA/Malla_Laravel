@@ -27,6 +27,7 @@ services:
       - .env
     volumes:
       - ./:/var/www
+      - ./docker/php/conf.d/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     networks:
       - laravel-production
 
@@ -40,6 +41,7 @@ services:
     container_name: malla-workspace-prod
     volumes:
       - ./:/var/www
+      - ./docker/php/conf.d/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     tty: true
     stdin_open: true
     networks:
