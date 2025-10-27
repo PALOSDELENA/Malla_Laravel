@@ -54,6 +54,40 @@
                     </button>
                 </div>
 
+                <!-- Botón para abrir modal -->
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalExportar">
+                    <i class="fa-solid fa-file-excel"></i>
+                </button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="modalExportar" tabindex="-1" aria-labelledby="modalExportarLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                    <form id="formExport" action="{{ route('novedad.exportar') }}" method="GET">
+                        <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="modalExportarLabel">Exportar Novedades</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="fecha_inicio" class="form-label">Desde:</label>
+                            <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fecha_fin" class="form-label">Hasta:</label>
+                            <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" required>
+                        </div>
+                        </div>
+
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Generar Excel</button>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+                </div>
             </div>
 
             <!-- Modal Crear Novedad -->
@@ -332,75 +366,74 @@
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('formComentario');
-    const rows = document.querySelectorAll('.clickable-row');
-    const modal = new bootstrap.Modal(document.getElementById('modalComentario'));
-    const previewContainer = document.getElementById('preview-2');
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('formComentario');
+        const rows = document.querySelectorAll('.clickable-row');
+        const modal = new bootstrap.Modal(document.getElementById('modalComentario'));
+        const previewContainer = document.getElementById('preview-2');
 
-    rows.forEach(row => {
-        row.addEventListener('click', (event) => {
-            // Evita conflicto si el clic fue en un icono de imagen
-            if (event.target.closest('a, i')) return;
+        rows.forEach(row => {
+            row.addEventListener('click', (event) => {
+                // Evita conflicto si el clic fue en un icono de imagen
+                if (event.target.closest('a, i')) return;
 
-            // Obtener datos de la fila
-            const id = row.dataset.id;
-            const insumo = row.dataset.insumo;
-            const punto = row.dataset.punto;
-            const comentario = row.dataset.comentario;
-            const imagenes = JSON.parse(row.dataset.imagenes || '[]');
+                // Obtener datos de la fila
+                const id = row.dataset.id;
+                const insumo = row.dataset.insumo;
+                const punto = row.dataset.punto;
+                const comentario = row.dataset.comentario;
+                const imagenes = JSON.parse(row.dataset.imagenes || '[]');
 
-            // Asignar al modal
-            document.getElementById('id_novedad').value = id;
-            document.getElementById('insumo_nombre').value = insumo;
-            document.getElementById('punto').value = punto;
-            document.getElementById('com_operario').value = comentario;
+                // Asignar al modal
+                document.getElementById('id_novedad').value = id;
+                document.getElementById('insumo_nombre').value = insumo;
+                document.getElementById('punto').value = punto;
+                document.getElementById('com_operario').value = comentario;
 
-            // Limpiar previsualización anterior
-            previewContainer.innerHTML = '';
+                // Limpiar previsualización anterior
+                previewContainer.innerHTML = '';
 
-            // Crear previsualización de imágenes
-            imagenes.forEach(img => {
-                const imgElement = document.createElement('img');
-                imgElement.src = `/storage/${img}`;
-                imgElement.alt = "Imagen de novedad";
-                imgElement.classList.add('rounded', 'border', 'p-1');
-                imgElement.style.width = '100px';
-                imgElement.style.height = '100px';
-                imgElement.style.objectFit = 'cover';
-                previewContainer.appendChild(imgElement);
+                // Crear previsualización de imágenes
+                imagenes.forEach(img => {
+                    const imgElement = document.createElement('img');
+                    imgElement.src = `/storage/${img}`;
+                    imgElement.alt = "Imagen de novedad";
+                    imgElement.classList.add('rounded', 'border', 'p-1');
+                    imgElement.style.width = '100px';
+                    imgElement.style.height = '100px';
+                    imgElement.style.objectFit = 'cover';
+                    previewContainer.appendChild(imgElement);
+                });
+
+                // Actualizar acción del formulario
+                form.action = `/novedades/update/${id}`;
+
+                // Mostrar modal
+                modal.show();
             });
-
-            // Actualizar acción del formulario
-            form.action = `/novedades/update/${id}`;
-
-            // Mostrar modal
-            modal.show();
         });
     });
-});
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const overlay = document.getElementById('loading-overlay');
+    document.addEventListener('DOMContentLoaded', () => {
+        const overlay = document.getElementById('loading-overlay');
 
-    // Detecta envío de este formulario específico
-    const formNovedad = document.getElementById('formNovedad');
-    formNovedad.addEventListener('submit', () => {
-        overlay.style.display = 'flex';
+        // Detecta envío de este formulario específico
+        const formNovedad = document.getElementById('formNovedad');
+        formNovedad.addEventListener('submit', () => {
+            overlay.style.display = 'flex';
+        });
+
+        // Detecta envío de este formulario específico
+        const formComentario = document.getElementById('formComentario');
+        formComentario.addEventListener('submit', () => {
+            overlay.style.display = 'flex';
+        });
+
+        // Por seguridad, oculta el overlay si se cancela o hay error
+        window.addEventListener('pageshow', () => {
+            overlay.style.display = 'none';
+        });
     });
-
-    // Detecta envío de este formulario específico
-    const formComentario = document.getElementById('formComentario');
-    formComentario.addEventListener('submit', () => {
-        overlay.style.display = 'flex';
-    });
-
-
-    // Por seguridad, oculta el overlay si se cancela o hay error
-    window.addEventListener('pageshow', () => {
-        overlay.style.display = 'none';
-    });
-});
 </script>

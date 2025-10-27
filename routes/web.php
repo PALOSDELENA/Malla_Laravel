@@ -201,5 +201,7 @@ Route::get('/informes/exportarEncuesta', [InformeController::class,  'exportarEn
 Route::get('/novedades', [NovedadPaloteoController::class, 'index'])->name('novedad.index');
 Route::post('/novedades/create', [NovedadPaloteoController::class, 'store'])->name('novedad.store');
 Route::put('/novedades/update/{id}', [NovedadPaloteoController::class, 'update'])->name('novedad.update');
+Route::get('/novedades/exportar', [NovedadPaloteoController::class, 'exportarExcel'])->name('novedad.exportar');
+
 
 require __DIR__.'/auth.php';

@@ -132,4 +132,101 @@ class NovedadPaloteoController extends Controller
         return redirect()->route('novedad.index')
                         ->with('success', 'Comentario del admin actualizado correctamente.');
     }
+
+    public function exportarExcel(Request $request)
+    {
+        $request->validate([
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+        ]);
+
+        $fechaInicio = $request->fecha_inicio;
+        $fechaFin = $request->fecha_fin;
+
+        $novedades = NovedadPaloteo::with(['producto', 'punto'])
+            ->whereBetween('fecha_novedad', [$fechaInicio, $fechaFin])
+            ->get();
+
+        if ($novedades->isEmpty()) {
+            return back()->with('warning', 'No hay novedades en el rango seleccionado.');
+        }
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Novedades');
+
+        // Encabezados
+        $headers = ['Insumo', 'Comentario Operario', 'Comentario Admin', 'Fecha Novedad', 'Estado', 'Punto', 'Imágenes'];
+        $col = 'A';
+        foreach ($headers as $header) {
+            $sheet->setCellValue($col . '1', $header);
+            $sheet->getStyle($col . '1')->getFont()->setBold(true);
+            $sheet->getColumnDimension($col)->setWidth(25);
+            $col++;
+        }
+
+        $fila = 2;
+        foreach ($novedades as $nov) {
+            $sheet->setCellValue("A{$fila}", $nov->producto->proNombre ?? '—');
+            $sheet->setCellValue("B{$fila}", $nov->comentario_operario ?? '—');
+            $sheet->setCellValue("C{$fila}", $nov->comentario_admin ?? '—');
+            $sheet->setCellValue("D{$fila}", \Carbon\Carbon::parse($nov->fecha_novedad)->format('d-m-Y'));
+            $sheet->setCellValue("E{$fila}", $nov->estado ?? '—');
+            $sheet->setCellValue("F{$fila}", $nov->punto->nombre ?? '—');
+
+            // Imágenes
+            $imagenes = [];
+
+            if (!empty($nov->imagenes)) {
+                $data = $nov->imagenes;
+
+                // Si ya viene como array, se usa tal cual
+                if (is_array($data)) {
+                    $imagenes = $data;
+                } else {
+                    // Primera decodificación
+                    $decoded = json_decode($data, true);
+
+                    // Si el resultado sigue siendo string, se decodifica otra vez
+                    if (is_string($decoded)) {
+                        $decoded = json_decode($decoded, true);
+                    }
+
+                    if (is_array($decoded)) {
+                        $imagenes = $decoded;
+                    }
+                }
+            }
+
+            if (!empty($imagenes)) {
+                $columnaImagen = 'G';
+                $offsetX = 0;
+                foreach ($imagenes as $img) {
+                    $ruta = Storage::disk('public')->path($img);
+
+                    if (file_exists($ruta)) {
+                        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+                        $drawing->setPath($ruta);
+                        $drawing->setCoordinates("{$columnaImagen}{$fila}");
+                        $drawing->setOffsetX($offsetX);
+                        $drawing->setHeight(50);
+                        $drawing->setWorksheet($sheet);
+                        $offsetX += 55;
+                    }
+                }
+                $sheet->getRowDimension($fila)->setRowHeight(55);
+            } else {
+                $sheet->setCellValue("G{$fila}", '—');
+            }
+
+            $fila++;
+        }
+
+        $filename = 'Novedades_' . now()->format('Ymd_His') . '.xlsx';
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, $filename);
+    }
 }
