@@ -16,9 +16,10 @@ class NovedadPaloteoController extends Controller
     {
         $user = Auth::user();
         $punto = $user->usu_punto;
+        $puntoUser = $user->punto->nombre;
         $insumos = Productos::all();
 
-        // Determinar si el usuario es administrativo o planta
+        // Determinar si el usuario es administrativo (3) o planta (17)
         $esAdminOPlanta = in_array($punto, [3, 17]);
 
         // Construir la consulta
@@ -48,7 +49,7 @@ class NovedadPaloteoController extends Controller
             }
         }
 
-        return view('admin_novedades.index', compact('novedades', 'insumos', 'punto'));
+        return view('admin_novedades.index', compact('novedades', 'insumos', 'punto', 'puntoUser'));
     }
 
     public function store(Request $request)
@@ -185,7 +186,7 @@ class NovedadPaloteoController extends Controller
             // Centrar el texto horizontal y verticalmente
             $sheet->getStyle($col . '2')->getAlignment()->setHorizontal('center');
             $sheet->getStyle($col . '2')->getAlignment()->setVertical('center');
-            
+
             $col++;
         }
 

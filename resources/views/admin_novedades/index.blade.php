@@ -25,7 +25,7 @@
             @endif
 
             <div class="mb-4 d-flex justify-content-between flex-wrap align-items-center gap-3">
-                <!-- Filtros a la izquierda -->
+                <!-- Filtro - Fecha -->
                 <div class="d-flex flex-wrap align-items-center gap-3">
                     <form method="GET" action="{{ route('novedad.index') }}" class="flex items-center gap-4">
                         <div class="d-flex align-items-center">
@@ -47,7 +47,6 @@
                     </a>
                 </div>
 
-                <!-- Botón de registrar a la derecha -->
                 <div>
                     <button type="button" class="btn btn-warning fw-bold" data-bs-toggle="modal" data-bs-target="#modalNovedad">
                         + Registrar Novedad
@@ -59,7 +58,7 @@
                     <i class="fa-solid fa-file-excel"></i>
                 </button>
 
-                <!-- Modal -->
+                <!-- Modal - Exportar -->
                 <div class="modal fade" id="modalExportar" tabindex="-1" aria-labelledby="modalExportarLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -121,7 +120,7 @@
 
                                 <div class="mb-3">
                                     <label for="fecha_novedad" class="form-label fw-semibold">Fecha de la novedad</label>
-                                    <input type="date" name="fecha_novedad" id="fecha_novedad" class="form-control" required>
+                                    <input type="date" name="fecha_novedad" id="fecha_novedad" class="form-control" value="{{ now()->format('Y-m-d') }}" required>
                                 </div>
 
                                 <div class="mb-3">
@@ -145,6 +144,7 @@
             </div>
             
             <div class="bg-white shadow-sm sm:rounded-lg overflow-x-auto">
+                <!-- Abvertencia en caso de no existir registros a importar -->
                 @if (session('warning'))
                     <div class="alert alert-warning alert-dismissible fade show" role="alert">
                         {{ session('warning') }}
@@ -159,7 +159,7 @@
                             <th class="px-4 py-2">Comentario Admin</th>
                             <th class="px-4 py-2">Fecha Novedad</th>
                             <th class="px-4 py-2">Estado</th>
-                            @if($punto == 3 || $punto == 17)
+                            @if($punto == 3 || $punto == 17) <!-- administrativo (3) o planta (17) -->
                                 <th class="px-4 py-2">Punto</th>
                             @endif
                             <th class="px-4 py-2">Imagenes</th>
@@ -172,6 +172,7 @@
                                 data-insumo="{{ $nov->producto->proNombre ?? 'N/A' }}"
                                 data-comentario="{{ $nov->comentario_operario ?? 'Sin comentario' }}"
                                 data-punto="{{ $nov->punto->nombre }}"
+                                data-punto-user="{{ $puntoUser }}"
                                 data-imagenes='@json($nov->imagenes)'
                                 style="cursor: pointer;">
                                 <td class="px-4 py-2">{{ $nov->producto->proNombre }}</td>
@@ -179,7 +180,7 @@
                                 <td class="px-4 py-2">{{ $nov->comentario_admin ?? '—' }}</td>
                                 <td class="px-4 py-2">{{ \Carbon\Carbon::parse($nov->fecha_novedad)->format('d-m-Y') }}</td>
                                 <td class="px-4 py-2">{{ $nov->estado }}</td>
-                                @if($punto == 3 || $punto == 17)
+                                @if($punto == 3 || $punto == 17) <!-- administrativo (3) o planta (17) -->
                                     <td class="px-4 py-2">{{ $nov->punto->nombre }}</td>
                                 @endif
                                 <td class="px-4 py-2">
@@ -309,12 +310,12 @@
         </div>
     </div>
 
-<!-- Overlay de carga -->
-<div id="loading-overlay">
-  <div class="spinner-border text-warning" role="status">
-    <span class="visually-hidden">Cargando...</span>
-  </div>
-</div>
+    <!-- Overlay de carga -->
+    <div id="loading-overlay">
+    <div class="spinner-border text-warning" role="status">
+        <span class="visually-hidden">Cargando...</span>
+    </div>
+    </div>
 </x-app-layout>
 
 <script>
@@ -384,8 +385,16 @@
                 const id = row.dataset.id;
                 const insumo = row.dataset.insumo;
                 const punto = row.dataset.punto;
+                const puntoUser = row.dataset.puntoUser;
+                console.log(puntoUser);
                 const comentario = row.dataset.comentario;
                 const imagenes = JSON.parse(row.dataset.imagenes || '[]');
+
+                // Solo abrir modal si el punto del usuario es 3 o 17
+                if (!['Administrativo', 'Planta'].includes(puntoUser)) {
+                    console.log('Usuario sin permiso para abrir modal');
+                    return;
+                }
 
                 // Asignar al modal
                 document.getElementById('id_novedad').value = id;

@@ -30,11 +30,11 @@ class AppServiceProvider extends ServiceProvider
         View::composer('*', function ($view) {
             $routeName = Route::currentRouteName();
             $titles = [
+                //Titulos de vistas por nombre de rutas:
                 'dashboard' => 'Home',
                 'users.index' => 'Usuarios',
                 'reports.index' => 'Reportes',
                 'profile.edit' => 'Profile',
-                // Agrega más según tus rutas
                 'productos.index' => 'Productos',
                 'ordenProduccion.index' => 'Ordenes de Producción',
                 'ordenProduccion.create' => 'Crear Orden de Producción',
