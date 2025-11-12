@@ -162,7 +162,7 @@
                     <div class="card text-center">
                         <div class="mt-4 mb-2">
                             <a href="{{route('nov.proveedor.index')}}">
-                                <i class="fa-solid fa-file-excel fa-5x icon-hover"></i>
+                                <i class="fa-solid fa-users-gear fa-5x icon-hover"></i>
                             </a>
                         </div>
                         <div class="card-body">
