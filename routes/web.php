@@ -20,6 +20,7 @@ use App\Http\Controllers\InformeController;
 use App\Http\Controllers\NovedadPaloteoController;
 use App\Http\Controllers\OrdenCompraController;
 use App\Http\Controllers\PaloteoController;
+use App\Http\Controllers\ProveedorController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -276,5 +277,16 @@ Route::put('/novedades/update/{id}', [NovedadPaloteoController::class, 'update']
     ->middleware('auth');
 Route::get('/novedades/exportar', [NovedadPaloteoController::class, 'exportarExcel'])->name('novedad.exportar')
     ->middleware('auth');
+
+//Novedad Proveedor
+Route::get('/novedad/proveedor', [ProveedorController::class, 'index'])->name('nov.proveedor.index');
+Route::get('/novedad/productos/{id}', [ProveedorController::class, 'getProducts']);
+Route::post('/novedad/proveedor/create', [ProveedorController::class, 'store'])->name('nov.proveedor.store');
+
+Route::get('/filtrar-novedades', [ProveedorController::class, 'filtrar'])->name('novedades.filtrar');
+Route::get('/novedades/exportar-excel', [ProveedorController::class, 'exportarExcel'])->name('novedades.exportarExcel');
+Route::get('/filtrar-novedades-fetch', [ProveedorController::class, 'filtrarFetch'])->name('novedades.filtrarFetch');
+
+
 
 require __DIR__.'/auth.php';

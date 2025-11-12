@@ -19,6 +19,9 @@ return new class extends Migration
             $table->string('proListaIngredientes')->nullable();
             $table->string('proCondicionesConservacion', 255)->nullable();
             $table->string('proFabricante', 255)->nullable();
+            $table->unsignedBigInteger('id_proveedor')->nullable();
+
+            $table->foreign('id_proveedor')->references('id')->on('proveedores')->onDelete('cascade');
         });
     }
 

@@ -50,4 +50,15 @@ class Productos extends Model
     {
         return $this->hasMany(NovedadPaloteo::class, 'id_producto', 'id');
     }
+
+    public function proveedorNovedad()
+    {
+        return $this->belongsToMany(Productos::class, 'proveedores_producto', 'id_producto', 'id_proveedor')
+            ->withPivot('calidad_producto', 'tiempo_entrega', 'presentacion_personal', 'observacion');
+    }
+
+    public function proveedor()
+    {
+        return $this->belongsTo(Proveedor::class, 'id_proveedor', 'id');
+    }
 }

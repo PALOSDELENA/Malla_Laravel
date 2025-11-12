@@ -158,6 +158,18 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card text-center">
+                        <div class="mt-4 mb-2">
+                            <a href="{{route('nov.proveedor.index')}}">
+                                <i class="fa-solid fa-file-excel fa-5x icon-hover"></i>
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Evaluación Proveedores</h5>
+                        </div>
+                    </div>
+                </div>
             @endif
             @if ($perfil === 'Punto')
                 @php
