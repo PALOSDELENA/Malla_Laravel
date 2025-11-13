@@ -16,9 +16,21 @@ class ProveedorController extends Controller
     public function index()
     {
         $insumos = Productos::all();
-        $novedades = Proveedor::with('productosNovedad', 'productos')->paginate(10);
+        $proveedores = Proveedor::all();
 
-        return view('novedad_proveedor.index', compact('insumos', 'novedades'));
+        // Paginar por novedades (registros de la tabla pivote)
+        $novedades = DB::table('proveedores_producto as pp')
+            ->join('proveedores as p', 'pp.id_proveedor', '=', 'p.id')
+            ->join('productos as pr', 'pp.id_producto', '=', 'pr.id')
+            ->select(
+                'pp.*',
+                'p.nombre as proveedor',
+                'pr.proNombre as producto'
+            )
+            ->orderBy('pp.created_at', 'desc')
+            ->paginate(10);
+
+        return view('novedad_proveedor.index', compact('insumos', 'proveedores', 'novedades'));
     }
 
     // public function store(Request $request)
@@ -126,28 +138,28 @@ class ProveedorController extends Controller
     {
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin = $request->input('fecha_fin');
-
-        // Consulta Eloquent base con relaciones
-        $query = Proveedor::with(['productosNovedad' => function ($q) use ($fechaInicio, $fechaFin) {
-            // Si hay fechas, aplicar el filtro dentro de la relación pivote
-            if ($fechaInicio && $fechaFin) {
-                $q->whereBetween('proveedores_producto.created_at', [
-                    $fechaInicio . ' 00:00:00',
-                    $fechaFin . ' 23:59:59',
-                ]);
-            }
-        }, 'productos']);
-
-        // Si quieres ordenar las novedades más recientes primero:
-        $query->orderBy('created_at', 'desc');
-
-        // Paginamos igual que en el index
-        $novedades = $query->paginate(10);
-
         // Insumos (productos para el modal)
         $insumos = \App\Models\Productos::all();
+        $proveedores = Proveedor::all();
 
-        return view('novedad_proveedor.index', compact('novedades', 'insumos', 'fechaInicio', 'fechaFin'));
+        // Consultar los registros pivote filtrados por fecha y paginar por novedades
+        $query = DB::table('proveedores_producto as pp')
+            ->join('proveedores as p', 'pp.id_proveedor', '=', 'p.id')
+            ->join('productos as pr', 'pp.id_producto', '=', 'pr.id')
+            ->select(
+                'pp.*',
+                'p.nombre as proveedor',
+                'pr.proNombre as producto'
+            )
+            ->orderBy('pp.created_at', 'desc');
+
+        if ($fechaInicio && $fechaFin) {
+            $query->whereBetween('pp.created_at', [$fechaInicio . ' 00:00:00', $fechaFin . ' 23:59:59']);
+        }
+
+        $novedades = $query->paginate(10);
+
+        return view('novedad_proveedor.index', compact('novedades', 'insumos', 'proveedores', 'fechaInicio', 'fechaFin'));
     }
 
     public function exportarExcel(Request $request)

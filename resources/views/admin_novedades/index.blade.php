@@ -104,6 +104,16 @@
                             @csrf
                             <div class="modal-body">
                                 <div class="mb-3">
+                                    <label for="id_proveedor" class="form-label fw-semibold">Proveedor</label>
+                                    <select name="id_proveedor" id="id_proveedor" class="form-select" required>
+                                    <option value="">Seleccione un proveedor...</option>
+                                    @foreach ($proveedores as $proveedor)
+                                        <option value="{{ $proveedor->id }}">{{ $proveedor->nombre }}</option>
+                                    @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
                                     <label for="id_producto" class="form-label fw-semibold">Insumo</label>
                                     <select name="id_producto" id="id_producto" class="form-select" required>
                                     <option value="">Seleccione un insumo...</option>
@@ -121,6 +131,11 @@
                                 <div class="mb-3">
                                     <label for="fecha_novedad" class="form-label fw-semibold">Fecha de la novedad</label>
                                     <input type="date" name="fecha_novedad" id="fecha_novedad" class="form-control" value="{{ now()->format('Y-m-d') }}" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="lote" class="form-label fw-semibold">Lote</label>
+                                    <input type="text" name="lote" id="lote" class="form-control" required>
                                 </div>
 
                                 <div class="mb-3">
@@ -154,15 +169,17 @@
                 <table class="table w-100 divide-y divide-gray-200 text-sm text-center text-gray-700">
                     <thead class="table-warning">
                         <tr>
+                            <th class="px-4 py-2">Fecha</th>
+                            <th class="px-4 py-2">Lote</th>
+                            <th class="px-4 py-2">Novedad</th>
+                            <th class="px-4 py-2">Proveedor</th>
                             <th class="px-4 py-2">Insumo</th>
-                            <th class="px-4 py-2">Comentario Operario</th>
                             <th class="px-4 py-2">Comentario Admin</th>
-                            <th class="px-4 py-2">Fecha Novedad</th>
-                            <th class="px-4 py-2">Estado</th>
                             @if($punto == 3 || $punto == 17) <!-- administrativo (3) o planta (17) -->
                                 <th class="px-4 py-2">Punto</th>
                             @endif
                             <th class="px-4 py-2">Imagenes</th>
+                            <th class="px-4 py-2">Estado</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -175,11 +192,12 @@
                                 data-punto-user="{{ $puntoUser }}"
                                 data-imagenes='@json($nov->imagenes)'
                                 style="cursor: pointer;">
-                                <td class="px-4 py-2">{{ $nov->producto->proNombre }}</td>
-                                <td class="px-4 py-2">{{ $nov->comentario_operario }}</td>
-                                <td class="px-4 py-2">{{ $nov->comentario_admin ?? '—' }}</td>
                                 <td class="px-4 py-2">{{ \Carbon\Carbon::parse($nov->fecha_novedad)->format('d-m-Y') }}</td>
-                                <td class="px-4 py-2">{{ $nov->estado }}</td>
+                                <td class="px-4 py-2">{{ $nov->lote }}</td>
+                                <td class="px-4 py-2">{{ $nov->comentario_operario }}</td>
+                                <td class="px-4 py-2">{{ $nov->proveedor->nombre ?? 'N/A' }}</td>
+                                <td class="px-4 py-2">{{ $nov->producto->proNombre }}</td>
+                                <td class="px-4 py-2">{{ $nov->comentario_admin ?? '—' }}</td>
                                 @if($punto == 3 || $punto == 17) <!-- administrativo (3) o planta (17) -->
                                     <td class="px-4 py-2">{{ $nov->punto->nombre }}</td>
                                 @endif
@@ -238,6 +256,7 @@
                                         —
                                     @endif
                                 </td>
+                                <td class="px-4 py-2">{{ $nov->estado }}</td>
                             </tr>
                         @empty
                             <tr>

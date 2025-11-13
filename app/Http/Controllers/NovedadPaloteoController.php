@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\NovedadPaloteo;
 use App\Models\Productos;
+use App\Models\Proveedor;
 use Illuminate\Http\Request;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver; // O usa Imagick si lo prefieres
@@ -18,6 +19,7 @@ class NovedadPaloteoController extends Controller
         $punto = $user->usu_punto;
         $puntoUser = $user->punto->nombre;
         $insumos = Productos::all();
+        $proveedores = Proveedor::all();
 
         // Determinar si el usuario es administrativo (3) o planta (17)
         $esAdminOPlanta = in_array($punto, [3, 17]);
@@ -49,20 +51,24 @@ class NovedadPaloteoController extends Controller
             }
         }
 
-        return view('admin_novedades.index', compact('novedades', 'insumos', 'punto', 'puntoUser'));
+        return view('admin_novedades.index', compact('novedades', 'insumos', 'punto', 'puntoUser', 'proveedores'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'id_producto' => 'required|exists:productos,id',
+            'id_proveedor' => 'required|exists:proveedores,id',
             'comentario_operario' => 'required|string',
+            'lote' => 'required|string',
             'fecha_novedad' => 'required|date',
             'imagenes.*' => 'image|mimes:jpeg,png,jpg,gif|max:5120', // hasta 5MB permitidos
         ], [
             'id_producto.required' => 'Debes seleccionar un producto.',
+            'id_proveedor.required' => 'Debes seleccionar un proveedor.',
             'id_producto.exists' => 'El producto seleccionado no existe.',
             'comentario_operario.required' => 'El comentario del operario es obligatorio.',
+            'lote' => 'El lote es obligatorio.',
             'fecha_novedad.required' => 'Debes indicar la fecha de la novedad.',
             'imagenes.*.image' => 'Cada archivo debe ser una imagen.',
             'imagenes.*.mimes' => 'Las imágenes deben ser de tipo jpeg, png, jpg o gif.',
@@ -109,6 +115,8 @@ class NovedadPaloteoController extends Controller
             'comentario_operario' => $request->comentario_operario,
             'fecha_novedad' => $request->fecha_novedad,
             'imagenes' => json_encode($imagenesGuardadas),
+            'lote' => $request->lote,
+            'id_proveedor' => $request->id_proveedor,
         ]);
 
         return redirect()->route('novedad.index')->with('success', 'Novedad registrada exitosamente.');
@@ -176,7 +184,7 @@ class NovedadPaloteoController extends Controller
         $sheet->getRowDimension(1)->setRowHeight(25);
 
         // Encabezados
-        $headers = ['Insumo', 'Comentario Operario', 'Comentario Admin', 'Fecha Novedad', 'Estado', 'Punto', 'Imágenes'];
+        $headers = ['Fecha', 'Lote', 'Novedad', 'Proveedor', 'Insumo',  'Comentario Admin', 'Punto', 'Estado', 'Imágenes'];
         $col = 'A';
         foreach ($headers as $header) {
             $sheet->setCellValue($col . '2', $header);
@@ -192,13 +200,15 @@ class NovedadPaloteoController extends Controller
 
         $fila = 3;
         foreach ($novedades as $nov) {
-            $sheet->setCellValue("A{$fila}", $nov->producto->proNombre ?? '—');
-            $sheet->setCellValue("B{$fila}", $nov->comentario_operario ?? '—');
-            $sheet->setCellValue("C{$fila}", $nov->comentario_admin ?? '—');
-            $sheet->setCellValue("D{$fila}", \Carbon\Carbon::parse($nov->fecha_novedad)->format('d-m-Y'));
-            $sheet->setCellValue("E{$fila}", $nov->estado ?? '—');
-            $sheet->setCellValue("F{$fila}", $nov->punto->nombre ?? '—');
-
+            $sheet->setCellValue("A{$fila}", $nov->fecha_novedad->format('d-m-Y'));
+            $sheet->setCellValue("B{$fila}", $nov->lote ?? '—');
+            $sheet->setCellValue("C{$fila}", $nov->comentario_operario ?? '—');
+            $sheet->setCellValue("D{$fila}", $nov->proveedor->nombre ?? '—');
+            $sheet->setCellValue("E{$fila}", $nov->producto->proNombre ?? '—');
+            $sheet->setCellValue("F{$fila}", $nov->comentario_admin ?? '—');
+            $sheet->setCellValue("G{$fila}", $nov->punto->nombre ?? '—');
+            $sheet->setCellValue("H{$fila}", ucfirst($nov->estado) ?? '—');
+            
             // Imágenes
             $imagenes = [];
 
@@ -224,7 +234,7 @@ class NovedadPaloteoController extends Controller
             }
 
             if (!empty($imagenes)) {
-                $columnaImagen = 'G';
+                $columnaImagen = 'I';
                 $offsetX = 0;
                 foreach ($imagenes as $img) {
                     $ruta = Storage::disk('public')->path($img);

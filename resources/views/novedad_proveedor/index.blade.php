@@ -108,19 +108,30 @@
                                 <div class="mb-3">
                                     <label for="id_proveedor" class="form-label fw-semibold">Proveedor</label>
                                     <select name="id_proveedor" id="id_proveedor" class="form-select select-bold-options" required>
-                                        <option value="">Seleccione un proveedor...</option>
-                                        @foreach ($novedades as $prov)
-                                            <option value="{{ $prov->id }}">{{ $prov->nombre }}</option>
-                                        @endforeach
-                                    </select>
+                                            <option value="">Seleccione un proveedor...</option>
+                                            @foreach ($proveedores as $prov)
+                                                <option value="{{ $prov->id }}">{{ $prov->nombre }}</option>
+                                            @endforeach
+                                        </select>
                                 </div>
 
                                 <!-- Insumo (productos del proveedor) -->
-                                <div class="mb-3">
+                                <!-- <div class="mb-3">
                                     <label for="id_producto" class="form-label fw-semibold">Insumo</label>
                                     <select name="id_producto" id="id_producto" class="form-select select-bold-options" required>
                                         <option value="">Seleccione un insumo...</option>
                                     </select>
+                                </div> -->
+                                <div class="mb-3">
+                                    <label for="producto_input" class="form-label fw-semibold">Insumo</label>
+                                    <input id="producto_input" class="form-control" list="productosListModal" placeholder="Escribe para buscar...">
+                                    <datalist id="productosListModal">
+                                        @foreach ($insumos as $ins)
+                                            <option value="{{ $ins->proNombre }}" data-id="{{ $ins->id }}"></option>
+                                        @endforeach
+                                    </datalist>
+                                    {{-- hidden id field that will be submitted as id_producto --}}
+                                    <input type="hidden" name="id_producto" id="id_producto_hidden" value="">
                                 </div>
 
                                 <!-- Campos de la tabla pivote -->
@@ -213,9 +224,9 @@
                         <tr>
                             <th class="align-middle">           
                                 <select id="filtroProveedor" class="form-select form-select-sm bg-transparent text-center select-bold-options" onchange="filtrarTabla()">
-                                    <option value="">Proveedor <i class="fa-solid fa-chevron-down"></i></option>
-                                    @foreach ($novedades as $nov)
-                                        <option value="{{ $nov->nombre }}">{{ $nov->nombre }}</option>
+                                    <option value="">Proveedor</option>
+                                    @foreach ($proveedores as $prov)
+                                        <option value="{{ $prov->nombre }}">{{ $prov->nombre }}</option>
                                     @endforeach
                                 </select>
                             </th>
@@ -236,19 +247,17 @@
                     </thead>
                     <tbody id="tbodyNovedades" class="divide-y divide-gray-100">
                         @forelse ($novedades as $nov)
-                            @foreach ($nov->productosNovedad as $producto)
-                                <tr class="clickable-row" style="cursor: pointer;"
-                                    data-id="{{ $nov->id }}">
-                                    <td class="px-4 py-2">{{ $nov->nombre }}</td>
-                                    <td class="px-4 py-2">{{ $producto->proNombre }}</td>
-                                    <td class="px-4 py-2">{{ $producto->pivot->calidad_producto }}</td>
-                                    <td class="px-4 py-2">{{ $producto->pivot->tiempo_entrega }}</td>
-                                    <td class="px-4 py-2">{{ $producto->pivot->presentacion_personal }}</td>
-                                    <td class="px-4 py-2">{{ $producto->pivot->observacion }}</td>
-                                    <td class="px-4 py-2">{{ $producto->pivot->created_at ? $producto->pivot->created_at->format('d-m-Y') : '—' }}</td>
-                                </tr>
-                            @endforeach
-                            @empty
+                            <tr class="clickable-row" style="cursor: pointer;"
+                                data-id="{{ $nov->id }}" data-insumo="{{ $nov->producto }}" data-comentario="{{ $nov->observacion }}" data-imagenes="[]">
+                                <td class="px-4 py-2"><small>{{ $nov->proveedor }}</small></td>
+                                <td class="px-4 py-2"><small>{{ $nov->producto }}</small></td>
+                                <td class="px-4 py-2">{{ $nov->calidad_producto }}</td>
+                                <td class="px-4 py-2">{{ $nov->tiempo_entrega }}</td>
+                                <td class="px-4 py-2">{{ $nov->presentacion_personal }}</td>
+                                <td class="px-4 py-2"><small>{{ $nov->observacion }}</small></td>
+                                <td class="px-4 py-2">{{ $nov->created_at ? \Carbon\Carbon::parse($nov->created_at)->format('d-m-Y') : '—' }}</td>
+                            </tr>
+                        @empty
                             <tr>
                                 <td colspan="7" class="px-4 py-2 text-center text-gray-500">No hay novedades registradas.</td>
                             </tr>
@@ -272,33 +281,75 @@
 </x-app-layout>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const proveedorSelect = document.getElementById('id_proveedor');
-    const productoSelect = document.getElementById('id_producto');
+// document.addEventListener('DOMContentLoaded', function() {
+//     const proveedorSelect = document.getElementById('id_proveedor');
+//     const productoSelect = document.getElementById('id_producto');
 
-    proveedorSelect.addEventListener('change', function() {
-        const proveedorId = this.value;
+//     proveedorSelect.addEventListener('change', function() {
+//         const proveedorId = this.value;
 
-        productoSelect.innerHTML = '<option value="">Cargando...</option>';
+//         productoSelect.innerHTML = '<option value="">Cargando...</option>';
 
-        if (proveedorId) {
-            const baseUrl = "{{ url('/') }}";
-            fetch(`${baseUrl}/novedad/productos/${proveedorId}`)
-                .then(response => response.json())
-                .then(data => {
-                    productoSelect.innerHTML = '<option value="">Seleccione un insumo...</option>';
-                    data.forEach(producto => {
-                        productoSelect.innerHTML += `<option value="${producto.id}">${producto.proNombre}</option>`;
-                    });
-                })
-                .catch(error => {
-                    console.error('Error al cargar productos:', error);
-                    productoSelect.innerHTML = '<option value="">Error al cargar</option>';
-                });
-        } else {
-            productoSelect.innerHTML = '<option value="">Seleccione un proveedor primero...</option>';
+//         if (proveedorId) {
+//             const baseUrl = "{{ url('/') }}";
+//             fetch(`${baseUrl}/novedad/productos/${proveedorId}`)
+//                 .then(response => response.json())
+//                 .then(data => {
+//                     productoSelect.innerHTML = '<option value="">Seleccione un insumo...</option>';
+//                     data.forEach(producto => {
+//                         productoSelect.innerHTML += `<option value="${producto.id}">${producto.proNombre}</option>`;
+//                     });
+//                 })
+//                 .catch(error => {
+//                     console.error('Error al cargar productos:', error);
+//                     productoSelect.innerHTML = '<option value="">Error al cargar</option>';
+//                 });
+//         } else {
+//             productoSelect.innerHTML = '<option value="">Seleccione un proveedor primero...</option>';
+//         }
+//     });
+// });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const productoInput = document.getElementById('producto_input');
+    const lista = document.getElementById('productosListModal');
+    const idHidden = document.getElementById('id_producto_hidden');
+    const formNovedad = document.getElementById('formNovedadProveedor');
+
+    if (!productoInput || !lista || !idHidden) return;
+
+    // Cuando el usuario escribe, intentamos resolver a un id
+    productoInput.addEventListener('input', () => {
+        const val = productoInput.value.trim();
+        idHidden.value = '';
+        if (!val) return;
+
+        // Buscar opción exacta primero
+        const options = Array.from(lista.options);
+        let matched = options.find(opt => opt.value === val);
+        if (!matched) {
+            // buscar coincidencia que empiece por el texto (case-insensitive)
+            const lower = val.toLowerCase();
+            matched = options.find(opt => opt.value.toLowerCase().startsWith(lower));
+        }
+
+        if (matched && (matched.dataset && matched.dataset.id)) {
+            idHidden.value = matched.dataset.id;
         }
     });
+
+    if (formNovedad) {
+        formNovedad.addEventListener('submit', (e) => {
+            // validar que se seleccionó un id de producto
+            if (!idHidden.value) {
+                e.preventDefault();
+                alert('Por favor selecciona un insumo válido desde la lista.');
+                productoInput.focus();
+            }
+        });
+    }
 });
 </script>
 

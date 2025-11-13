@@ -22,4 +22,9 @@ class Proveedor extends Model
     {
         return $this->hasMany(Productos::class, 'id_proveedor');
     }
+
+    public function novedades()
+    {
+        return $this->hasMany(NovedadPaloteo::class, 'id_proveedor');
+    }
 }

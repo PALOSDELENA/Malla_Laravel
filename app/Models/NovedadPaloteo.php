@@ -16,7 +16,9 @@ class NovedadPaloteo extends Model
         'comentario_operario',
         'comentario_admin',
         'imagenes',
-        'estado'
+        'estado',
+        'lote',
+        'id_proveedor'
     ];
 
     protected $casts = [
@@ -37,5 +39,10 @@ class NovedadPaloteo extends Model
     public function producto()
     {
         return $this->belongsTo(Productos::class, 'id_producto');
+    }
+
+    public function proveedor()
+    {
+        return $this->belongsTo(Proveedor::class, 'id_proveedor');
     }
 }
