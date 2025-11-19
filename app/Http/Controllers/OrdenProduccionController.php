@@ -40,7 +40,6 @@ class OrdenProduccionController extends Controller
             'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
             'estado' => 'required|string|max:50',
             'novedadProduccion' => 'nullable|string|max:255',
-
             'materias_primas' => 'required|array|min:1',
             'materias_primas.*.producto_id' => 'required|exists:productos,id',
             'materias_primas.*.cantidad_consumida' => 'required|numeric|min:0',

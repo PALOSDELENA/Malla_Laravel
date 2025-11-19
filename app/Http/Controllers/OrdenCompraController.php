@@ -90,7 +90,7 @@ class OrdenCompraController extends Controller
 
         // Obtener productos paginados
         $productos = $productosQuery->paginate(10);
-        $productos->appends($request->all()); // 🔑 mantiene filtros en la paginación
+        $productos->appends($request->all()); //mantiene filtros en la paginación
 
         // Nombre del punto
         $punto = Puntos::where('id', $id_punto)->value('nombre');
