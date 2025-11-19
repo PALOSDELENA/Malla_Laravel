@@ -61,4 +61,9 @@ class Productos extends Model
     {
         return $this->belongsTo(Proveedor::class, 'id_proveedor', 'id');
     }
+
+    public function cotizacionItems()
+    {
+        return $this->hasMany(CotizacionItem::class, 'id_producto');
+    }
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\CargosController;
 use App\Http\Controllers\OrdenProduccionController;
 use App\Http\Controllers\ProduccionController;
+use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PuntosController;
@@ -16,6 +17,7 @@ use App\Livewire\AsignacionTurnosKanban;
 use Dom\Document;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\InformeController;
 use App\Http\Controllers\NovedadPaloteoController;
 use App\Http\Controllers\OrdenCompraController;
@@ -287,6 +289,13 @@ Route::get('/filtrar-novedades', [ProveedorController::class, 'filtrar'])->name(
 Route::get('/novedades/exportar-excel', [ProveedorController::class, 'exportarExcel'])->name('novedades.exportarExcel');
 Route::get('/filtrar-novedades-fetch', [ProveedorController::class, 'filtrarFetch'])->name('novedades.filtrarFetch');
 
+//Cotizaciones
+Route::get('/cotizaciones', [CotizacionController::class, 'index'])->name('coti.index');
+Route::get('/cotizaciones/crear', [CotizacionController::class, 'create'])->name('coti.create');
+Route::post('/cotizaciones/crear', [CotizacionController::class, 'store'])->name('coti.store');
 
+// Clientes (creación via modal AJAX)
+Route::post('/clientes', [ClienteController::class, 'store'])
+    ->middleware('auth')->name('clientes.store');
 
 require __DIR__.'/auth.php';

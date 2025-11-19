@@ -170,6 +170,18 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card text-center">
+                        <div class="mt-4 mb-2">
+                            <a href="{{route('coti.index')}}">
+                                <i class="fa-solid fa-hand-holding-dollar fa-5x icon-hover"></i>
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Cotizaciones</h5>
+                        </div>
+                    </div>
+                </div>
             @endif
             @if ($perfil === 'Punto')
                 @php

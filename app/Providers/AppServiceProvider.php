@@ -71,6 +71,8 @@ class AppServiceProvider extends ServiceProvider
                 'informe.index' => 'Informes',
                 'novedad.index' => 'Reporte de Novedades',
                 'nov.proveedor.index' => 'Novedades de Proveedores',
+                'coti.index' => 'Abemus Cotización',
+                'coti.create' => 'Crear Cotización',
             ];
 
             $view->with('pageTitle', $titles[$routeName] ?? 'Panel2');
