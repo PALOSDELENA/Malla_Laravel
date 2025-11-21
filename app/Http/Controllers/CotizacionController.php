@@ -31,6 +31,13 @@ class CotizacionController extends Controller
         return view('cotizaciones.show', compact('cot'));
     }
 
+    public function create()
+    {
+        $productos = Productos::whereIn('proTipo', ['Carta-E', 'Carta-F', 'Carta-P', 'Carta-B'])->get();
+        $sedes = Puntos::whereNotIn('nombre', ['Planta', 'Administrativo', 'Cocina', 'Parrilla'])->get();
+        return view('cotizaciones.create', compact('productos', 'sedes'));
+    }
+    
     /**
      * Export a single cotizacion to Excel (.xlsx)
      */
