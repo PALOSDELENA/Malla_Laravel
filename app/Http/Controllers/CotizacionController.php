@@ -37,7 +37,7 @@ class CotizacionController extends Controller
         $sedes = Puntos::whereNotIn('nombre', ['Planta', 'Administrativo', 'Cocina', 'Parrilla'])->get();
         return view('cotizaciones.create', compact('productos', 'sedes'));
     }
-    
+
     /**
      * Export a single cotizacion to Excel (.xlsx)
      */
@@ -341,7 +341,7 @@ class CotizacionController extends Controller
         // propina (only if > 0)
         if (!empty($cot->propina) && (float)$cot->propina > 0) {
             $sheet->mergeCells('A' . $r . ':E' . $r);
-            $sheet->setCellValue('A' . $r, 'PROPINA');
+            $sheet->setCellValue('A' . $r, 'SERVICIO');
             $sheet->setCellValue('F' . $r, (float) $cot->propina);
             // style row
             $sheet->getStyle('A' . $r . ':F' . $r)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('652726');
@@ -404,12 +404,15 @@ class CotizacionController extends Controller
         $sheet->getStyle('A' . $r . ':F' . $r)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('652726');
         $sheet->getStyle('A' . $r . ':F' . $r)->getFont()->getColor()->setRGB('FFFFFF');
         $sheet->getStyle('A' . $r . ':F' . $r)->getFont()->setBold(true);
+        $lastTotalRow = $r; // Save the last total row before terms
         $r++;
 
         // Terms and conditions section
         $terms = [
             'El impuesto del 8% de impoconsumo ya esta incluido en el valor total de los platos.',
-            'Si requiere de facturación electronica , por favor llenar los datos en el siguiente link : https://palosdelena.typeform.com/facturacion',
+            'TODOS NUESTROS VALORES ESTAN SUJETOS A CAMBIOS',
+            'NO MANEJAMOS EXCLUSIVIDAD EN NINGUNA SEDE',
+            'Si requiere de facturación electronica, por favor comunicarse al correo facturacionelectronica@palosdelena.com',
             'Para garantizar el espacio , solicitamos un anticipo  del 50% del total de la cotización Y EL OTRO 50% AL FINALIZAR EL EVENTO,  los consumos adicionales que se presenten serán cancelados durante o al finalizar el evento.',
             'Una vez aprobada la cotización, u orden de compra y realizado el anticipo , NO se realizan devoluciones de los productos ni del dinero, en caso de no consumir todos los productos nuestros clientes podrán llevarselos o solicitar un acuerdo para realizar el consumo de los productos faltantes , ( Entiéndase productos NO perecederos ) en las fechas y ubicación que disponga PALOS DE LEÑA.',
             'El pago del anticipo del 50% debe ser consignado a la cuenta de palos de leña, el restante debe ser realizado en  el punto, recuerda que si confirmas entre hoy y mañana te brindamos el postre adicional sin costo.',
@@ -434,7 +437,7 @@ class CotizacionController extends Controller
         $lastRowWithTerms = $r - 1;
 
         // Apply bold to totals area only (excluding terms and conditions)
-        $sheet->getStyle('A' . ($subtotalRow) . ':F' . ($lastRowWithTerms - 10))->getFont()->setBold(true);
+        $sheet->getStyle('A' . ($subtotalRow) . ':F' . $lastTotalRow)->getFont()->setBold(true);
 
         // Number format for column D (Cantidad) - no currency symbol, just number
         $sheet->getStyle('D' . $startProductsRow . ':D' . ($r - 1))->getNumberFormat()->setFormatCode('#,##0');
