@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('cotizacion_id');
             $table->unsignedBigInteger('producto_id');
+            $table->double('producto_precio', 15, 2);
             $table->integer('cantidad');
             $table->double('total_item', 15, 2);
             $table->timestamps();

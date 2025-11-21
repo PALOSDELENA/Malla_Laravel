@@ -293,6 +293,11 @@ Route::get('/filtrar-novedades-fetch', [ProveedorController::class, 'filtrarFetc
 Route::get('/cotizaciones', [CotizacionController::class, 'index'])->name('coti.index');
 Route::get('/cotizaciones/crear', [CotizacionController::class, 'create'])->name('coti.create');
 Route::post('/cotizaciones/crear', [CotizacionController::class, 'store'])->name('coti.store');
+Route::get('/cotizaciones/ver/{id}', [CotizacionController::class, 'show'])->name('coti.show');
+Route::get('/cotizaciones/{id}/export', [CotizacionController::class, 'exportExcel'])->name('coti.export');
+Route::get('/cotizaciones/{id}/export-pdf', [CotizacionController::class, 'exportPdf'])->name('coti.export.pdf');
+Route::get('/cotizaciones/editar/{id}', [CotizacionController::class, 'edit'])->name('coti.edit');
+Route::put('/cotizaciones/editar/{id}', [CotizacionController::class, 'update'])->name('coti.update');
 
 // Clientes (creación via modal AJAX)
 Route::post('/clientes', [ClienteController::class, 'store'])

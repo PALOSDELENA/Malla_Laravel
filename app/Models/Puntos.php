@@ -38,4 +38,8 @@ class Puntos extends Model
     {
         return $this->hasMany(NovedadPaloteo::class, 'id_punto');
     }
+    public function cotizaciones()
+    {
+        return $this->hasMany(Cotizacion::class, 'sede');
+    }
 }

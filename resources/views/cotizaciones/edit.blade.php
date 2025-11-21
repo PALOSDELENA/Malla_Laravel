@@ -3,15 +3,16 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-sm sm:rounded-lg p-4">
 
-                <form id="formCotizacion" method="POST" action="{{ route('coti.store') }}">
+                <form id="formCotizacion" method="POST" action="{{ route('coti.update', $cot->id) }}">
                     @csrf
+                    @method('PUT')
                     <div class="mb-3 d-flex align-items-start gap-2">
                         <div style="flex:1">
                             <label for="cliente_id" class="form-label fw-semibold">Cliente</label>
                             <select name="cliente_id" id="cliente_id" class="form-select" required>
                                 <option value="">Seleccione un cliente...</option>
                                 @foreach(\App\Models\Cliente::all() as $cliente)
-                                    <option value="{{ $cliente->id }}">{{ $cliente->nombre }} - {{ $cliente->celular }}</option>
+                                    <option value="{{ $cliente->id }}" {{ $cliente->id == $cot->cliente_id ? 'selected' : '' }}>{{ $cliente->nombre }} - {{ $cliente->celular }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -26,14 +27,14 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="motivo" class="form-label fw-semibold">Motivo</label>
-                            <input type="text" name="motivo" id="motivo" class="form-control" required>
+                            <input type="text" name="motivo" id="motivo" class="form-control" required value="{{ old('motivo', $cot->motivo) }}">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="sede" class="form-label fw-semibold">Sede</label>
                             <select name="sede" id="sede" class="form-select">
-                                <option value="">Seleccione un cliente...</option>
+                                <option value="">Seleccione una sede...</option>
                                 @foreach($sedes as $sede)
-                                    <option value="{{ $sede->id }}">{{ $sede->nombre }}</option>
+                                    <option value="{{ $sede->id }}" {{ $sede->id == $cot->sede ? 'selected' : '' }}>{{ $sede->nombre }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -42,15 +43,15 @@
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label for="fecha" class="form-label fw-semibold">Fecha</label>
-                            <input type="date" name="fecha" id="fecha" class="form-control" required>
+                            <input type="date" name="fecha" id="fecha" class="form-control" required value="{{ old('fecha', (isset($cot->fecha) && is_object($cot->fecha) && method_exists($cot->fecha,'format')) ? $cot->fecha->format('Y-m-d') : (isset($cot->fecha) && $cot->fecha ? \Carbon\Carbon::parse($cot->fecha)->format('Y-m-d') : '')) }}">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="hora" class="form-label fw-semibold">Hora</label>
-                            <input type="time" name="hora" id="hora" class="form-control" required>
+                            <input type="time" name="hora" id="hora" class="form-control" required value="{{ old('hora', $cot->hora) }}">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="numero_personas" class="form-label fw-semibold">Número de personas</label>
-                            <input type="number" name="numero_personas" id="numero_personas" class="form-control" min="1" value="1" required>
+                            <input type="number" name="numero_personas" id="numero_personas" class="form-control" min="1" value="{{ old('numero_personas', $cot->numero_personas ?? 1) }}" required>
                         </div>
                     </div>
 
@@ -69,6 +70,34 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @foreach($cot->items as $i => $item)
+                                <tr class="item-row">
+                                    <td>
+                                        <select name="items[{{ $i }}][producto_id]" class="form-select item-producto" required>
+                                            <option value="">Seleccione producto...</option>
+                                            @foreach($productos as $prod)
+                                                <option value="{{ $prod->id }}" data-precio="{{ $prod->proPrecio ?? 0 }}" {{ $prod->id == $item->producto_id ? 'selected' : '' }}>{{ $prod->proNombre }}</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" name="items[{{ $i }}][cantidad]" class="form-control item-cantidad" min="1" value="{{ $item->cantidad }}" required>
+                                    </td>
+                                    <td>
+                                        <input type="hidden" name="items[{{ $i }}][id]" value="{{ $item->id }}">
+                                        <input type="hidden" name="items[{{ $i }}][precio]" class="item-precio-hidden" value="{{ $item->producto_precio }}">
+                                        <input type="text" class="form-control item-precio-display" value="${{ number_format($item->producto_precio,0,',','.') }}" readonly>
+                                    </td>
+                                    <td>
+                                        <input type="hidden" name="items[{{ $i }}][total_item]" class="item-total-hidden" value="{{ $item->total_item }}" required>
+                                        <input type="text" class="form-control item-total-display" value="${{ number_format($item->total_item,0,',','.') }}" readonly>
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-sm btn-danger btn-remove">-</button>
+                                    </td>
+                                </tr>
+                                @endforeach
+                                @if($cot->items->isEmpty())
                                 <tr class="item-row">
                                     <td>
                                         <select name="items[0][producto_id]" class="form-select item-producto" required>
@@ -93,6 +122,7 @@
                                         <button type="button" class="btn btn-sm btn-danger btn-remove">-</button>
                                     </td>
                                 </tr>
+                                @endif
                             </tbody>
                         </table>
 
@@ -106,17 +136,17 @@
                     <div class="row mt-3">
                         <div class="col-md-4 mb-3">
                             <label for="subtotal" class="form-label">Subtotal</label>
-                            <input type="hidden" name="subtotal" id="subtotal_hidden" value="0">
-                            <input type="text" id="subtotal_display" class="form-control" readonly value="$0">
+                            <input type="hidden" name="subtotal" id="subtotal_hidden" value="{{ old('subtotal', $cot->subtotal) }}">
+                            <input type="text" id="subtotal_display" class="form-control" readonly value="${{ number_format($cot->subtotal ?? 0,0,',','.') }}">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="descuento_pct" class="form-label">Descuento (%)</label>
-                            <input type="number" step="0.01" name="descuento_pct" id="descuento_pct" class="form-control" value="0">
+                            <input type="number" step="0.01" name="descuento_pct" id="descuento_pct" class="form-control" value="{{ old('descuento_pct', $cot->descuento_pct ?? 0) }}">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="descuento_monto" class="form-label">Descuento (monto)</label>
-                            <input type="hidden" name="descuento_monto" id="descuento_monto_hidden" value="0">
-                            <input type="text" id="descuento_monto_display" class="form-control" readonly value="$0">
+                            <input type="hidden" name="descuento_monto" id="descuento_monto_hidden" value="{{ old('descuento_monto', $cot->descuento_monto ?? 0) }}">
+                            <input type="text" id="descuento_monto_display" class="form-control" readonly value="${{ number_format($cot->descuento_monto ?? 0,0,',','.') }}">
                         </div>
                     </div>
 
@@ -126,24 +156,24 @@
                                 <input class="form-check-input" type="checkbox" id="ipoconsumo_toggle">
                                 <label class="form-check-label fw-semibold" for="ipoconsumo_toggle">Ipo consumo</label>
                             </div>
-                            <input type="hidden" name="ipoconsumo" id="ipoconsumo_hidden" value="0">
-                            <input type="text" id="ipoconsumo_display" class="form-control mt-2" readonly value="$0">
+                            <input type="hidden" name="ipoconsumo" id="ipoconsumo_hidden" value="{{ old('ipoconsumo', $cot->ipoconsumo ?? 0) }}">
+                            <input type="text" id="ipoconsumo_display" class="form-control mt-2" readonly value="${{ number_format($cot->ipoconsumo ?? 0,0,',','.') }}">
                         </div>
                         <div class="col-md-4 mb-3">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="reteica_toggle">
                                 <label class="form-check-label fw-semibold" for="reteica_toggle">Reteica</label>
                             </div>
-                            <input type="hidden" name="reteica" id="reteica_hidden" value="0">
-                            <input type="text" id="reteica_display" class="form-control mt-2" readonly value="$0">
+                            <input type="hidden" name="reteica" id="reteica_hidden" value="{{ old('reteica', $cot->reteica ?? 0) }}">
+                            <input type="text" id="reteica_display" class="form-control mt-2" readonly value="${{ number_format($cot->reteica ?? 0,0,',','.') }}">
                         </div>
                         <div class="col-md-4 mb-3">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="retefuente_toggle">
                                 <label class="form-check-label fw-semibold" for="retefuente_toggle">Retefuente</label>
                             </div>
-                            <input type="hidden" name="retefuente" id="retefuente_hidden" value="0">
-                            <input type="text" id="retefuente_display" class="form-control mt-2" readonly value="$0">
+                            <input type="hidden" name="retefuente" id="retefuente_hidden" value="{{ old('retefuente', $cot->retefuente ?? 0) }}">
+                            <input type="text" id="retefuente_display" class="form-control mt-2" readonly value="${{ number_format($cot->retefuente ?? 0,0,',','.') }}">
                         </div>
                     </div>
 
@@ -151,39 +181,39 @@
                         <div class="col-md-4 mb-3">
                             <label for="propina" class="form-label">Propina</label>
                             <div class="d-flex align-items-center gap-2">
-                                <input type="number" step="0.01" name="propina" id="propina" class="form-control" value="0.00">
+                                <input type="number" step="0.01" name="propina" id="propina" class="form-control" value="{{ old('propina', 0) }}">
                                 <div class="form-check form-switch ms-2">
                                     <input class="form-check-input" type="checkbox" id="propina_pct_toggle">
                                     <label class="form-check-label small" for="propina_pct_toggle">usar % del subtotal</label>
                                 </div>
                             </div>
-                            <input type="hidden" name="propina_aplicado" id="propina_aplicado" value="0">
+                            <input type="hidden" name="propina_aplicado" id="propina_aplicado" value="{{ old('propina_aplicado', $cot->propina ?? 0) }}">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="anticipo" class="form-label">Anticipo</label>
                             <div class="d-flex align-items-center gap-2">
-                                <input type="number" step="0.01" name="anticipo" id="anticipo" class="form-control" value="0.00">
+                                <input type="number" step="0.01" name="anticipo" id="anticipo" class="form-control" value="{{ old('anticipo', 0) }}">
                                 <div class="form-check form-switch ms-2">
                                     <input class="form-check-input" type="checkbox" id="anticipo_pct_toggle">
                                     <label class="form-check-label small" for="anticipo_pct_toggle">usar % del subtotal</label>
                                 </div>
                             </div>
-                            <input type="hidden" name="anticipo_aplicado" id="anticipo_aplicado" value="0">
+                            <input type="hidden" name="anticipo_aplicado" id="anticipo_aplicado" value="{{ old('anticipo_aplicado', $cot->anticipo ?? 0) }}">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="total_pendiente" class="form-label">Total Pendiente</label>
-                            <input type="hidden" name="total_pendiente" id="total_pendiente_hidden" value="0.00">
-                            <input type="text" id="total_pendiente_display" class="form-control" readonly value="$0,00">
+                            <input type="hidden" name="total_pendiente" id="total_pendiente_hidden" value="{{ old('total_pendiente', $cot->saldo_pendiente ?? 0) }}">
+                            <input type="text" id="total_pendiente_display" class="form-control" readonly value="${{ number_format($cot->saldo_pendiente ?? 0,2,',','.') }}">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="total_final" class="form-label">Total final</label>
-                            <input type="hidden" name="total_final" id="total_final_hidden" value="0.00">
-                            <input type="text" id="total_final_display" class="form-control" readonly value="$0,00">
+                            <input type="hidden" name="total_final" id="total_final_hidden" value="{{ old('total_final', $cot->total_final ?? 0) }}">
+                            <input type="text" id="total_final_display" class="form-control" readonly value="${{ number_format($cot->total_final ?? 0,0,',','.') }}">
                         </div>
                     </div>
 
                     <div class="d-flex justify-content-end mt-4">
-                        <button type="submit" class="btn btn-success">Guardar Cotización</button>
+                        <button type="submit" class="btn btn-success">Actualizar Cotización</button>
                     </div>
                 </form>
             
@@ -228,26 +258,24 @@
     document.addEventListener('DOMContentLoaded', () => {
         const itemsTable = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
         const btnAdd = document.getElementById('btnAddItem');
-        let index = 1; // ya existe un row con index 0
+        let index = Math.max(1, @json($cot->items->count())); // start index based on existing items
 
         function parseFloatSafe(v){
-            const n = parseFloat(String(v).replace(/[^0-9\.-]+/g, ''));
+            const n = parseFloat(String(v).replace(/[^0-9\\.-]+/g, ''));
             return isNaN(n)?0:n;
         }
 
-        // Formatea número entero a formato local: miles con punto, sin decimales, prefijo $
         function formatMoney(n){
             const v = Math.ceil(Number(n || 0));
-            return '$' + String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            return '$' + String(v).replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');
         }
 
-        // Formatea número con 2 decimales: miles con punto, decimales con coma, prefijo $
         function formatMoneyDecimal(n){
             const num = Number(n || 0).toFixed(2);
             const parts = String(num).split('.');
             const intPart = parts[0];
             const decPart = parts[1] || '00';
-            const intWithThousands = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            const intWithThousands = intPart.replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');
             return '$' + intWithThousands + ',' + decPart;
         }
 
@@ -270,6 +298,8 @@
             recalcularTotales();
         }
 
+        let __initialLoad = true;
+
         function recalcularTotales(){
             const rows = itemsTable.querySelectorAll('.item-row');
             let subtotal = 0;
@@ -278,7 +308,6 @@
                 subtotal += parseFloatSafe(v);
             });
 
-            // ajustar subtotal: dividir entre 1.08 y usar ese valor para mostrar/enviar (redondeado hacia arriba)
             const baseSubtotalRaw = subtotal / 1.08;
             const baseSubtotal = Math.ceil(baseSubtotalRaw);
             const subtotalHidden = document.querySelector('input[name="subtotal"]');
@@ -289,8 +318,6 @@
             const descuentoPct = parseFloatSafe(document.getElementById('descuento_pct').value);
             const descuentoMontoRaw = baseSubtotal * (1 - (descuentoPct/100));
             const descuentoMonto = Math.ceil(descuentoMontoRaw);
-            // si hay descuento en porcentaje, usar el subtotal neto (descuentoMonto) como base para cálculos;
-            // si no, usar baseSubtotal
             const effectiveBase = (descuentoPct > 0) ? descuentoMonto : baseSubtotal;
             const descuentoHidden = document.querySelector('input[name="descuento_monto"]');
             const descuentoDisplay = document.getElementById('descuento_monto_display');
@@ -303,25 +330,36 @@
             const anticipoToggle = document.getElementById('anticipo_pct_toggle');
 
             const propinaAppliedRaw = (propinaToggle && propinaToggle.checked) ? effectiveBase * (propinaVal/100) : propinaVal;
-            const propinaApplied = Math.ceil(propinaAppliedRaw);
-
-            // store applied amounts in hidden inputs for server
+            let propinaApplied = Math.ceil(propinaAppliedRaw);
             const propinaHiddenApplied = document.getElementById('propina_aplicado');
+            // On initial load prefer stored value if present
+            if (__initialLoad && propinaHiddenApplied && parseFloatSafe(propinaHiddenApplied.value) > 0) {
+                propinaApplied = Math.ceil(parseFloatSafe(propinaHiddenApplied.value));
+            }
             if (propinaHiddenApplied) propinaHiddenApplied.value = propinaApplied.toString();
 
-            // aplicar impuestos sólo si el toggle correspondiente está marcado
             const ipoconsumoToggle = document.getElementById('ipoconsumo_toggle');
             const reteicaToggle = document.getElementById('reteica_toggle');
             const retefuenteToggle = document.getElementById('retefuente_toggle');
 
-            const ipoconsumoRaw = (ipoconsumoToggle && ipoconsumoToggle.checked) ? baseSubtotal * 0.08 : 0;
-            const reteicaAppliedRaw = (reteicaToggle && reteicaToggle.checked) ? baseSubtotal * 0.0138 : 0;
-            const retefuenteAppliedRaw = (retefuenteToggle && retefuenteToggle.checked) ? baseSubtotal * 0.035 : 0;
-            const ipoconsumo = Math.ceil(ipoconsumoRaw);
-            const reteicaApplied = Math.ceil(reteicaAppliedRaw);
-            const retefuenteApplied = Math.ceil(retefuenteAppliedRaw);
+            const storedIpo = parseFloatSafe(document.getElementById('ipoconsumo_hidden')?.value);
+            const storedReteica = parseFloatSafe(document.getElementById('reteica_hidden')?.value);
+            const storedRetefuente = parseFloatSafe(document.getElementById('retefuente_hidden')?.value);
 
-            // actualizar hidden/display según toggles
+            const ipoconsumoRaw = (ipoconsumoToggle && ipoconsumoToggle.checked) ? effectiveBase * 0.08 : 0;
+            const reteicaAppliedRaw = (reteicaToggle && reteicaToggle.checked) ? effectiveBase * 0.0138 : 0;
+            const retefuenteAppliedRaw = (retefuenteToggle && retefuenteToggle.checked) ? effectiveBase * 0.035 : 0;
+
+            let ipoconsumo = Math.ceil(ipoconsumoRaw);
+            let reteicaApplied = Math.ceil(reteicaAppliedRaw);
+            let retefuenteApplied = Math.ceil(retefuenteAppliedRaw);
+            // On initial load prefer stored values if they exist and toggles are not checked
+            if (__initialLoad) {
+                if ((!ipoconsumoToggle || !ipoconsumoToggle.checked) && storedIpo > 0) ipoconsumo = Math.ceil(storedIpo);
+                if ((!reteicaToggle || !reteicaToggle.checked) && storedReteica > 0) reteicaApplied = Math.ceil(storedReteica);
+                if ((!retefuenteToggle || !retefuenteToggle.checked) && storedRetefuente > 0) retefuenteApplied = Math.ceil(storedRetefuente);
+            }
+
             const ipoHidden = document.querySelector('input[name="ipoconsumo"]');
             const ipoDisplay = document.getElementById('ipoconsumo_display');
             if (ipoHidden) ipoHidden.value = ipoconsumo.toString();
@@ -340,23 +378,76 @@
             const total_final = effectiveBase + ipoconsumo + propinaApplied - reteicaApplied - retefuenteApplied;
             const totalHidden = document.querySelector('input[name="total_final"]');
             const totalDisplay = document.getElementById('total_final_display');
-            if (totalHidden) totalHidden.value = Math.ceil(total_final).toString();
-            if (totalDisplay) totalDisplay.value = formatMoney(total_final);
+            const totalFinalCeil = Math.ceil(total_final);
+            if (totalHidden) totalHidden.value = totalFinalCeil.toString();
+            if (totalDisplay) totalDisplay.value = formatMoney(totalFinalCeil);
 
-            const anticipoAppliedRaw = (anticipoToggle && anticipoToggle.checked) ? total_final * (anticipoVal/100) : anticipoVal;
-            // No redondear el anticipo; permitir centavos. Guardar con 2 decimales.
-            const anticipoApplied = Number(anticipoAppliedRaw);
+            const storedAnticipo = parseFloatSafe(document.getElementById('anticipo_aplicado')?.value);
+            const anticipoAppliedRaw = (anticipoToggle && anticipoToggle.checked) ? totalFinalCeil * (anticipoVal/100) : anticipoVal;
+            let anticipoApplied = Number(anticipoAppliedRaw);
+            // On initial load prefer stored applied anticipo if present
+            if (__initialLoad && storedAnticipo > 0) {
+                anticipoApplied = Number(storedAnticipo);
+            }
             const anticipoHiddenApplied = document.getElementById('anticipo_aplicado');
             if (anticipoHiddenApplied) anticipoHiddenApplied.value = anticipoApplied.toFixed(2);
 
-            const total_pendiente = Number(total_final) - anticipoApplied;
+            // Set visible anticipo input: if percent-toggle is checked, show percentage, otherwise show fixed amount
+            try {
+                const anticipoInput = document.getElementById('anticipo');
+                if (anticipoInput) {
+                    if (anticipoToggle && anticipoToggle.checked) {
+                        // Avoid division by zero
+                        if (Number(totalFinalCeil) > 0) {
+                            const pct = (Number(anticipoApplied) / Number(totalFinalCeil)) * 100;
+                            // Show percentage with 2 decimals
+                            anticipoInput.value = isNaN(pct) ? '' : Number(pct).toFixed(2);
+                        } else {
+                            anticipoInput.value = '';
+                        }
+                    } else {
+                        // Show fixed amount with 2 decimals
+                        anticipoInput.value = isNaN(anticipoApplied) ? '' : Number(anticipoApplied).toFixed(2);
+                    }
+                }
+            } catch (err) {
+                console.error('setting visible anticipo failed', err);
+            }
+
+            const total_pendiente = Number(totalFinalCeil) - anticipoApplied;
             const totalPendienteHidden = document.querySelector('input[name="total_pendiente"]');
             const totalPendienteDisplay = document.getElementById('total_pendiente_display');
             if (totalPendienteHidden) totalPendienteHidden.value = Number(total_pendiente).toFixed(2);
             if (totalPendienteDisplay) totalPendienteDisplay.value = formatMoneyDecimal(total_pendiente);
+            // After first full calculation, unset initial flag so further changes recompute normally
+            if (__initialLoad) __initialLoad = false;
         }
 
-        // listeners: input (cantidad) and change (select producto)
+        function applyInitialToggles(){
+            try {
+                const ipoconsumoToggle = document.getElementById('ipoconsumo_toggle');
+                const reteicaToggle = document.getElementById('reteica_toggle');
+                const retefuenteToggle = document.getElementById('retefuente_toggle');
+                const propinaPctToggle = document.getElementById('propina_pct_toggle');
+                const anticipoPctToggle = document.getElementById('anticipo_pct_toggle');
+
+                const storedIpo = parseFloatSafe(document.getElementById('ipoconsumo_hidden')?.value);
+                const storedReteica = parseFloatSafe(document.getElementById('reteica_hidden')?.value);
+                const storedRetefuente = parseFloatSafe(document.getElementById('retefuente_hidden')?.value);
+                const storedPropina = parseFloatSafe(document.getElementById('propina_aplicado')?.value);
+                const storedAnticipo = parseFloatSafe(document.getElementById('anticipo_aplicado')?.value);
+
+                if (ipoconsumoToggle && storedIpo > 0) ipoconsumoToggle.checked = true;
+                if (reteicaToggle && storedReteica > 0) reteicaToggle.checked = true;
+                if (retefuenteToggle && storedRetefuente > 0) retefuenteToggle.checked = true;
+
+                if (propinaPctToggle && storedPropina > 0) propinaPctToggle.checked = true;
+                if (anticipoPctToggle && storedAnticipo > 0) anticipoPctToggle.checked = true;
+            } catch (err) {
+                console.error('applyInitialToggles error', err);
+            }
+        }
+
         itemsTable.addEventListener('input', (e) => {
             const row = e.target.closest('.item-row');
             if (row) recalcularFila(row);
@@ -366,10 +457,8 @@
             if (row) recalcularFila(row);
         });
 
-        // add item
         btnAdd.addEventListener('click', () => {
             const template = document.querySelector('.item-row').cloneNode(true);
-            // limpiar inputs (ajustar hidden y display)
             template.querySelectorAll('input').forEach(i => {
                 if (i.classList.contains('item-cantidad')) i.value = 1;
                 else if (i.classList.contains('item-precio-hidden')) i.value = '0';
@@ -380,7 +469,6 @@
             });
             template.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
 
-            // actualizar names
             template.querySelectorAll('select, input').forEach(el => {
                 const name = el.getAttribute('name');
                 if (!name) return;
@@ -390,26 +478,24 @@
 
             template.classList.add('item-row');
             itemsTable.appendChild(template);
-            // recalcular fila recién añadida para sincronizar precios/total
             recalcularFila(template);
             index++;
         });
 
-        // remove item
         itemsTable.addEventListener('click', (e) => {
             if (e.target.classList.contains('btn-remove')){
                 const rows = itemsTable.querySelectorAll('.item-row');
-                if (rows.length <= 1) return; // no eliminar último
+                if (rows.length <= 1) return;
                 const row = e.target.closest('.item-row');
                 row.remove();
                 recalcularTotales();
             }
         });
 
-        // recalcular al inicio
+        // apply initial toggles based on saved hidden values, then recalculate
+        applyInitialToggles();
         recalcularTotales();
 
-        // recalcular al cambiar descuentos/propina/anticipo y toggles de impuestos
         ['descuento_pct','propina','anticipo'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('input', recalcularTotales);
@@ -420,8 +506,9 @@
         });
     });
     </script>
+
     <script>
-    // AJAX submit para crear cliente desde modal
+    // AJAX submit para crear cliente desde modal (same as create)
     document.addEventListener('DOMContentLoaded', () => {
         const formCrear = document.getElementById('formCrearCliente');
         const alertBox = document.getElementById('clienteAlert');
@@ -457,14 +544,12 @@
                 const json = await res.json();
                 if (!res.ok) throw json;
 
-                // Añadir al select y seleccionarlo
                 const option = document.createElement('option');
                 option.value = json.id;
                 option.text = `${json.nombre} - ${json.celular ?? ''}`;
                 clienteSelect.appendChild(option);
                 clienteSelect.value = json.id;
 
-                // Cerrar modal y resetear
                 modalBootstrap.hide();
                 formCrear.reset();
             } catch (err) {
@@ -473,7 +558,6 @@
                 alertBox.classList.remove('alert-success');
                 alertBox.classList.remove('alert-danger');
                 if (err && err.errors) {
-                    // Validación
                     alertBox.classList.add('alert-danger');
                     alertBox.innerHTML = Object.values(err.errors).flat().join('<br>');
                 } else if (err && err.message) {
