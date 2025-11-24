@@ -10,7 +10,7 @@
                             <label for="cliente_id" class="form-label fw-semibold">Cliente</label>
                             <select name="cliente_id" id="cliente_id" class="form-select" required>
                                 <option value="">Seleccione un cliente...</option>
-                                @foreach(\App\Models\Cliente::all() as $cliente)
+                                @foreach($clientes as $cliente)
                                     <option value="{{ $cliente->id }}">{{ $cliente->nombre }} - {{ $cliente->celular }}</option>
                                 @endforeach
                             </select>
@@ -123,7 +123,7 @@
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="ipoconsumo_toggle">
+                                <input class="form-check-input" type="checkbox" id="ipoconsumo_toggle" checked>
                                 <label class="form-check-label fw-semibold" for="ipoconsumo_toggle">Ipo consumo</label>
                             </div>
                             <input type="hidden" name="ipoconsumo" id="ipoconsumo_hidden" value="0">
@@ -151,9 +151,9 @@
                         <div class="col-md-4 mb-3">
                             <label for="propina" class="form-label">Propina</label>
                             <div class="d-flex align-items-center gap-2">
-                                <input type="number" step="0.01" name="propina" id="propina" class="form-control" value="0.00">
+                                <input type="number" step="0.01" name="propina" id="propina" class="form-control" >
                                 <div class="form-check form-switch ms-2">
-                                    <input class="form-check-input" type="checkbox" id="propina_pct_toggle">
+                                    <input class="form-check-input" type="checkbox" id="propina_pct_toggle" checked>
                                     <label class="form-check-label small" for="propina_pct_toggle">usar % del subtotal</label>
                                 </div>
                             </div>
@@ -162,9 +162,9 @@
                         <div class="col-md-4 mb-3">
                             <label for="anticipo" class="form-label">Anticipo</label>
                             <div class="d-flex align-items-center gap-2">
-                                <input type="number" step="0.01" name="anticipo" id="anticipo" class="form-control" value="0.00">
+                                <input type="number" step="0.01" name="anticipo" id="anticipo" class="form-control">
                                 <div class="form-check form-switch ms-2">
-                                    <input class="form-check-input" type="checkbox" id="anticipo_pct_toggle">
+                                    <input class="form-check-input" type="checkbox" id="anticipo_pct_toggle" checked>
                                     <label class="form-check-label small" for="anticipo_pct_toggle">usar % del subtotal</label>
                                 </div>
                             </div>
@@ -223,6 +223,46 @@
             </div>
         </div>
     </div>
+
+    {{-- jQuery (required for Select2) --}}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    {{-- Select2 CSS --}}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+
+    {{-- Select2 JS --}}
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+    // Function to initialize Select2 on a specific element
+    function initializeSelect2(element) {
+        $(element).select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Seleccione producto...',
+            allowClear: true,
+            width: '100%'
+        });
+    }
+
+    // Initialize Select2 on product selects
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize existing product selects
+        $('.item-producto').each(function() {
+            initializeSelect2(this);
+        });
+
+        // Listen to Select2 change events for price calculation
+        $(document).on('select2:select', '.item-producto', function(e) {
+            const row = this.closest('.item-row');
+            if (row) {
+                // Trigger recalculation
+                const event = new Event('change', { bubbles: true });
+                this.dispatchEvent(event);
+            }
+        });
+    });
+    </script>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -368,8 +408,20 @@
 
         // add item
         btnAdd.addEventListener('click', () => {
-            const template = document.querySelector('.item-row').cloneNode(true);
-            // limpiar inputs (ajustar hidden y display)
+            // Get the first row as template
+            const firstRow = document.querySelector('.item-row');
+            const firstSelect = firstRow.querySelector('.item-producto');
+            
+            // Destroy Select2 temporarily to clone clean HTML
+            $(firstSelect).select2('destroy');
+            
+            // Clone the row
+            const template = firstRow.cloneNode(true);
+            
+            // Re-initialize Select2 on the first row
+            initializeSelect2(firstSelect);
+            
+            // Clean the cloned row
             template.querySelectorAll('input').forEach(i => {
                 if (i.classList.contains('item-cantidad')) i.value = 1;
                 else if (i.classList.contains('item-precio-hidden')) i.value = '0';
@@ -378,9 +430,15 @@
                 else if (i.classList.contains('item-total-display')) i.value = '$0';
                 else i.value = '';
             });
-            template.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+            
+            // Reset select to first option
+            const clonedSelect = template.querySelector('.item-producto');
+            if (clonedSelect) {
+                clonedSelect.selectedIndex = 0;
+                clonedSelect.value = '';
+            }
 
-            // actualizar names
+            // Update names
             template.querySelectorAll('select, input').forEach(el => {
                 const name = el.getAttribute('name');
                 if (!name) return;
@@ -390,7 +448,13 @@
 
             template.classList.add('item-row');
             itemsTable.appendChild(template);
-            // recalcular fila recién añadida para sincronizar precios/total
+            
+            // Initialize Select2 on the new select
+            if (clonedSelect) {
+                initializeSelect2(clonedSelect);
+            }
+            
+            // Recalculate the newly added row
             recalcularFila(template);
             index++;
         });
@@ -487,6 +551,39 @@
                 btn.disabled = false;
             }
         });
+    });
+    </script>
+
+    <script>
+    // Confirmación antes de guardar cotización
+    document.addEventListener('DOMContentLoaded', () => {
+        const formCotizacion = document.getElementById('formCotizacion');
+        
+        if (formCotizacion) {
+            formCotizacion.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const result = await Swal.fire({
+                    title: '¿Está seguro?',
+                    html: '¿Ha verificado que todos los datos de la cotización son correctos?<br><br>' +
+                          '<small class="text-muted">• Cliente y datos del evento<br>' +
+                          '• Productos y cantidades<br>' +
+                          '• Descuentos y totales</small>',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#198754',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Sí, guardar cotización',
+                    cancelButtonText: 'Cancelar',
+                    reverseButtons: true
+                });
+                
+                if (result.isConfirmed) {
+                    // Submit the form
+                    formCotizacion.submit();
+                }
+            });
+        }
     });
     </script>
 </x-app-layout>

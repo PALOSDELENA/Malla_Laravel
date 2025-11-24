@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Productos;
 use App\Models\Puntos;
 use App\Models\Cotizacion;
+use App\Models\Cliente;
 use App\Models\CotizacionItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -33,9 +34,10 @@ class CotizacionController extends Controller
 
     public function create()
     {
+        $clientes = Cliente::orderBy('created_at', 'desc')->get();
         $productos = Productos::whereIn('proTipo', ['Carta-E', 'Carta-F', 'Carta-P', 'Carta-B'])->get();
         $sedes = Puntos::whereNotIn('nombre', ['Planta', 'Administrativo', 'Cocina', 'Parrilla'])->get();
-        return view('cotizaciones.create', compact('productos', 'sedes'));
+        return view('cotizaciones.create', compact('clientes', 'productos', 'sedes'));
     }
 
     /**
@@ -51,7 +53,7 @@ class CotizacionController extends Controller
         $spreadsheet = $this->generateCotizacionSpreadsheet($cot, false);
 
         $writer = new Xlsx($spreadsheet);
-        $filename = 'cotizacion_' . $cot->id . '.xlsx';
+        $filename = 'cotizacion_' . $cot->id . '_' . $cot->cliente->nombre . '.xlsx';
 
         $response = new StreamedResponse(function () use ($writer) {
             $writer->save('php://output');
@@ -86,7 +88,7 @@ class CotizacionController extends Controller
             ->setLeft(0.5)
             ->setBottom(0.5);
 
-        $filename = 'cotizacion_' . $cot->id . '.pdf';
+        $filename = 'cotizacion_' . $cot->id . '_' . $cot->cliente->nombre .'.pdf';
 
         $response = new StreamedResponse(function () use ($writer) {
             $writer->save('php://output');
