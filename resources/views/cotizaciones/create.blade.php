@@ -5,7 +5,7 @@
 
                 <form id="formCotizacion" method="POST" action="{{ route('coti.store') }}">
                     @csrf
-                    <div class="mb-3 d-flex align-items-start gap-2">
+                    <div class="mb-3 d-flex align-items-end gap-2">
                         <div style="flex:1">
                             <label for="cliente_id" class="form-label fw-semibold">Cliente</label>
                             <select name="cliente_id" id="cliente_id" class="form-select" required>
@@ -15,7 +15,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="pt-4">
+                        <div>
                             <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearCliente">
                                 <i class="fa-solid fa-user-plus"></i> Nuevo
                             </button>
@@ -100,6 +100,30 @@
                             <button type="button" id="btnAddItem" class="btn btn-sm btn-primary">Agregar item</button>
                             <small class="text-muted">Los precios se toman del catálogo de productos (campo `precio`).</small>
                         </div>
+                    </div>
+
+                    <!-- Items Extras -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Items Extras (Opcional)</label>
+                        <small class="text-muted d-block mb-2">Agregue servicios adicionales, decoración u otros conceptos</small>
+                        
+                        <table class="table table-sm" id="extrasTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:40%">Concepto</th>
+                                    <th style="width:25%">Valor</th>
+                                    <th style="width:25%" class="text-center">Sumar al total</th>
+                                    <th style="width:10%"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Filas dinámicas se agregarán aquí -->
+                            </tbody>
+                        </table>
+                        
+                        <button type="button" id="btnAddExtra" class="btn btn-sm btn-outline-primary">
+                            <i class="fa-solid fa-plus"></i> Agregar Item Extra
+                        </button>
                     </div>
 
                     <!-- Totales y descuentos -->
@@ -247,6 +271,14 @@
 
     // Initialize Select2 on product selects
     document.addEventListener('DOMContentLoaded', () => {
+        // Initialize Select2 on cliente select
+        $('#cliente_id').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Seleccione un cliente...',
+            allowClear: true,
+            width: '100%'
+        });
+
         // Initialize existing product selects
         $('.item-producto').each(function() {
             initializeSelect2(this);
@@ -311,12 +343,35 @@
         }
 
         function recalcularTotales(){
+            console.log('=== Recalculando Totales ===');
             const rows = itemsTable.querySelectorAll('.item-row');
             let subtotal = 0;
             rows.forEach(r => {
                 const v = r.querySelector('.item-total-hidden')?.value ?? '0';
                 subtotal += parseFloatSafe(v);
             });
+            console.log('Subtotal de productos:', subtotal);
+
+            // Sumar items extras al subtotal ANTES de dividir entre 1.08
+            let totalExtras = 0;
+            const extrasRows = document.querySelectorAll('.extra-row');
+            extrasRows.forEach(row => {
+                const sumaCheckbox = row.querySelector('.extra-suma');
+                const valorInput = row.querySelector('.extra-valor');
+                const suma = sumaCheckbox?.checked;
+                const valorRaw = valorInput?.value || '0';
+                
+                if (suma) {
+                    const valor = parseFloatSafe(valorRaw);
+                    console.log('Item extra - Suma:', suma, 'Valor raw:', valorRaw, 'Valor parsed:', valor);
+                    totalExtras += valor;
+                }
+            });
+            
+            console.log('Total Extras:', totalExtras);
+            
+            // Sumar extras al subtotal antes del ajuste
+            subtotal += totalExtras;
 
             // ajustar subtotal: dividir entre 1.08 y usar ese valor para mostrar/enviar (redondeado hacia arriba)
             const baseSubtotalRaw = subtotal / 1.08;
@@ -377,6 +432,7 @@
             if (retefuenteHidden) retefuenteHidden.value = retefuenteApplied.toString();
             if (retefuenteDisplay) retefuenteDisplay.value = formatMoney(retefuenteApplied);
 
+            // Los extras ya están incluidos en baseSubtotal (se sumaron antes de dividir entre 1.08)
             const total_final = effectiveBase + ipoconsumo + propinaApplied - reteicaApplied - retefuenteApplied;
             const totalHidden = document.querySelector('input[name="total_final"]');
             const totalDisplay = document.getElementById('total_final_display');
@@ -482,8 +538,117 @@
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', recalcularTotales);
         });
+
+        // Event listeners para items extras (usando delegación de eventos)
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('extra-valor')) {
+                console.log('Cambio en valor de extra detectado');
+                recalcularTotales();
+            }
+        });
+
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('extra-suma')) {
+                console.log('Cambio en checkbox de extra detectado');
+                recalcularTotales();
+            }
+        });
+
+        // Event listener para eliminar items extras
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.btn-remove-extra')) {
+                console.log('Eliminando item extra');
+                const row = e.target.closest('.extra-row');
+                if (row) {
+                    row.remove();
+                    recalcularTotales();
+                }
+            }
+        });
     });
     </script>
+
+    <script>
+    // Manejo de Items Extras
+    document.addEventListener('DOMContentLoaded', () => {
+        const extrasTable = document.getElementById('extrasTable').getElementsByTagName('tbody')[0];
+        const btnAddExtra = document.getElementById('btnAddExtra');
+        let extraIndex = 0;
+
+        // Función para crear una nueva fila de item extra
+        function createExtraRow(index) {
+            const row = document.createElement('tr');
+            row.classList.add('extra-row');
+            row.innerHTML = `
+                <td>
+                    <select name="extras[${index}][item_extra_id]" class="form-select form-select-sm extra-select">
+                        <option value="">Seleccione o escriba...</option>
+                        <option value="custom">✏️ Personalizado</option>
+                        @foreach($extras as $extra)
+                            <option value="{{ $extra->id }}" data-precio="{{ $extra->precio ?? 0 }}">{{ $extra->nombre }}</option>
+                        @endforeach
+                    </select>
+                    <input type="text" name="extras[${index}][nombre_custom]" 
+                           class="form-control form-control-sm mt-1 d-none extra-nombre-custom" 
+                           placeholder="Nombre del concepto">
+                </td>
+                <td>
+                    <input type="number" name="extras[${index}][valor]" 
+                           class="form-control form-control-sm extra-valor" 
+                           step="0.01" value="0" min="0">
+                </td>
+                <td class="text-center">
+                    <div class="form-check form-switch d-flex justify-content-center">
+                        <input class="form-check-input extra-suma" 
+                               type="checkbox" 
+                               name="extras[${index}][suma_al_total]" 
+                               value="1" 
+                               >
+                    </div>
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-danger btn-remove-extra">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            return row;
+        }
+
+        // Agregar item extra
+        btnAddExtra.addEventListener('click', () => {
+            const row = createExtraRow(extraIndex);
+            extrasTable.appendChild(row);
+            
+            // Inicializar Select2 en el nuevo select
+            const newSelect = row.querySelector('.extra-select');
+            if (newSelect) {
+                initializeSelect2(newSelect);
+            }
+            
+            extraIndex++;
+        });
+
+        // Mostrar/ocultar campo personalizado y cargar precio
+        $(document).on('change', '.extra-select', function() {
+            const row = $(this).closest('.extra-row');
+            const customInput = row.find('.extra-nombre-custom');
+            const valorInput = row.find('.extra-valor');
+            
+            if ($(this).val() === 'custom') {
+                customInput.removeClass('d-none');
+                valorInput.val(0);
+            } else {
+                customInput.addClass('d-none');
+                const precio = $(this).find(':selected').data('precio');
+                valorInput.val(precio || 0);
+            }
+            
+            recalcularTotales();
+        });
+    });
+    </script>
+
     <script>
     // AJAX submit para crear cliente desde modal
     document.addEventListener('DOMContentLoaded', () => {

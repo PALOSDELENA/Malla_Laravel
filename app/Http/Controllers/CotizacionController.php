@@ -6,6 +6,7 @@ use App\Models\Productos;
 use App\Models\Puntos;
 use App\Models\Cotizacion;
 use App\Models\Cliente;
+use App\Models\ItemExtras;
 use App\Models\CotizacionItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -34,10 +35,11 @@ class CotizacionController extends Controller
 
     public function create()
     {
+        $extras = ItemExtras::all();
         $clientes = Cliente::orderBy('created_at', 'desc')->get();
         $productos = Productos::whereIn('proTipo', ['Carta-E', 'Carta-F', 'Carta-P', 'Carta-B'])->get();
         $sedes = Puntos::whereNotIn('nombre', ['Planta', 'Administrativo', 'Cocina', 'Parrilla'])->get();
-        return view('cotizaciones.create', compact('clientes', 'productos', 'sedes'));
+        return view('cotizaciones.create', compact('extras', 'clientes', 'productos', 'sedes'));
     }
 
     /**
@@ -48,7 +50,7 @@ class CotizacionController extends Controller
      */
     public function exportExcel($id)
     {
-        $cot = Cotizacion::with(['cliente', 'items.producto', 'punto'])->findOrFail($id);
+        $cot = Cotizacion::with(['cliente', 'items.producto', 'punto', 'itemExtras'])->findOrFail($id);
 
         $spreadsheet = $this->generateCotizacionSpreadsheet($cot, false);
 
@@ -69,7 +71,7 @@ class CotizacionController extends Controller
      */
     public function exportPdf($id)
     {
-        $cot = Cotizacion::with(['cliente', 'items.producto', 'punto'])->findOrFail($id);
+        $cot = Cotizacion::with(['cliente', 'items.producto', 'punto', 'itemExtras'])->findOrFail($id);
 
         $spreadsheet = $this->generateCotizacionSpreadsheet($cot, true);
 
@@ -272,6 +274,45 @@ class CotizacionController extends Controller
             }
         }
 
+        // Items Extras (OTROS) - si existen
+        if ($cot->itemExtras && $cot->itemExtras->count() > 0) {
+            // Category header row para OTROS
+            $sheet->mergeCells('A' . $current . ':C' . $current);
+            $sheet->setCellValue('A' . $current, 'OTROS');
+            $sheet->mergeCells('D' . $current . ':F' . $current);
+            $sheet->setCellValue('D' . $current, '');
+            // Apply light gray background to category header
+            $sheet->getStyle('A' . $current . ':F' . $current)->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('D3D3D3');
+            $sheet->getStyle('A' . $current . ':F' . $current)->getFont()->setBold(true);
+            $current++;
+
+            // Print items extras
+            foreach ($cot->itemExtras as $extra) {
+                $sheet->mergeCells('A' . $current . ':C' . $current);
+                $nombreExtra = $extra->pivot->nombre;
+                
+                // Si no suma al total, agregar indicador
+                if (!$extra->pivot->suma_al_total) {
+                    $nombreExtra .= ' (No incluido)';
+                }
+                
+                $sheet->setCellValue('A' . $current, $nombreExtra);
+                $sheet->setCellValue('D' . $current, '');
+                $sheet->setCellValue('E' . $current, '');
+                $sheet->setCellValue('F' . $current, (float) $extra->pivot->valor);
+                
+                // Si no suma al total, aplicar estilo diferente (texto gris)
+                if (!$extra->pivot->suma_al_total) {
+                    $sheet->getStyle('A' . $current . ':F' . $current)->getFont()->getColor()->setRGB('808080');
+                    $sheet->getStyle('A' . $current . ':F' . $current)->getFont()->setItalic(true);
+                }
+                
+                $current++;
+            }
+        }
+
         $lastProductRow = max($startProductsRow, $current - 1);
 
         // After products, next row: merge A-E and put 'TOTAL ALIMENTOS Y BEBIDAS, OTROS' and in F place sum of totals
@@ -287,8 +328,34 @@ class CotizacionController extends Controller
         $sheet->getStyle('A' . $sumRow . ':F' . $sumRow)->getFont()->setBold(true);
         $sheet->getStyle('A' . $sumRow . ':F' . $sumRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
+        $r = $sumRow + 1;
+
+        // Total de items extras (solo los que suman al total)
+        if ($cot->itemExtras && $cot->itemExtras->count() > 0) {
+            $totalExtras = 0;
+            foreach ($cot->itemExtras as $extra) {
+                if ($extra->pivot->suma_al_total) {
+                    $totalExtras += (float) $extra->pivot->valor;
+                }
+            }
+            
+            if ($totalExtras > 0) {
+                $sheet->mergeCells('A' . $r . ':E' . $r);
+                $sheet->setCellValue('A' . $r, 'TOTAL ITEMS EXTRAS');
+                $sheet->setCellValue('F' . $r, $totalExtras);
+                // Style the row
+                $sheet->getStyle('A' . $r . ':F' . $r)->getFill()
+                    ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                    ->getStartColor()->setRGB('652726');
+                $sheet->getStyle('A' . $r . ':F' . $r)->getFont()->getColor()->setRGB('FFFFFF');
+                $sheet->getStyle('A' . $r . ':F' . $r)->getFont()->setBold(true);
+                $sheet->getStyle('A' . $r . ':F' . $r)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $r++;
+            }
+        }
+
         // Next row: merge A-E and put 'SUBTOTAL' and in F put subtotal from DB
-        $subtotalRow = $sumRow + 1;
+        $subtotalRow = $r;
         $sheet->mergeCells('A' . $subtotalRow . ':E' . $subtotalRow);
         $sheet->setCellValue('A' . $subtotalRow, 'SUBTOTAL');
         $sheet->setCellValue('F' . $subtotalRow, (float) $cot->subtotal);
@@ -645,6 +712,13 @@ class CotizacionController extends Controller
             'items.*.cantidad' => 'required|integer|min:1',
             'items.*.precio' => 'required|numeric|min:0',
             'items.*.total_item' => 'required|numeric|min:0',
+
+            // Validación para items extras (opcional)
+            'extras' => 'nullable|array',
+            'extras.*.item_extra_id' => 'required|string',
+            'extras.*.nombre_custom' => 'nullable|string|max:255',
+            'extras.*.valor' => 'required|numeric|min:0',
+            'extras.*.suma_al_total' => 'nullable|boolean',
         ]);
 
         // Use DB transaction to ensure integrity
@@ -698,6 +772,56 @@ class CotizacionController extends Controller
                     'total_item' => (float)$item['total_item'],
                 ]);
             }
+
+
+            // Guardar items extras si existen
+            Log::info('Verificando items extras', ['extras' => $request->input('extras')]);
+            
+            if (isset($validated['extras']) && is_array($validated['extras'])) {
+                Log::info('Items extras encontrados', ['count' => count($validated['extras'])]);
+                
+                foreach ($validated['extras'] as $extra) {
+                    Log::info('Procesando item extra', ['extra' => $extra]);
+                    
+                    $itemExtraId = null;
+                    $nombre = '';
+                    
+                    // Si es personalizado
+                    if ($extra['item_extra_id'] === 'custom') {
+                        $nombre = $extra['nombre_custom'] ?? 'Item Extra';
+                        
+                        // Guardar en catálogo para reutilización futura
+                        $nuevoExtra = ItemExtras::firstOrCreate(
+                            ['nombre' => $nombre],
+                            ['precio' => (float)$extra['valor']]
+                        );
+                        $itemExtraId = $nuevoExtra->id;
+                        Log::info('Item extra personalizado creado', ['id' => $itemExtraId, 'nombre' => $nombre]);
+                    } else {
+                        // Si es del catálogo
+                        $itemExtraId = (int)$extra['item_extra_id'];
+                        $itemExtra = ItemExtras::find($itemExtraId);
+                        $nombre = $itemExtra ? $itemExtra->nombre : 'Item Extra';
+                        Log::info('Item extra del catálogo', ['id' => $itemExtraId, 'nombre' => $nombre]);
+                    }
+                    
+                    // Guardar en la tabla pivot usando attach
+                    $cotizacion->itemExtras()->attach($itemExtraId, [
+                        'nombre' => $nombre,
+                        'valor' => (float)$extra['valor'],
+                        'suma_al_total' => isset($extra['suma_al_total']) ? true : false,
+                    ]);
+                    
+                    Log::info('Item extra guardado en pivot', [
+                        'cotizacion_id' => $cotizacion->id,
+                        'item_extra_id' => $itemExtraId,
+                        'suma_al_total' => isset($extra['suma_al_total'])
+                    ]);
+                }
+            } else {
+                Log::info('No se encontraron items extras en validated');
+            }
+
 
             DB::commit();
 

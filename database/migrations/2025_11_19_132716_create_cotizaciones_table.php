@@ -42,9 +42,13 @@ return new class extends Migration
             $table->double('total_final', 15, 2)->default(0);
             $table->double('anticipo', 15, 2)->default(0);
             $table->double('saldo_pendiente', 15, 2)->default(0);
+
+            // Extras
+            $table->unsignedBigInteger('extra_id')->nullable();
             
             $table->timestamps();
             $table->foreign('cliente_id')->references('id')->on('clientes')->onDelete('cascade');
+            $table->foreign('extra_id')->references('id')->on('item_extras')->onDelete('cascade');
         });
     }
 
