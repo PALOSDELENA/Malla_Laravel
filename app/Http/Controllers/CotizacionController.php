@@ -576,68 +576,74 @@ class CotizacionController extends Controller
         return $spreadsheet;
     }
 
+    public function edit($id)
+    {
+        $cot = Cotizacion::with(['items.producto', 'itemExtras'])->findOrFail($id);
+        $extras = ItemExtras::all();
+        $clientes = Cliente::orderBy('created_at', 'desc')->get();
+        $productos = Productos::whereIn('proTipo', ['Carta-E', 'Carta-F', 'Carta-P', 'Carta-B'])->get();
+        $sedes = Puntos::whereNotIn('nombre', ['Planta', 'Administrativo', 'Cocina', 'Parrilla'])->get();
+
+        return view('cotizaciones.edit', compact('cot', 'extras', 'clientes', 'productos', 'sedes'));
+    }
+
     // Begin update flow for cotizacion
     public function update(Request $request, $id)
     {
-            $cot = Cotizacion::with('items')->findOrFail($id);
+        $cot = Cotizacion::findOrFail($id);
 
-            $validated = $request->validate([
-                'cliente_id' => 'required|exists:clientes,id',
-                'motivo' => 'required|string',
-                'sede' => 'required',
-                'fecha' => 'required|date',
-                'hora' => 'required',
-                'numero_personas' => 'required|integer|min:1',
+        $validated = $request->validate([
+            'cliente_id' => 'required|exists:clientes,id',
+            'motivo' => 'required|string',
+            'sede' => 'required',
+            'fecha' => 'required|date',
+            'hora' => 'required',
+            'numero_personas' => 'required|integer|min:1',
 
-                'descuento_pct' => 'nullable|numeric',
-                'descuento_monto' => 'nullable|numeric',
+            'subtotal' => 'required|numeric',
+            'ipoconsumo' => 'nullable|numeric',
 
-                'propina_aplicado' => 'nullable|numeric',
-                'anticipo_aplicado' => 'nullable|numeric',
+            'descuento_pct' => 'nullable|numeric',
+            'descuento_monto' => 'nullable|numeric',
 
-                'total_final' => 'nullable|numeric',
-                'total_pendiente' => 'nullable|numeric',
+            'reteica' => 'nullable|numeric',
+            'retefuente' => 'nullable|numeric',
 
-                'items' => 'required|array|min:1',
-                'items.*.id' => 'nullable|exists:cotizacion_items,id',
-                'items.*.producto_id' => 'required|exists:productos,id',
-                'items.*.cantidad' => 'required|integer|min:1',
-                'items.*.precio' => 'required|numeric|min:0',
-                'items.*.total_item' => 'required|numeric|min:0',
-            ]);
+            'propina_aplicado' => 'nullable|numeric',
+            'anticipo_aplicado' => 'nullable|numeric',
 
-            DB::beginTransaction();
+            'total_final' => 'required|numeric',
+            'total_pendiente' => 'nullable|numeric',
+
+            'items' => 'required|array|min:1',
+            'items.*.producto_id' => 'required|exists:productos,id',
+            'items.*.cantidad' => 'required|integer|min:1',
+            'items.*.precio' => 'required|numeric|min:0',
+            'items.*.total_item' => 'required|numeric|min:0',
+
+            // Validación para items extras
+            'extras' => 'nullable|array',
+            'extras.*.item_extra_id' => 'required|string',
+            'extras.*.nombre_custom' => 'nullable|string|max:255',
+            'extras.*.cantidad' => 'nullable|integer|min:1',
+            'extras.*.valor' => 'required|numeric|min:0',
+            'extras.*.suma_al_total' => 'nullable|boolean',
+        ]);
+
+        DB::beginTransaction();
         try {
-            // Recalculate totals server-side from items
-            $items = $validated['items'];
-            $subtotalItems = 0;
-            foreach ($items as $it) {
-                $subtotalItems += (float) $it['total_item'];
-            }
-
-            $baseSubtotalRaw = $subtotalItems / 1.08;
-            $baseSubtotal = (float) ceil($baseSubtotalRaw);
-
+            // Logic similar to store for totals
+            $subtotal = (float) $validated['subtotal'];
             $descuentoPct = isset($validated['descuento_pct']) ? (float)$validated['descuento_pct'] : 0;
-            $descuentoMonto = isset($validated['descuento_monto']) ? (float)$validated['descuento_monto'] : 0;
-            $subtotal_menos_descuento = ($descuentoPct > 0) ? $descuentoMonto : $baseSubtotal;
+            $descuentoMontoTotal = isset($validated['descuento_monto']) ? (float)$validated['descuento_monto'] : 0;
 
-            $effectiveBase = $subtotal_menos_descuento;
+            if ($descuentoPct > 0 && !empty($descuentoMontoTotal)) {
+                $descuentoMonto = $subtotal - $descuentoMontoTotal;
+            } else {
+                $descuentoMonto = 0;
+            }
+            $subtotal_menos_descuento = ($descuentoPct > 0) ? $descuentoMontoTotal : $subtotal;
 
-            // Taxes and propina/anticipo: prefer submitted applied values when available
-            $ipoconsumo = isset($validated['ipoconsumo']) ? (float)$validated['ipoconsumo'] : (float) ceil($effectiveBase * 0.08);
-            $reteica = isset($validated['reteica']) ? (float)$validated['reteica'] : (float) ceil($effectiveBase * 0.0138);
-            $retefuente = isset($validated['retefuente']) ? (float)$validated['retefuente'] : (float) ceil($effectiveBase * 0.035);
-
-            $propina = isset($validated['propina_aplicado']) ? (float)$validated['propina_aplicado'] : (float) ceil($effectiveBase * (float)($request->input('propina', 0) / 100));
-
-            $total_final = $effectiveBase + $ipoconsumo + $propina - $reteica - $retefuente;
-
-            $anticipo = isset($validated['anticipo_aplicado']) ? (float)$validated['anticipo_aplicado'] : (float) $request->input('anticipo', 0);
-
-            $saldo_pendiente = $total_final - $anticipo;
-
-            // Update cotizacion main fields
             $cot->update([
                 'cliente_id' => $validated['cliente_id'],
                 'motivo' => $validated['motivo'],
@@ -646,59 +652,70 @@ class CotizacionController extends Controller
                 'hora' => $validated['hora'],
                 'numero_personas' => $validated['numero_personas'],
 
-                'subtotal' => $baseSubtotal,
-                'ipoconsumo' => $ipoconsumo,
+                'subtotal' => $subtotal,
+                'ipoconsumo' => isset($validated['ipoconsumo']) ? (float)$validated['ipoconsumo'] : 0,
 
                 'descuento_pct' => $descuentoPct,
                 'descuento_monto' => $descuentoMonto,
                 'subtotal_menos_descuento' => $subtotal_menos_descuento,
 
-                'reteica' => $reteica,
-                'retefuente' => $retefuente,
+                'reteica' => isset($validated['reteica']) ? (float)$validated['reteica'] : 0,
+                'retefuente' => isset($validated['retefuente']) ? (float)$validated['retefuente'] : 0,
 
-                'propina' => $propina,
-                'total_final' => $total_final,
-                'anticipo' => $anticipo,
-                'saldo_pendiente' => $saldo_pendiente,
+                'propina' => isset($validated['propina_aplicado']) ? (float)$validated['propina_aplicado'] : 0,
+                'total_final' => (float)$validated['total_final'],
+                'anticipo' => isset($validated['anticipo_aplicado']) ? (float)$validated['anticipo_aplicado'] : 0,
+                'saldo_pendiente' => isset($validated['total_pendiente']) ? (float)$validated['total_pendiente'] : 0,
             ]);
 
-            // Sync items: delete removed, update existing, create new
-            $submittedIds = array_filter(array_map(function($i){ return $i['id'] ?? null; }, $items));
-            $existingIds = $cot->items->pluck('id')->toArray();
-            $toDelete = array_diff($existingIds, $submittedIds ?: []);
-            if (!empty($toDelete)) {
-                CotizacionItem::whereIn('id', $toDelete)->delete();
+            // Sync Items: Delete all and recreate to ensure exact match
+            $cot->items()->delete();
+            foreach ($validated['items'] as $item) {
+                 CotizacionItem::create([
+                    'cotizacion_id' => $cot->id,
+                    'producto_id' => $item['producto_id'],
+                    'producto_precio' => (float)$item['precio'],
+                    'cantidad' => (int)$item['cantidad'],
+                    'total_item' => (float)$item['total_item'],
+                ]);
             }
 
-            foreach ($items as $it) {
-                if (isset($it['id']) && $it['id']) {
-                    $itm = CotizacionItem::find($it['id']);
-                    if ($itm && $itm->cotizacion_id == $cot->id) {
-                        $itm->update([
-                            'producto_id' => $it['producto_id'],
-                            'producto_precio' => (float)$it['precio'],
-                            'cantidad' => (int)$it['cantidad'],
-                            'total_item' => (float)$it['total_item'],
-                        ]);
+            // Sync Extras
+            $cot->itemExtras()->detach(); // Remove all existing
+            if (isset($validated['extras']) && is_array($validated['extras'])) {
+                foreach ($validated['extras'] as $extra) {
+                    $itemExtraId = null;
+                    $nombre = '';
+                    
+                    if ($extra['item_extra_id'] === 'custom') {
+                        $nombre = $extra['nombre_custom'] ?? 'Item Extra';
+                        $nuevoExtra = ItemExtras::firstOrCreate(
+                            ['nombre' => $nombre],
+                            ['precio' => (float)$extra['valor']]
+                        );
+                        $itemExtraId = $nuevoExtra->id;
+                    } else {
+                        $itemExtraId = (int)$extra['item_extra_id'];
+                        $itemExtra = ItemExtras::find($itemExtraId);
+                        $nombre = $itemExtra ? $itemExtra->nombre : 'Item Extra';
                     }
-                } else {
-                    CotizacionItem::create([
-                        'cotizacion_id' => $cot->id,
-                        'producto_id' => $it['producto_id'],
-                        'producto_precio' => (float)$it['precio'],
-                        'cantidad' => (int)$it['cantidad'],
-                        'total_item' => (float)$it['total_item'],
+                    
+                    $cot->itemExtras()->attach($itemExtraId, [
+                        'nombre' => $nombre,
+                        'cantidad' => isset($extra['cantidad']) ? (int)$extra['cantidad'] : 1,
+                        'valor' => (float)$extra['valor'],
+                        'suma_al_total' => isset($extra['suma_al_total']) ? true : false,
                     ]);
                 }
             }
 
             DB::commit();
-
             return redirect()->route('coti.show', $cot->id)->with('success', 'Cotización actualizada correctamente.');
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error actualizando cotización', ['exception' => $e]);
-            return back()->withInput()->withErrors(['error' => 'Error al actualizar la cotización. Por favor intente nuevamente.']);
+            return back()->withInput()->withErrors(['error' => 'Error al actualizar la cotización. ' . $e->getMessage()]);
         }
     }
 

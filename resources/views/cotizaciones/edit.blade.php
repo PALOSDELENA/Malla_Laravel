@@ -132,6 +132,70 @@
                         </div>
                     </div>
 
+                    <!-- Items Extras -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Items Extras (Opcional)</label>
+                        <small class="text-muted d-block mb-2">Agregue servicios adicionales, decoración u otros conceptos</small>
+                        
+                        <table class="table table-sm" id="extrasTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:35%">Concepto</th>
+                                    <th style="width:10%">Cant.</th>
+                                    <th style="width:20%">Valor Unit.</th>
+                                    <th style="width:20%" class="text-center">Sumar al total</th>
+                                    <th style="width:15%"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($cot->itemExtras as $index => $extra)
+                                <tr class="extra-row">
+                                    <td>
+                                        <select name="extras[{{ $index }}][item_extra_id]" class="form-select form-select-sm extra-select">
+                                            <option value="">Seleccione o escriba...</option>
+                                            <option value="custom">✏️ Personalizado</option>
+                                            @foreach($extras as $e)
+                                                <option value="{{ $e->id }}" data-precio="{{ $e->precio ?? 0 }}" {{ $e->id == $extra->id ? 'selected' : '' }}>{{ $e->nombre }}</option>
+                                            @endforeach
+                                        </select>
+                                        <input type="text" name="extras[{{ $index }}][nombre_custom]" 
+                                               class="form-control form-control-sm mt-1 d-none extra-nombre-custom" 
+                                               placeholder="Nombre del concepto"
+                                               value="{{ $extra->pivot->nombre }}">
+                                    </td>
+                                    <td>
+                                        <input type="number" name="extras[{{ $index }}][cantidad]" 
+                                               class="form-control form-control-sm extra-cantidad" 
+                                               value="{{ $extra->pivot->cantidad ?? 1 }}" min="1" step="1">
+                                    </td>
+                                    <td>
+                                        <input type="number" name="extras[{{ $index }}][valor]" 
+                                               class="form-control form-control-sm extra-valor" 
+                                               step="0.01" value="{{ $extra->pivot->valor }}" min="0">
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="form-check form-switch d-flex justify-content-center">
+                                            <input class="form-check-input extra-suma" 
+                                                   type="checkbox" 
+                                                   name="extras[{{ $index }}][suma_al_total]" 
+                                                   value="1" 
+                                                   {{ $extra->pivot->suma_al_total ? 'checked' : '' }}>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-sm btn-danger btn-remove-extra">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnAddExtra">
+                            <i class="fa-solid fa-plus"></i> Agregar Extra
+                        </button>
+                    </div>
+
                     <!-- Totales y descuentos -->
                     <div class="row mt-3">
                         <div class="col-md-4 mb-3">
@@ -181,7 +245,7 @@
                         <div class="col-md-4 mb-3">
                             <label for="propina" class="form-label">Propina</label>
                             <div class="d-flex align-items-center gap-2">
-                                <input type="number" step="0.01" name="propina" id="propina" class="form-control" value="{{ old('propina', 0) }}">
+                                <input type="number" step="0.01" name="propina" id="propina" class="form-control" value="{{ old('propina', $cot->propina ?? 0) }}">
                                 <div class="form-check form-switch ms-2">
                                     <input class="form-check-input" type="checkbox" id="propina_pct_toggle">
                                     <label class="form-check-label small" for="propina_pct_toggle">usar % del subtotal</label>
@@ -192,7 +256,7 @@
                         <div class="col-md-4 mb-3">
                             <label for="anticipo" class="form-label">Anticipo</label>
                             <div class="d-flex align-items-center gap-2">
-                                <input type="number" step="0.01" name="anticipo" id="anticipo" class="form-control" value="{{ old('anticipo', 0) }}">
+                                <input type="number" step="0.01" name="anticipo" id="anticipo" class="form-control" value="{{ old('anticipo', $cot->anticipo ?? 0) }}">
                                 <div class="form-check form-switch ms-2">
                                     <input class="form-check-input" type="checkbox" id="anticipo_pct_toggle">
                                     <label class="form-check-label small" for="anticipo_pct_toggle">usar % del subtotal</label>
@@ -254,6 +318,72 @@
         </div>
     </div>
 
+    {{-- jQuery (required for Select2) --}}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    {{-- Select2 CSS --}}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+
+    {{-- Select2 JS --}}
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+    // Function to initialize Select2 on a specific element
+    function initializeSelect2(element) {
+        $(element).select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Seleccione producto...',
+            allowClear: true,
+            width: '100%'
+        });
+    }
+
+    function initializeSelect2Extra(element) {
+        $(element).select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Seleccione o escriba...',
+            allowClear: true,
+            width: '100%'
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize Select2 on cliente select
+        $('#cliente_id').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Seleccione un cliente...',
+            allowClear: true,
+            width: '100%'
+        });
+
+        // Initialize existing product selects
+        $('.item-producto').each(function() {
+            initializeSelect2(this);
+        });
+
+        // Initialize existing extra selects
+        $('.extra-select').each(function() {
+            initializeSelect2Extra(this);
+        });
+
+        // Listen to Select2 change events for price calculation (Products)
+        $(document).on('select2:select', '.item-producto', function(e) {
+            const row = this.closest('.item-row');
+            // Trigger change event manually so vanilla JS listener picks it up
+            const event = new Event('change', { bubbles: true });
+            this.dispatchEvent(event);
+        });
+
+        // Listen to Select2 change events for extras
+        $(document).on('select2:select', '.extra-select', function(e) {
+            const row = this.closest('.extra-row');
+            const event = new Event('change', { bubbles: true });
+            this.dispatchEvent(event);
+        });
+    });
+    </script>
+
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const itemsTable = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
@@ -307,6 +437,28 @@
                 const v = r.querySelector('.item-total-hidden')?.value ?? '0';
                 subtotal += parseFloatSafe(v);
             });
+
+            // Sumar items extras al subtotal
+            let totalExtras = 0;
+            const extrasRows = document.querySelectorAll('.extra-row');
+            extrasRows.forEach(row => {
+                const sumaCheckbox = row.querySelector('.extra-suma');
+                const valorInput = row.querySelector('.extra-valor');
+                const cantidadInput = row.querySelector('.extra-cantidad');
+                
+                const suma = sumaCheckbox?.checked;
+                const valorRaw = valorInput?.value || '0';
+                const cantidadRaw = cantidadInput?.value || '1';
+                
+                if (suma) {
+                    const valor = parseFloatSafe(valorRaw);
+                    const cantidad = parseInt(cantidadRaw) || 1;
+                    const totalLinea = valor * cantidad;
+                    totalExtras += totalLinea;
+                }
+            });
+            
+            subtotal += totalExtras;
 
             const baseSubtotalRaw = subtotal / 1.08;
             const baseSubtotal = Math.ceil(baseSubtotalRaw);
@@ -400,8 +552,9 @@
                         // Avoid division by zero
                         if (Number(totalFinalCeil) > 0) {
                             const pct = (Number(anticipoApplied) / Number(totalFinalCeil)) * 100;
-                            // Show percentage with 2 decimals
-                            anticipoInput.value = isNaN(pct) ? '' : Number(pct).toFixed(2);
+                            // Show percentage without trailing zeros
+                            const pctFixed = Number(pct).toFixed(2);
+                            anticipoInput.value = isNaN(pct) ? '' : parseFloat(pctFixed);
                         } else {
                             anticipoInput.value = '';
                         }
@@ -441,8 +594,10 @@
                 if (reteicaToggle && storedReteica > 0) reteicaToggle.checked = true;
                 if (retefuenteToggle && storedRetefuente > 0) retefuenteToggle.checked = true;
 
-                if (propinaPctToggle && storedPropina > 0) propinaPctToggle.checked = true;
-                if (anticipoPctToggle && storedAnticipo > 0) anticipoPctToggle.checked = true;
+                // No activar automáticamente los toggles de porcentaje para propina y anticipo
+                // ya que al editar cargamos el valor monetario fijo.
+                // if (propinaPctToggle && storedPropina > 0) propinaPctToggle.checked = true;
+                // if (anticipoPctToggle && storedAnticipo > 0) anticipoPctToggle.checked = true;
             } catch (err) {
                 console.error('applyInitialToggles error', err);
             }
@@ -458,7 +613,22 @@
         });
 
         btnAdd.addEventListener('click', () => {
-            const template = document.querySelector('.item-row').cloneNode(true);
+            // Get the first row as template
+            const firstRow = document.querySelector('.item-row');
+            const firstSelect = firstRow.querySelector('.item-producto');
+            
+            // Destroy Select2 temporarily to clone clean HTML
+            if ($(firstSelect).data('select2')) {
+                $(firstSelect).select2('destroy');
+            }
+            
+            // Clone the row
+            const template = firstRow.cloneNode(true);
+            
+            // Re-initialize Select2 on the first row
+            initializeSelect2(firstSelect);
+            
+            // Clean the cloned row
             template.querySelectorAll('input').forEach(i => {
                 if (i.classList.contains('item-cantidad')) i.value = 1;
                 else if (i.classList.contains('item-precio-hidden')) i.value = '0';
@@ -467,8 +637,15 @@
                 else if (i.classList.contains('item-total-display')) i.value = '$0';
                 else i.value = '';
             });
-            template.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+            
+            // Reset select to first option
+            const clonedSelect = template.querySelector('.item-producto');
+            if (clonedSelect) {
+                clonedSelect.selectedIndex = 0;
+                clonedSelect.value = '';
+            }
 
+            // Update names
             template.querySelectorAll('select, input').forEach(el => {
                 const name = el.getAttribute('name');
                 if (!name) return;
@@ -478,6 +655,12 @@
 
             template.classList.add('item-row');
             itemsTable.appendChild(template);
+            
+            // Initialize Select2 on the new select
+            if (clonedSelect) {
+                initializeSelect2(clonedSelect);
+            }
+            
             recalcularFila(template);
             index++;
         });
@@ -500,9 +683,187 @@
             const el = document.getElementById(id);
             if (el) el.addEventListener('input', recalcularTotales);
         });
-        ['ipoconsumo_toggle','reteica_toggle','retefuente_toggle','propina_pct_toggle','anticipo_pct_toggle'].forEach(id => {
+        
+        // Listeners para impuestos (excluyendo propina y anticipo que tienen lógica especial)
+        ['ipoconsumo_toggle','reteica_toggle','retefuente_toggle'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', recalcularTotales);
+        });
+
+        // Lógica especial para alternar entre Valor y Porcentaje (Propina y Anticipo)
+        function handlePercentToggle(e) {
+            const toggle = e.target;
+            const isChecked = toggle.checked;
+            const type = toggle.id.replace('_pct_toggle', ''); // 'propina' or 'anticipo'
+            const input = document.getElementById(type);
+            const val = parseFloatSafe(input.value);
+            
+            let base = 0;
+            
+            if (type === 'propina') {
+                // Base para propina: Subtotal - Descuento (effectiveBase)
+                const subtotal = parseFloatSafe(document.querySelector('input[name="subtotal"]')?.value);
+                const descuentoPct = parseFloatSafe(document.getElementById('descuento_pct')?.value);
+                // Replicar lógica de effectiveBase
+                const descuentoMontoRaw = subtotal * (1 - (descuentoPct/100));
+                const descuentoMonto = Math.ceil(descuentoMontoRaw);
+                base = (descuentoPct > 0) ? descuentoMonto : subtotal;
+            } else if (type === 'anticipo') {
+                // Base para anticipo: Total Final
+                base = parseFloatSafe(document.querySelector('input[name="total_final"]')?.value);
+            }
+            
+            if (base === 0) {
+                recalcularTotales();
+                return;
+            }
+            
+            if (isChecked) {
+                // Convertir $ a %: (Valor / Base) * 100
+                const pct = (val / base) * 100;
+                // parseFloat elimina los ceros no significativos (10.00 -> 10)
+                input.value = parseFloat(pct.toFixed(2));
+            } else {
+                // Convertir % a $: (Valor / 100) * Base
+                const amount = (val / 100) * base;
+                input.value = Math.ceil(amount);
+            }
+            
+            recalcularTotales();
+        }
+
+        document.getElementById('propina_pct_toggle').addEventListener('change', handlePercentToggle);
+        document.getElementById('anticipo_pct_toggle').addEventListener('change', handlePercentToggle);
+
+        // Inicializar Propina y Anticipo en modo porcentaje si tienen valor
+        function applyInitialPercentModes() {
+             const propinaPctToggle = document.getElementById('propina_pct_toggle');
+             const anticipoPctToggle = document.getElementById('anticipo_pct_toggle');
+             const storedPropina = parseFloatSafe(document.getElementById('propina_aplicado')?.value);
+             const storedAnticipo = parseFloatSafe(document.getElementById('anticipo_aplicado')?.value);
+             
+             if (propinaPctToggle && storedPropina > 0) {
+                 propinaPctToggle.checked = true;
+                 // Trigger conversion manually
+                 const event = { target: propinaPctToggle };
+                 handlePercentToggle(event);
+             }
+             
+             if (anticipoPctToggle && storedAnticipo > 0) {
+                 anticipoPctToggle.checked = true;
+                 // Trigger conversion manually
+                 const event = { target: anticipoPctToggle };
+                 handlePercentToggle(event);
+             }
+        }
+        applyInitialPercentModes();
+
+        // Lógica para Items Extras
+        const extrasTable = document.getElementById('extrasTable').getElementsByTagName('tbody')[0];
+        const btnAddExtra = document.getElementById('btnAddExtra');
+        let extraIndex = {{ $cot->itemExtras->count() > 0 ? $cot->itemExtras->count() : 0 }};
+
+        function createExtraRow(index) {
+            const row = document.createElement('tr');
+            row.classList.add('extra-row');
+            row.innerHTML = `
+                <td>
+                    <select name="extras[${index}][item_extra_id]" class="form-select form-select-sm extra-select">
+                        <option value="">Seleccione o escriba...</option>
+                        <option value="custom">✏️ Personalizado</option>
+                        @foreach($extras as $extra)
+                            <option value="{{ $extra->id }}" data-precio="{{ $extra->precio ?? 0 }}">{{ $extra->nombre }}</option>
+                        @endforeach
+                    </select>
+                    <input type="text" name="extras[${index}][nombre_custom]" 
+                           class="form-control form-control-sm mt-1 d-none extra-nombre-custom" 
+                           placeholder="Nombre del concepto">
+                </td>
+                <td>
+                    <input type="number" name="extras[${index}][cantidad]" 
+                           class="form-control form-control-sm extra-cantidad" 
+                           value="1" min="1" step="1">
+                </td>
+                <td>
+                    <input type="number" name="extras[${index}][valor]" 
+                           class="form-control form-control-sm extra-valor" 
+                           step="0.01" value="0" min="0">
+                </td>
+                <td class="text-center">
+                    <div class="form-check form-switch d-flex justify-content-center">
+                        <input class="form-check-input extra-suma" 
+                               type="checkbox" 
+                               name="extras[${index}][suma_al_total]" 
+                               value="1" 
+                               >
+                    </div>
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-danger btn-remove-extra">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            return row;
+        }
+
+        if (btnAddExtra) {
+            btnAddExtra.addEventListener('click', () => {
+                const row = createExtraRow(extraIndex);
+                extrasTable.appendChild(row);
+                
+                // Initialize Select2 on the new extra select
+                const newSelect = row.querySelector('.extra-select');
+                if (newSelect) {
+                    initializeSelect2Extra(newSelect);
+                }
+                
+                extraIndex++;
+            });
+        }
+
+        // Delegación de eventos para extras
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.btn-remove-extra')) {
+                const row = e.target.closest('.extra-row');
+                if (row) {
+                    row.remove();
+                    recalcularTotales();
+                }
+            }
+        });
+
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('extra-select')) {
+                const select = e.target;
+                const row = select.closest('tr');
+                const customInput = row.querySelector('.extra-nombre-custom');
+                const valorInput = row.querySelector('.extra-valor');
+                
+                if (select.value === 'custom') {
+                    customInput.classList.remove('d-none');
+                    customInput.required = true;
+                    valorInput.value = '';
+                } else {
+                    customInput.classList.add('d-none');
+                    customInput.required = false;
+                    // Obtener precio del data-attribute
+                    const option = select.options[select.selectedIndex];
+                    const precio = option.dataset.precio || 0;
+                    valorInput.value = precio;
+                }
+                recalcularTotales();
+            }
+            
+            if (e.target.classList.contains('extra-suma')) {
+                recalcularTotales();
+            }
+        });
+
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('extra-valor') || e.target.classList.contains('extra-cantidad')) {
+                recalcularTotales();
+            }
         });
     });
     </script>

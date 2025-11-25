@@ -2,10 +2,12 @@
 	<div class="py-6">
 		<div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
 			<div class="bg-white shadow-sm sm:rounded-lg p-4">
-				<div class="d-flex justify-content-between mb-3">
+				<div class="d-flex justify-content-between align-items-center mb-3">
 					<h3 class="mb-0">Cotización #{{ $cot->id }}</h3>
-					<!-- <a href="{{ route('coti.edit', $cot->id) }}" class="btn btn-secondary btn-sm">Editar</a> -->
-					<a href="{{ route('coti.index') }}" class="btn btn-secondary btn-sm">Volver</a>
+					<div class="d-flex gap-2">
+						<a href="{{ route('coti.edit', $cot->id) }}" class="btn btn-secondary btn-sm">Editar</a>
+						<a href="{{ route('coti.index') }}" class="btn btn-secondary btn-sm">Volver</a>
+					</div>
 				</div>
 
 				<div class="row mb-3">
@@ -44,6 +46,40 @@
 						</tbody>
 					</table>
 				</div>
+
+				@if($cot->itemExtras->count() > 0)
+				<h5 class="mt-4 mb-2">Items Extras</h5>
+				<div class="table-responsive mb-3">
+					<table class="table table-bordered table-sm">
+						<thead>
+							<tr>
+								<th>Concepto</th>
+								<th style="width:120px">Cantidad</th>
+								<th style="width:140px">Valor Unitario</th>
+								<th style="width:160px">Total</th>
+								<th style="width:100px">Suma Total</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach($cot->itemExtras as $extra)
+								<tr>
+									<td>{{ $extra->pivot->nombre ?? $extra->nombre }}</td>
+									<td>{{ $extra->pivot->cantidad }}</td>
+									<td>{{ number_format($extra->pivot->valor ?? 0, 0, ',', '.') }}</td>
+									<td>{{ number_format(($extra->pivot->valor * $extra->pivot->cantidad) ?? 0, 0, ',', '.') }}</td>
+									<td class="text-center">
+										@if($extra->pivot->suma_al_total)
+											<span class="badge bg-success">Sí</span>
+										@else
+											<span class="badge bg-secondary">No</span>
+										@endif
+									</td>
+								</tr>
+							@endforeach
+						</tbody>
+					</table>
+				</div>
+				@endif
 
 				<div class="row">
 					<div class="col-md-6">
