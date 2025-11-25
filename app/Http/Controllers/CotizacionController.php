@@ -315,11 +315,28 @@ class CotizacionController extends Controller
 
         $lastProductRow = max($startProductsRow, $current - 1);
 
+        // Calcular el total manualmente: suma de productos + items extras que suman al total
+        $totalProductos = 0;
+        foreach ($cot->items as $item) {
+            $totalProductos += (float) $item->total_item;
+        }
+        
+        $totalExtrasIncluidos = 0;
+        if ($cot->itemExtras && $cot->itemExtras->count() > 0) {
+            foreach ($cot->itemExtras as $extra) {
+                if ($extra->pivot->suma_al_total) {
+                    $totalExtrasIncluidos += (float) $extra->pivot->valor;
+                }
+            }
+        }
+        
+        $totalAlimentosYBebidas = $totalProductos + $totalExtrasIncluidos;
+
         // After products, next row: merge A-E and put 'TOTAL ALIMENTOS Y BEBIDAS, OTROS' and in F place sum of totals
         $sumRow = $current;
         $sheet->mergeCells('A' . $sumRow . ':E' . $sumRow);
         $sheet->setCellValue('A' . $sumRow, 'TOTAL ALIMENTOS Y BEBIDAS, OTROS');
-        $sheet->setCellValue('F' . $sumRow, '=SUM(F' . $startProductsRow . ':F' . $lastProductRow . ')');
+        $sheet->setCellValue('F' . $sumRow, $totalAlimentosYBebidas);
         // Style the TOTAL row with the same color as OPCIONES (#652726) and white text for full A-F
         $sheet->getStyle('A' . $sumRow . ':F' . $sumRow)->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
