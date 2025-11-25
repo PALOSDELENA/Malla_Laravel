@@ -110,10 +110,11 @@
                         <table class="table table-sm" id="extrasTable">
                             <thead>
                                 <tr>
-                                    <th style="width:40%">Concepto</th>
-                                    <th style="width:25%">Valor</th>
-                                    <th style="width:25%" class="text-center">Sumar al total</th>
-                                    <th style="width:10%"></th>
+                                    <th style="width:35%">Concepto</th>
+                                    <th style="width:10%">Cant.</th>
+                                    <th style="width:20%">Valor Unit.</th>
+                                    <th style="width:20%" class="text-center">Sumar al total</th>
+                                    <th style="width:15%"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -358,13 +359,19 @@
             extrasRows.forEach(row => {
                 const sumaCheckbox = row.querySelector('.extra-suma');
                 const valorInput = row.querySelector('.extra-valor');
+                const cantidadInput = row.querySelector('.extra-cantidad');
+                
                 const suma = sumaCheckbox?.checked;
                 const valorRaw = valorInput?.value || '0';
+                const cantidadRaw = cantidadInput?.value || '1';
                 
                 if (suma) {
                     const valor = parseFloatSafe(valorRaw);
-                    console.log('Item extra - Suma:', suma, 'Valor raw:', valorRaw, 'Valor parsed:', valor);
-                    totalExtras += valor;
+                    const cantidad = parseInt(cantidadRaw) || 1;
+                    const totalLinea = valor * cantidad;
+                    
+                    console.log('Item extra - Suma:', suma, 'Valor:', valor, 'Cant:', cantidad, 'Total:', totalLinea);
+                    totalExtras += totalLinea;
                 }
             });
             
@@ -541,8 +548,8 @@
 
         // Event listeners para items extras (usando delegación de eventos)
         document.addEventListener('input', (e) => {
-            if (e.target.classList.contains('extra-valor')) {
-                console.log('Cambio en valor de extra detectado');
+            if (e.target.classList.contains('extra-valor') || e.target.classList.contains('extra-cantidad')) {
+                console.log('Cambio en valor o cantidad de extra detectado');
                 recalcularTotales();
             }
         });
@@ -591,6 +598,11 @@
                     <input type="text" name="extras[${index}][nombre_custom]" 
                            class="form-control form-control-sm mt-1 d-none extra-nombre-custom" 
                            placeholder="Nombre del concepto">
+                </td>
+                <td>
+                    <input type="number" name="extras[${index}][cantidad]" 
+                           class="form-control form-control-sm extra-cantidad" 
+                           value="1" min="1" step="1">
                 </td>
                 <td>
                     <input type="number" name="extras[${index}][valor]" 

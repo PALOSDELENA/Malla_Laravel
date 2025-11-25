@@ -292,6 +292,9 @@ class CotizacionController extends Controller
             foreach ($cot->itemExtras as $extra) {
                 $sheet->mergeCells('A' . $current . ':C' . $current);
                 $nombreExtra = $extra->pivot->nombre;
+                $cantidad = $extra->pivot->cantidad ?? 1;
+                $valorUnitario = (float) $extra->pivot->valor;
+                $totalLinea = $cantidad * $valorUnitario;
                 
                 // Si no suma al total, agregar indicador
                 if (!$extra->pivot->suma_al_total) {
@@ -299,9 +302,9 @@ class CotizacionController extends Controller
                 }
                 
                 $sheet->setCellValue('A' . $current, $nombreExtra);
-                $sheet->setCellValue('D' . $current, '');
-                $sheet->setCellValue('E' . $current, '');
-                $sheet->setCellValue('F' . $current, (float) $extra->pivot->valor);
+                $sheet->setCellValue('D' . $current, $cantidad); // Cantidad
+                $sheet->setCellValue('E' . $current, $valorUnitario); // Valor Unitario
+                $sheet->setCellValue('F' . $current, $totalLinea); // Total
                 
                 // Si no suma al total, aplicar estilo diferente (texto gris)
                 if (!$extra->pivot->suma_al_total) {
@@ -325,7 +328,9 @@ class CotizacionController extends Controller
         if ($cot->itemExtras && $cot->itemExtras->count() > 0) {
             foreach ($cot->itemExtras as $extra) {
                 if ($extra->pivot->suma_al_total) {
-                    $totalExtrasIncluidos += (float) $extra->pivot->valor;
+                    $cant = $extra->pivot->cantidad ?? 1;
+                    $val = (float) $extra->pivot->valor;
+                    $totalExtrasIncluidos += ($cant * $val);
                 }
             }
         }
@@ -352,7 +357,9 @@ class CotizacionController extends Controller
             $totalExtras = 0;
             foreach ($cot->itemExtras as $extra) {
                 if ($extra->pivot->suma_al_total) {
-                    $totalExtras += (float) $extra->pivot->valor;
+                    $cant = $extra->pivot->cantidad ?? 1;
+                    $val = (float) $extra->pivot->valor;
+                    $totalExtras += ($cant * $val);
                 }
             }
             
@@ -734,6 +741,7 @@ class CotizacionController extends Controller
             'extras' => 'nullable|array',
             'extras.*.item_extra_id' => 'required|string',
             'extras.*.nombre_custom' => 'nullable|string|max:255',
+            'extras.*.cantidad' => 'nullable|integer|min:1',
             'extras.*.valor' => 'required|numeric|min:0',
             'extras.*.suma_al_total' => 'nullable|boolean',
         ]);
@@ -825,6 +833,7 @@ class CotizacionController extends Controller
                     // Guardar en la tabla pivot usando attach
                     $cotizacion->itemExtras()->attach($itemExtraId, [
                         'nombre' => $nombre,
+                        'cantidad' => isset($extra['cantidad']) ? (int)$extra['cantidad'] : 1,
                         'valor' => (float)$extra['valor'],
                         'suma_al_total' => isset($extra['suma_al_total']) ? true : false,
                     ]);
