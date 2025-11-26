@@ -36,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
                 'reports.index' => 'Reportes',
                 'profile.edit' => 'Profile',
                 'productos.index' => 'Productos',
+                'productos.create' => 'Crear Producto',
                 'ordenProduccion.index' => 'Ordenes de Producción',
                 'ordenProduccion.create' => 'Crear Orden de Producción',
                 'cargos.index' => 'Cargos',

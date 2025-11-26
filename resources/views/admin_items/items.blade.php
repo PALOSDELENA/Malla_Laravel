@@ -13,7 +13,6 @@
                 });
             </script>
         @endif
-        <h2 class="mb-4">Listado de Productos</h2>
 
         <!-- Filtros -->
         <form method="GET" class="row g-3 mb-4">

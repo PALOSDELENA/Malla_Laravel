@@ -45,7 +45,7 @@ class ProductoController extends Controller
         $validated = $request->validate([
             'proNombre' => 'required|string|max:255',
             'proUnidadMedida' => 'required|string|max:50',
-            'proTipo' => 'required|string|in:Materia Prima,Producto Terminado',
+            'proTipo' => 'required|string|in:Materia Prima,Producto Terminado,Carta-E,Carta-F,Carta-P,Carta-B',
             'proListaIngredientes' => 'nullable|string',
             'proCondicionesConservacion' => 'nullable|string|max:255',
             'proFabricante' => 'nullable|string|max:255',
@@ -67,7 +67,6 @@ class ProductoController extends Controller
         ]);
 
         // Redirecciona o responde
-        // return redirect()->route('productos.index')->with('success', 'Producto registrado correctamente.');    }
         return redirect()->back()->with('success', 'Producto registrado correctamente.');
     }
     /**
