@@ -298,6 +298,7 @@ Route::get('/cotizaciones/{id}/export', [CotizacionController::class, 'exportExc
 Route::get('/cotizaciones/{id}/export-pdf', [CotizacionController::class, 'exportPdf'])->name('coti.export.pdf');
 Route::get('/cotizaciones/editar/{id}', [CotizacionController::class, 'edit'])->name('coti.edit');
 Route::put('/cotizaciones/editar/{id}', [CotizacionController::class, 'update'])->name('coti.update');
+Route::delete('/cotizaciones/{id}', [CotizacionController::class, 'destroy'])->name('coti.destroy');
 
 // Clientes (creación via modal AJAX)
 Route::post('/clientes', [ClienteController::class, 'store'])

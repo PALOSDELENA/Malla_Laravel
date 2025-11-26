@@ -876,4 +876,29 @@ class CotizacionController extends Controller
             return back()->withInput()->withErrors(['error' => 'Error al crear la cotización. Por favor intente nuevamente.']);
         }
     }
+
+    /**
+     * Delete a cotizacion and its related items.
+     */
+    public function destroy($id)
+    {
+        DB::beginTransaction();
+        try {
+            $cot = Cotizacion::findOrFail($id);
+            
+            // Delete related items and extras (cascade delete should handle this, but being explicit)
+            $cot->items()->delete();
+            $cot->itemExtras()->detach();
+            
+            // Delete the cotizacion
+            $cot->delete();
+            
+            DB::commit();
+            return redirect()->route('coti.index')->with('success', 'Cotización eliminada correctamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error eliminando cotización', ['exception' => $e]);
+            return back()->withErrors(['error' => 'Error al eliminar la cotización.']);
+        }
+    }
 }
