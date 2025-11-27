@@ -99,6 +99,9 @@
 											<a href="{{route('coti.show', $cot->id )}}" class="btn btn-sm btn-outline-secondary">Ver</a>
 											<a href="{{route('coti.export', $cot->id )}}" class="btn btn-sm btn-outline-secondary">Excel</a>
 											<a href="{{route('coti.export.pdf', $cot->id )}}" class="btn btn-sm btn-outline-secondary">PDF</a>
+											<button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#uploadFacturaModal{{ $cot->id }}" title="Cargar comprobante">
+												<i class="fa-solid fa-file-invoice"></i>
+											</button>
 											<form action="{{ route('coti.destroy', $cot->id) }}" method="POST" class="d-inline delete-form">
 												@csrf
 												@method('DELETE')
@@ -107,6 +110,52 @@
 										</div>
 									</td>
 								</tr>
+
+								<!-- Modal para cargar factura -->
+								<div class="modal fade" id="uploadFacturaModal{{ $cot->id }}" tabindex="-1" aria-labelledby="uploadFacturaModalLabel{{ $cot->id }}" aria-hidden="true">
+									<div class="modal-dialog">
+										<div class="modal-content">
+											<div class="modal-header">
+												<h5 class="modal-title" id="uploadFacturaModalLabel{{ $cot->id }}">Cargar Comprobante de Pago - Cotización #{{ $cot->id }}</h5>
+												<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+											</div>
+											<form action="{{ route('coti.uploadFactura', $cot->id) }}" method="POST" enctype="multipart/form-data">
+												@csrf
+												<div class="modal-body">
+													@if($cot->img_factura)
+														<div class="mb-3">
+															<label class="form-label"><strong>Comprobante actual:</strong></label>
+															<div class="text-center">
+																<img src="{{ asset('storage/cotizaciones_facturas/' . $cot->img_factura) }}" 
+																	class="img-thumbnail mb-2" 
+																	style="max-width: 100%; max-height: 300px;"
+																	alt="Comprobante actual">
+																<div>
+																	<a href="{{ asset('storage/cotizaciones_facturas/' . $cot->img_factura) }}" 
+																	target="_blank" 
+																	class="btn btn-sm btn-outline-primary">
+																		<i class="fa-solid fa-external-link-alt"></i> Ver en tamaño completo
+																	</a>
+																</div>
+															</div>
+															<hr>
+														</div>
+													@endif
+													<div class="mb-3">
+														<label for="img_factura{{ $cot->id }}" class="form-label">Seleccionar imagen del comprobante</label>
+														<input type="file" class="form-control" id="img_factura{{ $cot->id }}" name="img_factura" accept="image/*" required>
+														<div class="form-text">Formatos permitidos: JPG, PNG, PDF. Tamaño máximo: 5MB</div>
+													</div>
+													<div id="preview{{ $cot->id }}" class="mt-3"></div>
+												</div>
+												<div class="modal-footer">
+													<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+													<button type="submit" class="btn btn-primary">Guardar Comprobante</button>
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
 							@empty
 								<tr>
 									<td colspan="11" class="text-center">No hay cotizaciones.</td>
@@ -147,6 +196,25 @@
 					});
 				});
 			});
+
+		// Handle image preview for factura uploads
+		document.querySelectorAll('input[type="file"][name="img_factura"]').forEach(input => {
+			input.addEventListener('change', function(e) {
+				const file = e.target.files[0];
+				const cotId = this.id.replace('img_factura', '');
+				const previewDiv = document.getElementById('preview' + cotId);
+				
+				if (file && file.type.startsWith('image/')) {
+					const reader = new FileReader();
+					reader.onload = function(e) {
+						previewDiv.innerHTML = '<img src="' + e.target.result + '" class="img-thumbnail" style="max-width: 300px;">';
+					};
+					reader.readAsDataURL(file);
+				} else {
+					previewDiv.innerHTML = '';
+				}
+			});
 		});
+	});
 	</script>
 </x-app-layout>

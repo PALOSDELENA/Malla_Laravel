@@ -901,4 +901,37 @@ class CotizacionController extends Controller
             return back()->withErrors(['error' => 'Error al eliminar la cotización.']);
         }
     }
+
+    /**
+     * Upload payment receipt image for a cotizacion
+     */
+    public function uploadFactura(Request $request, $id)
+    {
+        $request->validate([
+            'img_factura' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
+        ]);
+
+        try {
+            $cot = Cotizacion::findOrFail($id);
+            
+            // Delete old image if exists
+            if ($cot->img_factura && \Storage::disk('public')->exists('cotizaciones_facturas/' . $cot->img_factura)) {
+                \Storage::disk('public')->delete('cotizaciones_facturas/' . $cot->img_factura);
+            }
+            
+            // Store new image
+            $file = $request->file('img_factura');
+            $filename = 'factura_cot_' . $id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('cotizaciones_facturas', $filename, 'public');
+            
+            // Update database
+            $cot->img_factura = $filename;
+            $cot->save();
+            
+            return redirect()->route('coti.index')->with('success', 'Comprobante de pago cargado correctamente.');
+        } catch (\Exception $e) {
+            Log::error('Error cargando factura', ['exception' => $e]);
+            return back()->withErrors(['error' => 'Error al cargar el comprobante.']);
+        }
+    }
 }
