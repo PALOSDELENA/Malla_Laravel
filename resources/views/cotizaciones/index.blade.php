@@ -45,6 +45,39 @@
 					<a href="{{ route('coti.create') }}" class="btn btn-warning btn-sm">Nueva Cotización</a>
 				</div>
 
+				<!-- Filtros dinámicos -->
+			<div class="card mb-3">
+				<div class="card-body">
+					<form method="GET" action="{{ route('coti.index') }}" id="filterForm">
+						<div class="row g-3">
+							<div class="col-md-4">
+								<label for="filter_cliente" class="form-label"><i class="fa-solid fa-user"></i> Buscar por Cliente</label>
+								<input type="text" class="form-control form-control-sm" id="filter_cliente" name="filter_cliente" 
+									   placeholder="Nombre del cliente..." value="{{ request('filter_cliente') }}">
+							</div>
+							<div class="col-md-4">
+								<label for="filter_sede" class="form-label"><i class="fa-solid fa-location-dot"></i> Buscar por Sede</label>
+								<input type="text" class="form-control form-control-sm" id="filter_sede" name="filter_sede" 
+									   placeholder="Nombre de la sede..." value="{{ request('filter_sede') }}">
+							</div>
+							<div class="col-md-3">
+								<label for="filter_fecha" class="form-label"><i class="fa-solid fa-calendar"></i> Buscar por Fecha</label>
+								<input type="date" class="form-control form-control-sm" id="filter_fecha" name="filter_fecha" 
+									   value="{{ request('filter_fecha') }}">
+							</div>
+							<div class="col-md-1 d-flex align-items-end gap-1">
+							<button type="submit" class="btn btn-sm btn-primary" title="Buscar">
+								<i class="fa-solid fa-search"></i>
+							</button>
+							<a href="{{ route('coti.index') }}" class="btn btn-sm btn-outline-secondary" title="Limpiar filtros">
+								<i class="fa-solid fa-eraser"></i>
+							</a>
+						</div>
+						</div>
+					</form>
+				</div>
+			</div>
+
 				<div class="table-responsive">
 					<table class="table table-striped table-hover">
 						<thead>
@@ -213,8 +246,8 @@
 				} else {
 					previewDiv.innerHTML = '';
 				}
-			});
 		});
 	});
+});
 	</script>
 </x-app-layout>

@@ -18,9 +18,32 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CotizacionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $cotizaciones = Cotizacion::with(['cliente', 'items', 'punto'])->orderBy('created_at', 'desc')->paginate(10);
+        $query = Cotizacion::with(['cliente', 'items', 'punto']);
+        
+        // Apply filters if present
+        if ($request->filled('filter_cliente')) {
+            $query->whereHas('cliente', function($q) use ($request) {
+                $q->where('nombre', 'like', '%' . $request->filter_cliente . '%');
+            });
+        }
+        
+        if ($request->filled('filter_sede')) {
+            $query->where(function($q) use ($request) {
+                $q->where('sede', 'like', '%' . $request->filter_sede . '%')
+                  ->orWhereHas('punto', function($subQ) use ($request) {
+                      $subQ->where('nombre', 'like', '%' . $request->filter_sede . '%');
+                  });
+            });
+        }
+        
+        if ($request->filled('filter_fecha')) {
+            $query->whereDate('fecha', $request->filter_fecha);
+        }
+        
+        $cotizaciones = $query->orderBy('created_at', 'desc')->paginate(10)->appends($request->except('page'));
+        
         return view('cotizaciones.index', compact('cotizaciones'));
     }
 
