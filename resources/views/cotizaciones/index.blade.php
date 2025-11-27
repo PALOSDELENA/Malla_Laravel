@@ -82,7 +82,7 @@
 									<!-- <td>{{ number_format($cot->subtotal ?? 0, 0, ',', '.') }}</td>
 									<td>{{ number_format($cot->propina ?? 0, 0, ',', '.') }}</td> -->
 									<!-- <td>{{ number_format($cot->anticipo ?? 0, 2, ',', '.') }}</td> -->
-									<td>{{ number_format($cot->total_final ?? 0, 0, ',', '.') }}</td>
+									<td>${{ number_format($cot->total_final ?? 0, 0, ',', '.') }}</td>
 									<!-- <td>{{ number_format($cot->saldo_pendiente ?? 0, 2, ',', '.') }}</td> -->
 									<!-- <td>{{ optional($cot->created_at)->format('Y-m-d H:i') }}</td> -->
 									<td>
