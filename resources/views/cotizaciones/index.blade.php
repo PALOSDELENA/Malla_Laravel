@@ -1,4 +1,14 @@
 <x-app-layout>
+	<style>
+		/* Limitar ancho de la columna Items */
+		.table td:nth-child(4),
+		.table th:nth-child(4) {
+			max-width: 200px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+	</style>
+
 	<div class="py-6">
 		<div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
 			<div class="bg-white shadow-sm sm:rounded-lg p-4">
@@ -39,16 +49,17 @@
 					<table class="table table-striped table-hover">
 						<thead>
 							<tr>
-								<th>#</th>
+								<th>ID</th>
 								<th>Cliente</th>
 								<th>Sede</th>
 								<th>Items</th>
-								<th>Subtotal</th>
-								<th>Propina</th>
+								<!-- <th>Subtotal</th>
+								<th>Propina</th> -->
 								<!-- <th>Anticipo</th> -->
 								<th>Total final</th>
 								<!-- <th>Saldo pendiente</th> -->
-								<th>Creada</th>
+								<!-- <th>Creada</th> -->
+								<th>Fecha</th>
 								<th></th>
 							</tr>
 						</thead>
@@ -68,12 +79,21 @@
 											</small>
 										@endif
 									</td>
-									<td>{{ number_format($cot->subtotal ?? 0, 0, ',', '.') }}</td>
-									<td>{{ number_format($cot->propina ?? 0, 0, ',', '.') }}</td>
+									<!-- <td>{{ number_format($cot->subtotal ?? 0, 0, ',', '.') }}</td>
+									<td>{{ number_format($cot->propina ?? 0, 0, ',', '.') }}</td> -->
 									<!-- <td>{{ number_format($cot->anticipo ?? 0, 2, ',', '.') }}</td> -->
 									<td>{{ number_format($cot->total_final ?? 0, 0, ',', '.') }}</td>
 									<!-- <td>{{ number_format($cot->saldo_pendiente ?? 0, 2, ',', '.') }}</td> -->
-									<td>{{ optional($cot->created_at)->format('Y-m-d H:i') }}</td>
+									<!-- <td>{{ optional($cot->created_at)->format('Y-m-d H:i') }}</td> -->
+									<td>
+										{{ $cot->fecha ? (is_object($cot->fecha) ? $cot->fecha->format('d-m-Y') : \Carbon\Carbon::parse($cot->fecha)->format('d-m-Y')) : '-' }}
+										@if($cot->fecha)
+											<br>
+											<small class="text-muted">
+												{{ is_object($cot->fecha) ? $cot->fecha->translatedFormat('l') : \Carbon\Carbon::parse($cot->fecha)->translatedFormat('l') }}
+											</small>
+										@endif
+									</td>
 									<td class="text-end">
 										<div class="d-flex justify-content-end gap-1">
 											<a href="{{route('coti.show', $cot->id )}}" class="btn btn-sm btn-outline-secondary">Ver</a>
