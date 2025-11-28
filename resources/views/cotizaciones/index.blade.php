@@ -132,7 +132,10 @@
 											<a href="{{route('coti.show', $cot->id )}}" class="btn btn-sm btn-outline-secondary">Ver</a>
 											<a href="{{route('coti.export', $cot->id )}}" class="btn btn-sm btn-outline-secondary">Excel</a>
 											<a href="{{route('coti.export.pdf', $cot->id )}}" class="btn btn-sm btn-outline-secondary">PDF</a>
-											<button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#uploadFacturaModal{{ $cot->id }}" title="Cargar comprobante">
+											<button type="button" 
+												class="{{ $cot->img_factura ? 'btn btn-sm btn-success' : 'btn btn-sm btn-danger' }}" 
+												data-bs-toggle="modal" data-bs-target="#uploadFacturaModal{{ $cot->id }}" 
+												title="{{ $cot->img_factura ? 'Comprobante cargado' : 'Cargar comprobante' }}">
 												<i class="fa-solid fa-file-invoice"></i>
 											</button>
 											<form action="{{ route('coti.destroy', $cot->id) }}" method="POST" class="d-inline delete-form">
@@ -236,18 +239,34 @@
 				const file = e.target.files[0];
 				const cotId = this.id.replace('img_factura', '');
 				const previewDiv = document.getElementById('preview' + cotId);
-				
+
+				// Find the trigger button that opens the modal for this cotizacion
+				const triggerBtn = document.querySelector(`[data-bs-target="#uploadFacturaModal${cotId}"]`);
+
 				if (file && file.type.startsWith('image/')) {
 					const reader = new FileReader();
 					reader.onload = function(e) {
 						previewDiv.innerHTML = '<img src="' + e.target.result + '" class="img-thumbnail" style="max-width: 300px;">';
 					};
 					reader.readAsDataURL(file);
+
+					// Mark the button as success (green) while a file is selected
+					if (triggerBtn) {
+						triggerBtn.classList.remove('btn-outline-info', 'btn-outline-danger', 'btn-danger', 'btn-outline-success', 'btn-success');
+						triggerBtn.classList.add('btn', 'btn-sm', 'btn-success');
+						triggerBtn.setAttribute('title', 'Comprobante (pendiente de guardar)');
+					}
 				} else {
 					previewDiv.innerHTML = '';
+					// No image selected — mark button as red
+					if (triggerBtn) {
+						triggerBtn.classList.remove('btn-outline-info', 'btn-outline-danger', 'btn-danger', 'btn-outline-success', 'btn-success');
+						triggerBtn.classList.add('btn', 'btn-sm', 'btn-danger');
+						triggerBtn.setAttribute('title', 'Cargar comprobante');
+					}
 				}
+			});
 		});
-	});
 });
 	</script>
 </x-app-layout>
