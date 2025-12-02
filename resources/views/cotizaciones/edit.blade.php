@@ -667,8 +667,6 @@
 
         itemsTable.addEventListener('click', (e) => {
             if (e.target.classList.contains('btn-remove')){
-                const rows = itemsTable.querySelectorAll('.item-row');
-                if (rows.length <= 1) return;
                 const row = e.target.closest('.item-row');
                 row.remove();
                 recalcularTotales();

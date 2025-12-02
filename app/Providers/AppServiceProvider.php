@@ -75,6 +75,7 @@ class AppServiceProvider extends ServiceProvider
                 'coti.index' => 'Abemus Cotización',
                 'coti.create' => 'Crear Cotización',
                 'coti.show' => 'Ver Cotización',
+                'coti.edit' => 'Editar Cotización',
             ];
 
             $view->with('pageTitle', $titles[$routeName] ?? 'Panel2');

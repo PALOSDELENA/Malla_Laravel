@@ -10,6 +10,10 @@ class Cotizacion extends Model
     
     protected $guarded = [];
 
+    protected $casts = [
+        'fecha' => 'date',
+    ];
+
     public function cliente()
     {
         return $this->belongsTo(Cliente::class, 'cliente_id');

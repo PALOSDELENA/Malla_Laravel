@@ -531,7 +531,7 @@ class CotizacionController extends Controller
             'Si requiere de facturación electronica, por favor comunicarse al correo facturacionelectronica@palosdelena.com',
             'Para garantizar el espacio , solicitamos un anticipo  del 50% del total de la cotización Y EL OTRO 50% AL FINALIZAR EL EVENTO,  los consumos adicionales que se presenten serán cancelados durante o al finalizar el evento.',
             'Una vez aprobada la cotización, u orden de compra y realizado el anticipo , NO se realizan devoluciones de los productos ni del dinero, en caso de no consumir todos los productos nuestros clientes podrán llevarselos o solicitar un acuerdo para realizar el consumo de los productos faltantes , ( Entiéndase productos NO perecederos ) en las fechas y ubicación que disponga PALOS DE LEÑA.',
-            'El pago del anticipo del 50% debe ser consignado a la cuenta de palos de leña, el restante debe ser realizado en  el punto, recuerda que si confirmas entre hoy y mañana te brindamos el postre adicional sin costo.',
+            'El pago del anticipo del 50% debe ser consignado a la cuenta de palos de leña, el restante debe ser realizado en  el punto.',
             'En caso de algún imprevisto , de ser postergado o cancelado el evento, es compromiso y responsabilidad de la persona, o empresa contratante informar por escrito como mínimo una semana antes para evitar perdidas y frustaciones del mismo. De no dar aviso en el tiempo reglamentario, PALOS DE LEÑA, hará la devolución  del 30% UNICAMENTE, correspondiente al anticipo.',
             'Los precios de los productos estan sujetos a cambios pasado 10 dias de enviarse la cotización, ya que nuestros precios pueden varias por temporadas',
             'La vigencia de la cotizacion enviada es de 7 a 10 dias habiles.',
@@ -638,11 +638,11 @@ class CotizacionController extends Controller
             'total_final' => 'required|numeric',
             'total_pendiente' => 'nullable|numeric',
 
-            'items' => 'required|array|min:1',
-            'items.*.producto_id' => 'required|exists:productos,id',
-            'items.*.cantidad' => 'required|integer|min:1',
-            'items.*.precio' => 'required|numeric|min:0',
-            'items.*.total_item' => 'required|numeric|min:0',
+            'items' => 'nullable|array',
+            'items.*.producto_id' => 'nullable|exists:productos,id',
+            'items.*.cantidad' => 'nullable|integer|min:1',
+            'items.*.precio' => 'nullable|numeric|min:0',
+            'items.*.total_item' => 'nullable|numeric|min:0',
 
             // Validación para items extras
             'extras' => 'nullable|array',
@@ -693,14 +693,16 @@ class CotizacionController extends Controller
 
             // Sync Items: Delete all and recreate to ensure exact match
             $cot->items()->delete();
-            foreach ($validated['items'] as $item) {
-                 CotizacionItem::create([
-                    'cotizacion_id' => $cot->id,
-                    'producto_id' => $item['producto_id'],
-                    'producto_precio' => (float)$item['precio'],
-                    'cantidad' => (int)$item['cantidad'],
-                    'total_item' => (float)$item['total_item'],
-                ]);
+            if (isset($validated['items']) && is_array($validated['items']) && count($validated['items']) > 0) {
+                foreach ($validated['items'] as $item) {
+                     CotizacionItem::create([
+                        'cotizacion_id' => $cot->id,
+                        'producto_id' => $item['producto_id'],
+                        'producto_precio' => (float)$item['precio'],
+                        'cantidad' => (int)$item['cantidad'],
+                        'total_item' => (float)$item['total_item'],
+                    ]);
+                }
             }
 
             // Sync Extras
