@@ -14,6 +14,6 @@ class Cargos extends Model
 
     public function cargo(): HasMany 
     {
-        return $this->hasMany(Usuarios::class, "usu_cargo");
+        return $this->hasMany(User::class, "usu_cargo");
     }
 }

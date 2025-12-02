@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Seguridad extends Model
 {
     protected $primaryKey = "id_seguridad";
+
+    protected $table = "seguridad";
     // Permitir la asignación masiva de todos los campos
     protected $guarded = [];
 
@@ -16,6 +18,6 @@ class Seguridad extends Model
     // Relaciones
     public function usuario(): BelongsTo
     {
-        return $this->belongsTo(Usuarios::class, "seg_usuario_id", "num_doc");
+        return $this->belongsTo(User::class, "seg_usuario_id", "num_doc");
     }
 }

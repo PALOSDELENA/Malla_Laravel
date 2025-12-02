@@ -18,6 +18,10 @@ class Puntos extends Model
         return $this->hasMany(Asignaciones_Personal::class, "punto_origen_id");
     }
 
+    public function usuariosAsignados(): HasMany
+    {
+        return $this->hasMany(User::class, "usu_punto");
+    }
     public function inventarioHistorico(): HasMany
     {
         return $this->hasMany(Inventario_Historico::class,"punto_id");
@@ -25,5 +29,17 @@ class Puntos extends Model
     public function inventarioRegistro(): HasMany
     {
         return $this->hasMany(Inventario_Registros::class,"punto_id");
+    }
+    public function ordenCompra()
+    {
+        return $this->hasMany(OrdenCompra::class, "punto_id");
+    }
+    public function novedadPaloteo()
+    {
+        return $this->hasMany(NovedadPaloteo::class, 'id_punto');
+    }
+    public function cotizaciones()
+    {
+        return $this->hasMany(Cotizacion::class, 'sede');
     }
 }

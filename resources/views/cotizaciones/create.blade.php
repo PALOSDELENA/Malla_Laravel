@@ -1,0 +1,764 @@
+<x-app-layout>
+    <div class="py-6">
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white shadow-sm sm:rounded-lg p-4">
+
+                <form id="formCotizacion" method="POST" action="{{ route('coti.store') }}">
+                    @csrf
+                    <div class="mb-3 d-flex align-items-end gap-2">
+                        <div style="flex:1">
+                            <label for="cliente_id" class="form-label fw-semibold">Cliente</label>
+                            <select name="cliente_id" id="cliente_id" class="form-select" required>
+                                <option value="">Seleccione un cliente...</option>
+                                @foreach($clientes as $cliente)
+                                    <option value="{{ $cliente->id }}">{{ $cliente->nombre }} - {{ $cliente->celular }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearCliente">
+                                <i class="fa-solid fa-user-plus"></i> Nuevo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Datos del evento -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="motivo" class="form-label fw-semibold">Motivo</label>
+                            <input type="text" name="motivo" id="motivo" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="sede" class="form-label fw-semibold">Sede</label>
+                            <select name="sede" id="sede" class="form-select">
+                                <option value="">Seleccione un cliente...</option>
+                                @foreach($sedes as $sede)
+                                    <option value="{{ $sede->id }}">{{ $sede->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="fecha" class="form-label fw-semibold">Fecha</label>
+                            <input type="date" name="fecha" id="fecha" class="form-control" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="hora" class="form-label fw-semibold">Hora</label>
+                            <input type="time" name="hora" id="hora" class="form-control" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="numero_personas" class="form-label fw-semibold">Número de personas</label>
+                            <input type="number" name="numero_personas" id="numero_personas" class="form-control" min="1" value="1" required>
+                        </div>
+                    </div>
+
+                    <!-- Items -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Items de la cotización</label>
+
+                        <table class="table" id="itemsTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:60%">Producto</th>
+                                    <th style="width:120px">Cantidad</th>
+                                    <th style="width:120px">Precio</th>
+                                    <th style="width:160px">Total Item</th>
+                                    <th style="width:60px"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="item-row">
+                                    <td>
+                                        <select name="items[0][producto_id]" class="form-select item-producto" required>
+                                            <option value="">Seleccione producto...</option>
+                                            @foreach($productos as $prod)
+                                                <option value="{{ $prod->id }}" data-precio="{{ $prod->proPrecio ?? 0 }}">{{ $prod->proNombre }}</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" name="items[0][cantidad]" class="form-control item-cantidad" min="1" value="1" required>
+                                    </td>
+                                    <td>
+                                        <input type="hidden" name="items[0][precio]" class="item-precio-hidden" value="0">
+                                        <input type="text" class="form-control item-precio-display" value="$0" readonly>
+                                    </td>
+                                    <td>
+                                        <input type="hidden" name="items[0][total_item]" class="item-total-hidden" value="0" required>
+                                        <input type="text" class="form-control item-total-display" value="$0" readonly>
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-sm btn-danger btn-remove">-</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="button" id="btnAddItem" class="btn btn-sm btn-primary">Agregar item</button>
+                            <small class="text-muted">Los precios se toman del catálogo de productos (campo `precio`).</small>
+                        </div>
+                    </div>
+
+                    <!-- Items Extras -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Items Extras (Opcional)</label>
+                        <small class="text-muted d-block mb-2">Agregue servicios adicionales, decoración u otros conceptos</small>
+                        
+                        <table class="table table-sm" id="extrasTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:35%">Concepto</th>
+                                    <th style="width:10%">Cant.</th>
+                                    <th style="width:20%">Valor Unit.</th>
+                                    <th style="width:20%" class="text-center">Sumar al total</th>
+                                    <th style="width:15%"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Filas dinámicas se agregarán aquí -->
+                            </tbody>
+                        </table>
+                        
+                        <button type="button" id="btnAddExtra" class="btn btn-sm btn-outline-primary">
+                            <i class="fa-solid fa-plus"></i> Agregar Item Extra
+                        </button>
+                    </div>
+
+                    <!-- Totales y descuentos -->
+                    <div class="row mt-3">
+                        <div class="col-md-4 mb-3">
+                            <label for="subtotal" class="form-label">Subtotal</label>
+                            <input type="hidden" name="subtotal" id="subtotal_hidden" value="0">
+                            <input type="text" id="subtotal_display" class="form-control" readonly value="$0">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="descuento_pct" class="form-label">Descuento (%)</label>
+                            <input type="number" step="0.01" name="descuento_pct" id="descuento_pct" class="form-control" value="0">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="descuento_monto" class="form-label">Descuento (monto)</label>
+                            <input type="hidden" name="descuento_monto" id="descuento_monto_hidden" value="0">
+                            <input type="text" id="descuento_monto_display" class="form-control" readonly value="$0">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="ipoconsumo_toggle" checked>
+                                <label class="form-check-label fw-semibold" for="ipoconsumo_toggle">Ipo consumo</label>
+                            </div>
+                            <input type="hidden" name="ipoconsumo" id="ipoconsumo_hidden" value="0">
+                            <input type="text" id="ipoconsumo_display" class="form-control mt-2" readonly value="$0">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="reteica_toggle">
+                                <label class="form-check-label fw-semibold" for="reteica_toggle">Reteica</label>
+                            </div>
+                            <input type="hidden" name="reteica" id="reteica_hidden" value="0">
+                            <input type="text" id="reteica_display" class="form-control mt-2" readonly value="$0">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="retefuente_toggle">
+                                <label class="form-check-label fw-semibold" for="retefuente_toggle">Retefuente</label>
+                            </div>
+                            <input type="hidden" name="retefuente" id="retefuente_hidden" value="0">
+                            <input type="text" id="retefuente_display" class="form-control mt-2" readonly value="$0">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="propina" class="form-label">Propina</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="number" step="0.01" name="propina" id="propina" class="form-control" >
+                                <div class="form-check form-switch ms-2">
+                                    <input class="form-check-input" type="checkbox" id="propina_pct_toggle" checked>
+                                    <label class="form-check-label small" for="propina_pct_toggle">usar % del subtotal</label>
+                                </div>
+                            </div>
+                            <input type="hidden" name="propina_aplicado" id="propina_aplicado" value="0">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="anticipo" class="form-label">Anticipo</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="number" step="0.01" name="anticipo" id="anticipo" class="form-control">
+                                <div class="form-check form-switch ms-2">
+                                    <input class="form-check-input" type="checkbox" id="anticipo_pct_toggle" checked>
+                                    <label class="form-check-label small" for="anticipo_pct_toggle">usar % del subtotal</label>
+                                </div>
+                            </div>
+                            <input type="hidden" name="anticipo_aplicado" id="anticipo_aplicado" value="0">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="total_pendiente" class="form-label">Total Pendiente</label>
+                            <input type="hidden" name="total_pendiente" id="total_pendiente_hidden" value="0.00">
+                            <input type="text" id="total_pendiente_display" class="form-control" readonly value="$0,00">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="total_final" class="form-label">Total final</label>
+                            <input type="hidden" name="total_final" id="total_final_hidden" value="0.00">
+                            <input type="text" id="total_final_display" class="form-control" readonly value="$0,00">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="submit" class="btn btn-success">Guardar Cotización</button>
+                    </div>
+                </form>
+            
+                <!-- Modal Crear Cliente -->
+                <div class="modal fade" id="modalCrearCliente" tabindex="-1" aria-labelledby="modalCrearClienteLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <form id="formCrearCliente">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="modalCrearClienteLabel">Registrar Cliente</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div id="clienteAlert" class="alert d-none" role="alert"></div>
+
+                                    <div class="mb-3">
+                                        <label for="nuevo_nombre" class="form-label">Nombre</label>
+                                        <input type="text" id="nuevo_nombre" name="nombre" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="nuevo_celular" class="form-label">Celular</label>
+                                        <input type="text" id="nuevo_celular" name="celular" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="nuevo_correo" class="form-label">Correo</label>
+                                        <input type="email" id="nuevo_correo" name="correo" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary" id="btnGuardarCliente">Guardar Cliente</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- jQuery (required for Select2) --}}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    {{-- Select2 CSS --}}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+
+    {{-- Select2 JS --}}
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+    // Function to initialize Select2 on a specific element
+    function initializeSelect2(element) {
+        $(element).select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Seleccione producto...',
+            allowClear: true,
+            width: '100%'
+        });
+    }
+
+    // Initialize Select2 on product selects
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize Select2 on cliente select
+        $('#cliente_id').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Seleccione un cliente...',
+            allowClear: true,
+            width: '100%'
+        });
+
+        // Initialize existing product selects
+        $('.item-producto').each(function() {
+            initializeSelect2(this);
+        });
+
+        // Listen to Select2 change events for price calculation
+        $(document).on('select2:select', '.item-producto', function(e) {
+            const row = this.closest('.item-row');
+            if (row) {
+                // Trigger recalculation
+                const event = new Event('change', { bubbles: true });
+                this.dispatchEvent(event);
+            }
+        });
+    });
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const itemsTable = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
+        const btnAdd = document.getElementById('btnAddItem');
+        let index = 1; // ya existe un row con index 0
+
+        function parseFloatSafe(v){
+            const n = parseFloat(String(v).replace(/[^0-9\.-]+/g, ''));
+            return isNaN(n)?0:n;
+        }
+
+        // Formatea número entero a formato local: miles con punto, sin decimales, prefijo $
+        function formatMoney(n){
+            const v = Math.ceil(Number(n || 0));
+            return '$' + String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        // Formatea número con 2 decimales: miles con punto, decimales con coma, prefijo $
+        function formatMoneyDecimal(n){
+            const num = Number(n || 0).toFixed(2);
+            const parts = String(num).split('.');
+            const intPart = parts[0];
+            const decPart = parts[1] || '00';
+            const intWithThousands = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            return '$' + intWithThousands + ',' + decPart;
+        }
+
+        function recalcularFila(row){
+            const select = row.querySelector('.item-producto');
+            const cantidad = row.querySelector('.item-cantidad');
+            const totalHidden = row.querySelector('.item-total-hidden');
+            const totalDisplay = row.querySelector('.item-total-display');
+            const precioHidden = row.querySelector('.item-precio-hidden');
+            const precioDisplay = row.querySelector('.item-precio-display');
+            const precio = parseFloatSafe(select.selectedOptions[0]?.dataset?.precio ?? 0);
+            const precioRounded = Math.ceil(precio);
+            if (precioHidden) precioHidden.value = precioRounded.toString();
+            if (precioDisplay) precioDisplay.value = formatMoney(precioRounded);
+            const cant = parseFloatSafe(cantidad.value);
+            const total = precio * cant;
+            const totalRounded = Math.ceil(total);
+            if (totalHidden) totalHidden.value = totalRounded.toString();
+            if (totalDisplay) totalDisplay.value = formatMoney(totalRounded);
+            recalcularTotales();
+        }
+
+        function recalcularTotales(){
+            console.log('=== Recalculando Totales ===');
+            const rows = itemsTable.querySelectorAll('.item-row');
+            let subtotal = 0;
+            rows.forEach(r => {
+                const v = r.querySelector('.item-total-hidden')?.value ?? '0';
+                subtotal += parseFloatSafe(v);
+            });
+            console.log('Subtotal de productos:', subtotal);
+
+            // Sumar items extras al subtotal ANTES de dividir entre 1.08
+            let totalExtras = 0;
+            const extrasRows = document.querySelectorAll('.extra-row');
+            extrasRows.forEach(row => {
+                const sumaCheckbox = row.querySelector('.extra-suma');
+                const valorInput = row.querySelector('.extra-valor');
+                const cantidadInput = row.querySelector('.extra-cantidad');
+                
+                const suma = sumaCheckbox?.checked;
+                const valorRaw = valorInput?.value || '0';
+                const cantidadRaw = cantidadInput?.value || '1';
+                
+                if (suma) {
+                    const valor = parseFloatSafe(valorRaw);
+                    const cantidad = parseInt(cantidadRaw) || 1;
+                    const totalLinea = valor * cantidad;
+                    
+                    console.log('Item extra - Suma:', suma, 'Valor:', valor, 'Cant:', cantidad, 'Total:', totalLinea);
+                    totalExtras += totalLinea;
+                }
+            });
+            
+            console.log('Total Extras:', totalExtras);
+            
+            // Sumar extras al subtotal antes del ajuste
+            subtotal += totalExtras;
+
+            // ajustar subtotal: dividir entre 1.08 y usar ese valor para mostrar/enviar (redondeado hacia arriba)
+            const baseSubtotalRaw = subtotal / 1.08;
+            const baseSubtotal = Math.ceil(baseSubtotalRaw);
+            const subtotalHidden = document.querySelector('input[name="subtotal"]');
+            const subtotalDisplay = document.getElementById('subtotal_display');
+            if (subtotalHidden) subtotalHidden.value = baseSubtotal.toString();
+            if (subtotalDisplay) subtotalDisplay.value = formatMoney(baseSubtotal);
+
+            const descuentoPct = parseFloatSafe(document.getElementById('descuento_pct').value);
+            const descuentoMontoRaw = baseSubtotal * (1 - (descuentoPct/100));
+            const descuentoMonto = Math.ceil(descuentoMontoRaw);
+            // si hay descuento en porcentaje, usar el subtotal neto (descuentoMonto) como base para cálculos;
+            // si no, usar baseSubtotal
+            const effectiveBase = (descuentoPct > 0) ? descuentoMonto : baseSubtotal;
+            const descuentoHidden = document.querySelector('input[name="descuento_monto"]');
+            const descuentoDisplay = document.getElementById('descuento_monto_display');
+            if (descuentoHidden) descuentoHidden.value = descuentoMonto.toString();
+            if (descuentoPct > 0) descuentoDisplay.value = formatMoney(descuentoMonto);
+
+            const propinaVal = parseFloatSafe(document.getElementById('propina')?.value);
+            const anticipoVal = parseFloatSafe(document.getElementById('anticipo')?.value);
+            const propinaToggle = document.getElementById('propina_pct_toggle');
+            const anticipoToggle = document.getElementById('anticipo_pct_toggle');
+
+            const propinaAppliedRaw = (propinaToggle && propinaToggle.checked) ? effectiveBase * (propinaVal/100) : propinaVal;
+            const propinaApplied = Math.ceil(propinaAppliedRaw);
+
+            // store applied amounts in hidden inputs for server
+            const propinaHiddenApplied = document.getElementById('propina_aplicado');
+            if (propinaHiddenApplied) propinaHiddenApplied.value = propinaApplied.toString();
+
+            // aplicar impuestos sólo si el toggle correspondiente está marcado
+            const ipoconsumoToggle = document.getElementById('ipoconsumo_toggle');
+            const reteicaToggle = document.getElementById('reteica_toggle');
+            const retefuenteToggle = document.getElementById('retefuente_toggle');
+
+            const ipoconsumoRaw = (ipoconsumoToggle && ipoconsumoToggle.checked) ? baseSubtotal * 0.08 : 0;
+            const reteicaAppliedRaw = (reteicaToggle && reteicaToggle.checked) ? baseSubtotal * 0.0138 : 0;
+            const retefuenteAppliedRaw = (retefuenteToggle && retefuenteToggle.checked) ? baseSubtotal * 0.035 : 0;
+            const ipoconsumo = Math.ceil(ipoconsumoRaw);
+            const reteicaApplied = Math.ceil(reteicaAppliedRaw);
+            const retefuenteApplied = Math.ceil(retefuenteAppliedRaw);
+
+            // actualizar hidden/display según toggles
+            const ipoHidden = document.querySelector('input[name="ipoconsumo"]');
+            const ipoDisplay = document.getElementById('ipoconsumo_display');
+            if (ipoHidden) ipoHidden.value = ipoconsumo.toString();
+            if (ipoDisplay) ipoDisplay.value = formatMoney(ipoconsumo);
+
+            const reteHidden = document.querySelector('input[name="reteica"]');
+            const reteDisplay = document.getElementById('reteica_display');
+            if (reteHidden) reteHidden.value = reteicaApplied.toString();
+            if (reteDisplay) reteDisplay.value = formatMoney(reteicaApplied);
+
+            const retefuenteHidden = document.querySelector('input[name="retefuente"]');
+            const retefuenteDisplay = document.getElementById('retefuente_display');
+            if (retefuenteHidden) retefuenteHidden.value = retefuenteApplied.toString();
+            if (retefuenteDisplay) retefuenteDisplay.value = formatMoney(retefuenteApplied);
+
+            // Los extras ya están incluidos en baseSubtotal (se sumaron antes de dividir entre 1.08)
+            const total_final = effectiveBase + ipoconsumo + propinaApplied - reteicaApplied - retefuenteApplied;
+            const totalHidden = document.querySelector('input[name="total_final"]');
+            const totalDisplay = document.getElementById('total_final_display');
+            if (totalHidden) totalHidden.value = Math.ceil(total_final).toString();
+            if (totalDisplay) totalDisplay.value = formatMoney(total_final);
+
+            const anticipoAppliedRaw = (anticipoToggle && anticipoToggle.checked) ? total_final * (anticipoVal/100) : anticipoVal;
+            // No redondear el anticipo; permitir centavos. Guardar con 2 decimales.
+            const anticipoApplied = Number(anticipoAppliedRaw);
+            const anticipoHiddenApplied = document.getElementById('anticipo_aplicado');
+            if (anticipoHiddenApplied) anticipoHiddenApplied.value = anticipoApplied.toFixed(2);
+
+            const total_pendiente = Number(total_final) - anticipoApplied;
+            const totalPendienteHidden = document.querySelector('input[name="total_pendiente"]');
+            const totalPendienteDisplay = document.getElementById('total_pendiente_display');
+            if (totalPendienteHidden) totalPendienteHidden.value = Number(total_pendiente).toFixed(2);
+            if (totalPendienteDisplay) totalPendienteDisplay.value = formatMoneyDecimal(total_pendiente);
+        }
+
+        // listeners: input (cantidad) and change (select producto)
+        itemsTable.addEventListener('input', (e) => {
+            const row = e.target.closest('.item-row');
+            if (row) recalcularFila(row);
+        });
+        itemsTable.addEventListener('change', (e) => {
+            const row = e.target.closest('.item-row');
+            if (row) recalcularFila(row);
+        });
+
+        // add item
+        btnAdd.addEventListener('click', () => {
+            // Get the first row as template
+            const firstRow = document.querySelector('.item-row');
+            const firstSelect = firstRow.querySelector('.item-producto');
+            
+            // Destroy Select2 temporarily to clone clean HTML
+            $(firstSelect).select2('destroy');
+            
+            // Clone the row
+            const template = firstRow.cloneNode(true);
+            
+            // Re-initialize Select2 on the first row
+            initializeSelect2(firstSelect);
+            
+            // Clean the cloned row
+            template.querySelectorAll('input').forEach(i => {
+                if (i.classList.contains('item-cantidad')) i.value = 1;
+                else if (i.classList.contains('item-precio-hidden')) i.value = '0';
+                else if (i.classList.contains('item-precio-display')) i.value = '$0';
+                else if (i.classList.contains('item-total-hidden')) i.value = '0';
+                else if (i.classList.contains('item-total-display')) i.value = '$0';
+                else i.value = '';
+            });
+            
+            // Reset select to first option
+            const clonedSelect = template.querySelector('.item-producto');
+            if (clonedSelect) {
+                clonedSelect.selectedIndex = 0;
+                clonedSelect.value = '';
+            }
+
+            // Update names
+            template.querySelectorAll('select, input').forEach(el => {
+                const name = el.getAttribute('name');
+                if (!name) return;
+                const newName = name.replace(/items\[0\]/, `items[${index}]`);
+                el.setAttribute('name', newName);
+            });
+
+            template.classList.add('item-row');
+            itemsTable.appendChild(template);
+            
+            // Initialize Select2 on the new select
+            if (clonedSelect) {
+                initializeSelect2(clonedSelect);
+            }
+            
+            // Recalculate the newly added row
+            recalcularFila(template);
+            index++;
+        });
+
+        // remove item
+        itemsTable.addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-remove')){
+                const row = e.target.closest('.item-row');
+                row.remove();
+                recalcularTotales();
+            }
+        });
+
+        // recalcular al inicio
+        recalcularTotales();
+
+        // recalcular al cambiar descuentos/propina/anticipo y toggles de impuestos
+        ['descuento_pct','propina','anticipo'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', recalcularTotales);
+        });
+        ['ipoconsumo_toggle','reteica_toggle','retefuente_toggle','propina_pct_toggle','anticipo_pct_toggle'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('change', recalcularTotales);
+        });
+
+        // Event listeners para items extras (usando delegación de eventos)
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('extra-valor') || e.target.classList.contains('extra-cantidad')) {
+                console.log('Cambio en valor o cantidad de extra detectado');
+                recalcularTotales();
+            }
+        });
+
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('extra-suma')) {
+                console.log('Cambio en checkbox de extra detectado');
+                recalcularTotales();
+            }
+        });
+
+        // Event listener para eliminar items extras
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.btn-remove-extra')) {
+                console.log('Eliminando item extra');
+                const row = e.target.closest('.extra-row');
+                if (row) {
+                    row.remove();
+                    recalcularTotales();
+                }
+            }
+        });
+    });
+    </script>
+
+    <script>
+    // Manejo de Items Extras
+    document.addEventListener('DOMContentLoaded', () => {
+        const extrasTable = document.getElementById('extrasTable').getElementsByTagName('tbody')[0];
+        const btnAddExtra = document.getElementById('btnAddExtra');
+        let extraIndex = 0;
+
+        // Función para crear una nueva fila de item extra
+        function createExtraRow(index) {
+            const row = document.createElement('tr');
+            row.classList.add('extra-row');
+            row.innerHTML = `
+                <td>
+                    <select name="extras[${index}][item_extra_id]" class="form-select form-select-sm extra-select">
+                        <option value="">Seleccione o escriba...</option>
+                        <option value="custom">✏️ Personalizado</option>
+                        @foreach($extras as $extra)
+                            <option value="{{ $extra->id }}" data-precio="{{ $extra->precio ?? 0 }}">{{ $extra->nombre }}</option>
+                        @endforeach
+                    </select>
+                    <input type="text" name="extras[${index}][nombre_custom]" 
+                           class="form-control form-control-sm mt-1 d-none extra-nombre-custom" 
+                           placeholder="Nombre del concepto">
+                </td>
+                <td>
+                    <input type="number" name="extras[${index}][cantidad]" 
+                           class="form-control form-control-sm extra-cantidad" 
+                           value="1" min="1" step="1">
+                </td>
+                <td>
+                    <input type="number" name="extras[${index}][valor]" 
+                           class="form-control form-control-sm extra-valor" 
+                           step="0.01" value="0" min="0">
+                </td>
+                <td class="text-center">
+                    <div class="form-check form-switch d-flex justify-content-center">
+                        <input class="form-check-input extra-suma" 
+                               type="checkbox" 
+                               name="extras[${index}][suma_al_total]" 
+                               value="1" 
+                               >
+                    </div>
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-danger btn-remove-extra">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            return row;
+        }
+
+        // Agregar item extra
+        btnAddExtra.addEventListener('click', () => {
+            const row = createExtraRow(extraIndex);
+            extrasTable.appendChild(row);
+            
+            // Inicializar Select2 en el nuevo select
+            const newSelect = row.querySelector('.extra-select');
+            if (newSelect) {
+                initializeSelect2(newSelect);
+            }
+            
+            extraIndex++;
+        });
+
+        // Mostrar/ocultar campo personalizado y cargar precio
+        $(document).on('change', '.extra-select', function() {
+            const row = $(this).closest('.extra-row');
+            const customInput = row.find('.extra-nombre-custom');
+            const valorInput = row.find('.extra-valor');
+            
+            if ($(this).val() === 'custom') {
+                customInput.removeClass('d-none');
+                valorInput.val(0);
+            } else {
+                customInput.addClass('d-none');
+                const precio = $(this).find(':selected').data('precio');
+                valorInput.val(precio || 0);
+            }
+            
+            recalcularTotales();
+        });
+    });
+    </script>
+
+    <script>
+    // AJAX submit para crear cliente desde modal
+    document.addEventListener('DOMContentLoaded', () => {
+        const formCrear = document.getElementById('formCrearCliente');
+        const alertBox = document.getElementById('clienteAlert');
+        const modalEl = document.getElementById('modalCrearCliente');
+        const modalBootstrap = bootstrap.Modal.getOrCreateInstance(modalEl);
+        const clienteSelect = document.getElementById('cliente_id');
+
+        if (!formCrear) return;
+
+        formCrear.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            alertBox.classList.add('d-none');
+            const btn = document.getElementById('btnGuardarCliente');
+            btn.disabled = true;
+
+            const data = {
+                nombre: document.getElementById('nuevo_nombre').value,
+                celular: document.getElementById('nuevo_celular').value,
+                correo: document.getElementById('nuevo_correo').value,
+            };
+
+            try {
+                const res = await fetch("{{ route('clientes.store') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const json = await res.json();
+                if (!res.ok) throw json;
+
+                // Añadir al select y seleccionarlo
+                const option = document.createElement('option');
+                option.value = json.id;
+                option.text = `${json.nombre} - ${json.celular ?? ''}`;
+                clienteSelect.appendChild(option);
+                clienteSelect.value = json.id;
+
+                // Cerrar modal y resetear
+                modalBootstrap.hide();
+                formCrear.reset();
+            } catch (err) {
+                console.error(err);
+                alertBox.classList.remove('d-none');
+                alertBox.classList.remove('alert-success');
+                alertBox.classList.remove('alert-danger');
+                if (err && err.errors) {
+                    // Validación
+                    alertBox.classList.add('alert-danger');
+                    alertBox.innerHTML = Object.values(err.errors).flat().join('<br>');
+                } else if (err && err.message) {
+                    alertBox.classList.add('alert-danger');
+                    alertBox.textContent = err.message;
+                } else {
+                    alertBox.classList.add('alert-danger');
+                    alertBox.textContent = 'Ocurrió un error al crear el cliente.';
+                }
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    });
+    </script>
+
+    <script>
+    // Confirmación antes de guardar cotización
+    document.addEventListener('DOMContentLoaded', () => {
+        const formCotizacion = document.getElementById('formCotizacion');
+        
+        if (formCotizacion) {
+            formCotizacion.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const result = await Swal.fire({
+                    title: '¿Está seguro?',
+                    html: '¿Ha verificado que todos los datos de la cotización son correctos?<br><br>' +
+                          '<small class="text-muted">• Cliente y datos del evento<br>' +
+                          '• Productos y cantidades<br>' +
+                          '• Descuentos y totales</small>',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#198754',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Sí, guardar cotización',
+                    cancelButtonText: 'Cancelar',
+                    reverseButtons: true
+                });
+                
+                if (result.isConfirmed) {
+                    // Submit the form
+                    formCotizacion.submit();
+                }
+            });
+        }
+    });
+    </script>
+</x-app-layout>

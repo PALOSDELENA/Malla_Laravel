@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('seguridad', function (Blueprint $table) {
             $table->increments('id_seguridad');
-            $table->string('seg_credencial', 45);
+            $table->string('seg_credencial', 65);
             $table->string('seg_usuario_id', 15);
 
             // Llave foránea
-            $table->foreign('seg_usuario_id')->references('num_doc')->on('usuarios')->onDelete('restrict');
+            $table->foreign('seg_usuario_id')->references('num_doc')->on('users')->onDelete('restrict');
         });
     }
 

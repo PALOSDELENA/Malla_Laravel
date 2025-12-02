@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Tipo_Documento extends Model
 {
+    protected $table = "tipo_documento";
     // Permitir la asignación masiva de todos los campos
     protected $guarded = [];
 
