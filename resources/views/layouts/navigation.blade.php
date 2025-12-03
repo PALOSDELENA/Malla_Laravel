@@ -111,10 +111,6 @@
                             <i class="fa-solid fa-users fa-5x" ></i>
                             <span class="tooltip">Usuarios</span>
                         </x-nav-link>
-                        <x-nav-link href="https://172.16.10.184/" class="header-btn">
-                            <i class="fa-solid fa-phone-volume a-5x"></i>
-                            <span class="tooltip">PBX</span>
-                        </x-nav-link>
                     @endif 
 
                     @if ($perfil === 'Planta')
