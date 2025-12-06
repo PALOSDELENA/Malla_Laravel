@@ -52,7 +52,7 @@ class CotizacionController extends Controller
      */
     public function show($id)
     {
-        $cot = Cotizacion::with(['cliente', 'items.producto', 'punto'])->findOrFail($id);
+        $cot = Cotizacion::with(['cliente', 'items.producto', 'punto', 'itemExtras'])->findOrFail($id);
         return view('cotizaciones.show', compact('cot'));
     }
 
@@ -651,6 +651,7 @@ class CotizacionController extends Controller
             'extras.*.cantidad' => 'nullable|integer|min:1',
             'extras.*.valor' => 'required|numeric|min:0',
             'extras.*.suma_al_total' => 'nullable|boolean',
+            'extras.*.aplicar_el_descuento' => 'nullable|boolean',
         ]);
 
         DB::beginTransaction();
@@ -730,6 +731,7 @@ class CotizacionController extends Controller
                         'cantidad' => isset($extra['cantidad']) ? (int)$extra['cantidad'] : 1,
                         'valor' => (float)$extra['valor'],
                         'suma_al_total' => isset($extra['suma_al_total']) ? true : false,
+                        'aplicar_el_descuento' => isset($extra['aplicar_el_descuento']) ? true : false,
                     ]);
                 }
             }
@@ -786,6 +788,7 @@ class CotizacionController extends Controller
             'extras.*.cantidad' => 'nullable|integer|min:1',
             'extras.*.valor' => 'required|numeric|min:0',
             'extras.*.suma_al_total' => 'nullable|boolean',
+            'extras.*.aplicar_el_descuento' => 'nullable|boolean',
         ]);
 
         // Use DB transaction to ensure integrity
@@ -878,6 +881,7 @@ class CotizacionController extends Controller
                         'cantidad' => isset($extra['cantidad']) ? (int)$extra['cantidad'] : 1,
                         'valor' => (float)$extra['valor'],
                         'suma_al_total' => isset($extra['suma_al_total']) ? true : false,
+                        'aplicar_el_descuento' => isset($extra['aplicar_el_descuento']) ? true : false,
                     ]);
                     
                     Log::info('Item extra guardado en pivot', [

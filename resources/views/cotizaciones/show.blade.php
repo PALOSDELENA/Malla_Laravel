@@ -6,6 +6,12 @@
 					<h3 class="mb-0">Cotización #{{ $cot->id }}</h3>
 					<div class="d-flex gap-2">
 						<a href="{{ route('coti.edit', $cot->id) }}" class="btn btn-secondary btn-sm">Editar</a>
+						<a href="{{ route('coti.export.pdf', $cot->id) }}" class="btn btn-danger btn-sm" target="_blank">
+							<i class="bi bi-file-pdf"></i> PDF
+						</a>
+						<a href="{{ route('coti.export', $cot->id) }}" class="btn btn-success btn-sm">
+							<i class="bi bi-file-excel"></i> Excel
+						</a>
 						<a href="{{ route('coti.index') }}" class="btn btn-secondary btn-sm">Volver</a>
 					</div>
 				</div>
@@ -39,8 +45,8 @@
 								<tr>
 									<td>{{ $item->producto->proNombre ?? 'Producto #' . ($item->producto_id ?? '-') }}</td>
 									<td>{{ $item->cantidad }}</td>
-									<td>{{ number_format($item->producto_precio ?? 0, 0, ',', '.') }}</td>
-									<td>{{ number_format($item->total_item ?? 0, 0, ',', '.') }}</td>
+									<td>${{ number_format($item->producto_precio ?? 0, 0, ',', '.') }}</td>
+									<td>${{ number_format($item->total_item ?? 0, 0, ',', '.') }}</td>
 								</tr>
 							@endforeach
 						</tbody>
@@ -53,11 +59,12 @@
 					<table class="table table-bordered table-sm">
 						<thead>
 							<tr>
-								<th>Concepto</th>
-								<th style="width:120px">Cantidad</th>
-								<th style="width:140px">Valor Unitario</th>
-								<th style="width:160px">Total</th>
-								<th style="width:100px">Suma Total</th>
+								<th style="text-align:center; width:30%">Concepto</th>
+								<th style="text-align:center; width:10%">Cantidad</th>
+								<th style="text-align:center; width:20%">Valor Unitario</th>
+								<th style="text-align:center; width:10%">Total</th>
+								<th style="text-align:center; width:15%">Suma Total</th>
+								<th style="text-align:center; width:15%">Aplicar Descuento</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -65,10 +72,17 @@
 								<tr>
 									<td>{{ $extra->pivot->nombre ?? $extra->nombre }}</td>
 									<td>{{ $extra->pivot->cantidad }}</td>
-									<td>{{ number_format($extra->pivot->valor ?? 0, 0, ',', '.') }}</td>
-									<td>{{ number_format(($extra->pivot->valor * $extra->pivot->cantidad) ?? 0, 0, ',', '.') }}</td>
+									<td>${{ number_format($extra->pivot->valor ?? 0, 0, ',', '.') }}</td>
+									<td>${{ number_format(($extra->pivot->valor * $extra->pivot->cantidad) ?? 0, 0, ',', '.') }}</td>
 									<td class="text-center">
 										@if($extra->pivot->suma_al_total)
+											<span class="badge bg-success">Sí</span>
+										@else
+											<span class="badge bg-secondary">No</span>
+										@endif
+									</td>
+									<td class="text-center">
+										@if($extra->pivot->aplicar_el_descuento ?? false)
 											<span class="badge bg-success">Sí</span>
 										@else
 											<span class="badge bg-secondary">No</span>
@@ -86,23 +100,27 @@
 						<ul class="list-group">
 							<li class="list-group-item d-flex justify-content-between">
 								<strong>Subtotal</strong>
-								<span>{{ number_format($cot->subtotal ?? 0, 0, ',', '.') }}</span>
+								@if($cot->descuento_pct > 0)
+									<span>${{ number_format($cot->subtotal_menos_descuento ?? 0, 0, ',', '.') }}</span>
+								@else
+									<span>${{ number_format($cot->subtotal ?? 0, 0, ',', '.') }}</span>
+								@endif
 							</li>
 							<li class="list-group-item d-flex justify-content-between">
 								<strong>Descuento ({{ $cot->descuento_pct ?? 0 }}%)</strong>
-								<span>{{ number_format($cot->descuento_monto ?? 0, 0, ',', '.') }}</span>
+								<span>${{ number_format($cot->descuento_monto ?? 0, 0, ',', '.') }}</span>
 							</li>
 							<li class="list-group-item d-flex justify-content-between">
 								<strong>Ipo consumo</strong>
-								<span>{{ number_format($cot->ipoconsumo ?? 0, 0, ',', '.') }}</span>
+								<span>${{ number_format($cot->ipoconsumo ?? 0, 0, ',', '.') }}</span>
 							</li>
 							<li class="list-group-item d-flex justify-content-between">
 								<strong>Reteica</strong>
-								<span>{{ number_format($cot->reteica ?? 0, 0, ',', '.') }}</span>
+								<span>${{ number_format($cot->reteica ?? 0, 0, ',', '.') }}</span>
 							</li>
 							<li class="list-group-item d-flex justify-content-between">
 								<strong>Retefuente</strong>
-								<span>{{ number_format($cot->retefuente ?? 0, 0, ',', '.') }}</span>
+								<span>${{ number_format($cot->retefuente ?? 0, 0, ',', '.') }}</span>
 							</li>
 						</ul>
 					</div>
@@ -110,19 +128,19 @@
 						<ul class="list-group">
 							<li class="list-group-item d-flex justify-content-between">
 								<strong>Propina</strong>
-								<span>{{ number_format($cot->propina ?? 0, 0, ',', '.') }}</span>
+								<span>${{ number_format($cot->propina ?? 0, 0, ',', '.') }}</span>
 							</li>
 							<li class="list-group-item d-flex justify-content-between">
 								<strong>Anticipo</strong>
-								<span>{{ number_format($cot->anticipo ?? 0, 2, ',', '.') }}</span>
+								<span>${{ number_format($cot->anticipo ?? 0, 2, ',', '.') }}</span>
 							</li>
 							<li class="list-group-item d-flex justify-content-between">
 								<strong>Total final</strong>
-								<span>{{ number_format($cot->total_final ?? 0, 0, ',', '.') }}</span>
+								<span>${{ number_format($cot->total_final ?? 0, 0, ',', '.') }}</span>
 							</li>
 							<li class="list-group-item d-flex justify-content-between">
 								<strong>Saldo pendiente</strong>
-								<span>{{ number_format($cot->saldo_pendiente ?? 0, 2, ',', '.') }}</span>
+								<span>${{ number_format($cot->saldo_pendiente ?? 0, 2, ',', '.') }}</span>
 							</li>
 							<li class="list-group-item d-flex justify-content-between">
 								<strong>Creada</strong>

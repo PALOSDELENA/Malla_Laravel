@@ -32,7 +32,7 @@ class Cotizacion extends Model
     public function itemExtras()
     {
         return $this->belongsToMany(ItemExtras::class, 'cotizacion_item_extras', 'cotizacion_id', 'item_extra_id')
-                    ->withPivot('nombre', 'cantidad', 'valor', 'suma_al_total')
+                    ->withPivot('nombre', 'cantidad', 'valor', 'suma_al_total', 'aplicar_el_descuento')
                     ->withTimestamps();
     }
 }

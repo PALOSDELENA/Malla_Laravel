@@ -110,11 +110,13 @@
                         <table class="table table-sm" id="extrasTable">
                             <thead>
                                 <tr>
-                                    <th style="width:35%">Concepto</th>
+                                    <th style="width:25%">Concepto</th>
                                     <th style="width:10%">Cant.</th>
-                                    <th style="width:20%">Valor Unit.</th>
-                                    <th style="width:20%" class="text-center">Sumar al total</th>
-                                    <th style="width:15%"></th>
+                                    <th style="width:15%">Valor Unit.</th>
+                                    <th style="width:15%">Total</th>
+                                    <th style="width:12%" class="text-center">Sumar al total</th>
+                                    <th style="width:13%" class="text-center">Aplicar el Descuento</th>
+                                    <th style="width:10%"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -346,22 +348,29 @@
         function recalcularTotales(){
             console.log('=== Recalculando Totales ===');
             const rows = itemsTable.querySelectorAll('.item-row');
-            let subtotal = 0;
+            let subtotalProductos = 0;
             rows.forEach(r => {
                 const v = r.querySelector('.item-total-hidden')?.value ?? '0';
-                subtotal += parseFloatSafe(v);
+                subtotalProductos += parseFloatSafe(v);
             });
-            console.log('Subtotal de productos:', subtotal);
+            console.log('Subtotal de productos:', subtotalProductos);
 
-            // Sumar items extras al subtotal ANTES de dividir entre 1.08
-            let totalExtras = 0;
+            const descuentoPct = parseFloatSafe(document.getElementById('descuento_pct').value);
+            console.log('Descuento %:', descuentoPct);
+
+            // Agrupar items extras según sus checkboxes
+            let extrasGrupoA = 0; // Solo "Sumar al Total"
+            let extrasGrupoB = 0; // "Sumar al Total" + "Aplicar el Descuento"
+            
             const extrasRows = document.querySelectorAll('.extra-row');
             extrasRows.forEach(row => {
                 const sumaCheckbox = row.querySelector('.extra-suma');
+                const descuentoCheckbox = row.querySelector('.extra-descuento');
                 const valorInput = row.querySelector('.extra-valor');
                 const cantidadInput = row.querySelector('.extra-cantidad');
                 
                 const suma = sumaCheckbox?.checked;
+                const aplicarDescuento = descuentoCheckbox?.checked;
                 const valorRaw = valorInput?.value || '0';
                 const cantidadRaw = cantidadInput?.value || '1';
                 
@@ -370,34 +379,81 @@
                     const cantidad = parseInt(cantidadRaw) || 1;
                     const totalLinea = valor * cantidad;
                     
-                    console.log('Item extra - Suma:', suma, 'Valor:', valor, 'Cant:', cantidad, 'Total:', totalLinea);
-                    totalExtras += totalLinea;
+                    if (aplicarDescuento) {
+                        // Grupo B: ambos checkboxes marcados
+                        console.log('Item extra Grupo B - Valor:', valor, 'Cant:', cantidad, 'Total:', totalLinea);
+                        extrasGrupoB += totalLinea;
+                    } else {
+                        // Grupo A: solo "Sumar al Total"
+                        console.log('Item extra Grupo A - Valor:', valor, 'Cant:', cantidad, 'Total:', totalLinea);
+                        extrasGrupoA += totalLinea;
+                    }
                 }
             });
             
-            console.log('Total Extras:', totalExtras);
-            
-            // Sumar extras al subtotal antes del ajuste
-            subtotal += totalExtras;
+            console.log('Total Extras Grupo A (solo suma):', extrasGrupoA);
+            console.log('Total Extras Grupo B (suma + descuento):', extrasGrupoB);
 
-            // ajustar subtotal: dividir entre 1.08 y usar ese valor para mostrar/enviar (redondeado hacia arriba)
-            const baseSubtotalRaw = subtotal / 1.08;
-            const baseSubtotal = Math.ceil(baseSubtotalRaw);
+            let baseSubtotal;
+            let baseConDescuento = 0; // Declarar fuera del bloque para usarlo después
+            
+            if (descuentoPct > 0) {
+                // HAY DESCUENTO: aplicar la nueva lógica
+                console.log('--- Aplicando lógica con descuento ---');
+                
+                // 1. Sumar productos + extras Grupo B
+                const baseParaDescuento = subtotalProductos + extrasGrupoB;
+                console.log('Base para descuento (productos + extras Grupo B):', baseParaDescuento);
+                
+                // 2. Dividir entre 1.08
+                const baseParaDescuentoSinIVA = baseParaDescuento / 1.08;
+                console.log('Base sin IVA (÷1.08):', baseParaDescuentoSinIVA);
+                
+                // 3. Aplicar descuento
+                baseConDescuento = baseParaDescuentoSinIVA * (1 - (descuentoPct/100));
+                console.log('Después del descuento:', baseConDescuento);
+                
+                // 4. Sumar extras Grupo A dividido entre 1.08
+                const extrasGrupoASinIVA = extrasGrupoA / 1.08;
+                console.log('Extras Grupo A sin IVA (÷1.08):', extrasGrupoASinIVA);
+                
+                // 5. El SUBTOTAL es la base SIN descuento + extras Grupo A
+                baseSubtotal = Math.ceil(baseParaDescuentoSinIVA + extrasGrupoASinIVA);
+                console.log('Subtotal (SIN descuento aplicado):', baseSubtotal);
+                
+            } else {
+                // NO HAY DESCUENTO: mantener comportamiento actual
+                console.log('--- Sin descuento: comportamiento actual ---');
+                const totalExtras = extrasGrupoA + extrasGrupoB;
+                const subtotalTotal = subtotalProductos + totalExtras;
+                baseSubtotal = Math.ceil(subtotalTotal / 1.08);
+                console.log('Subtotal (productos + todos los extras ÷1.08):', baseSubtotal);
+            }
+
+            // Actualizar subtotal en UI
             const subtotalHidden = document.querySelector('input[name="subtotal"]');
             const subtotalDisplay = document.getElementById('subtotal_display');
             if (subtotalHidden) subtotalHidden.value = baseSubtotal.toString();
             if (subtotalDisplay) subtotalDisplay.value = formatMoney(baseSubtotal);
 
-            const descuentoPct = parseFloatSafe(document.getElementById('descuento_pct').value);
-            const descuentoMontoRaw = baseSubtotal * (1 - (descuentoPct/100));
-            const descuentoMonto = Math.ceil(descuentoMontoRaw);
-            // si hay descuento en porcentaje, usar el subtotal neto (descuentoMonto) como base para cálculos;
-            // si no, usar baseSubtotal
-            const effectiveBase = (descuentoPct > 0) ? descuentoMonto : baseSubtotal;
+            // Actualizar descuento monto display
             const descuentoHidden = document.querySelector('input[name="descuento_monto"]');
             const descuentoDisplay = document.getElementById('descuento_monto_display');
-            if (descuentoHidden) descuentoHidden.value = descuentoMonto.toString();
-            if (descuentoPct > 0) descuentoDisplay.value = formatMoney(descuentoMonto);
+            
+            if (descuentoPct > 0) {
+                // Cuando hay descuento, el descuento_monto es baseConDescuento + extras Grupo A
+                const extrasGrupoASinIVA = extrasGrupoA / 1.08;
+                const descuentoMontoRedondeado = Math.ceil(baseConDescuento + extrasGrupoASinIVA);
+                if (descuentoHidden) descuentoHidden.value = descuentoMontoRedondeado.toString();
+                if (descuentoDisplay) descuentoDisplay.value = formatMoney(descuentoMontoRedondeado);
+            } else {
+                // Sin descuento, guardar el subtotal
+                if (descuentoHidden) descuentoHidden.value = baseSubtotal.toString();
+                if (descuentoDisplay) descuentoDisplay.value = formatMoney(baseSubtotal);
+            }
+            
+            // effectiveBase es el descuento_monto (subtotal con descuento aplicado) para cálculos posteriores
+            const effectiveBase = descuentoPct > 0 ? parseFloatSafe(descuentoHidden?.value) : baseSubtotal;
 
             const propinaVal = parseFloatSafe(document.getElementById('propina')?.value);
             const anticipoVal = parseFloatSafe(document.getElementById('anticipo')?.value);
@@ -416,9 +472,9 @@
             const reteicaToggle = document.getElementById('reteica_toggle');
             const retefuenteToggle = document.getElementById('retefuente_toggle');
 
-            const ipoconsumoRaw = (ipoconsumoToggle && ipoconsumoToggle.checked) ? baseSubtotal * 0.08 : 0;
-            const reteicaAppliedRaw = (reteicaToggle && reteicaToggle.checked) ? baseSubtotal * 0.0138 : 0;
-            const retefuenteAppliedRaw = (retefuenteToggle && retefuenteToggle.checked) ? baseSubtotal * 0.035 : 0;
+            const ipoconsumoRaw = (ipoconsumoToggle && ipoconsumoToggle.checked) ? effectiveBase * 0.08 : 0;
+            const reteicaAppliedRaw = (reteicaToggle && reteicaToggle.checked) ? effectiveBase * 0.0138 : 0;
+            const retefuenteAppliedRaw = (retefuenteToggle && retefuenteToggle.checked) ? effectiveBase * 0.035 : 0;
             const ipoconsumo = Math.ceil(ipoconsumoRaw);
             const reteicaApplied = Math.ceil(reteicaAppliedRaw);
             const retefuenteApplied = Math.ceil(retefuenteAppliedRaw);
@@ -547,13 +603,27 @@
         // Event listeners para items extras (usando delegación de eventos)
         document.addEventListener('input', (e) => {
             if (e.target.classList.contains('extra-valor') || e.target.classList.contains('extra-cantidad')) {
-                console.log('Cambio en valor o cantidad de extra detectado');
+                // Actualizar el campo Total de la fila
+                const row = e.target.closest('.extra-row');
+                if (row) {
+                    const cantidadInput = row.querySelector('.extra-cantidad');
+                    const valorInput = row.querySelector('.extra-valor');
+                    const totalInput = row.querySelector('.extra-total');
+                    
+                    if (cantidadInput && valorInput && totalInput) {
+                        const cantidad = parseFloat(cantidadInput.value) || 0;
+                        const valor = parseFloat(valorInput.value) || 0;
+                        const total = cantidad * valor;
+                        totalInput.value = formatMoney(total);
+                    }
+                }
+                
                 recalcularTotales();
             }
         });
 
         document.addEventListener('change', (e) => {
-            if (e.target.classList.contains('extra-suma')) {
+            if (e.target.classList.contains('extra-suma') || e.target.classList.contains('extra-descuento')) {
                 console.log('Cambio en checkbox de extra detectado');
                 recalcularTotales();
             }
@@ -607,11 +677,26 @@
                            class="form-control form-control-sm extra-valor" 
                            step="0.01" value="0" min="0">
                 </td>
+                <td>
+                    <input type="text" 
+                           class="form-control form-control-sm extra-total" 
+                           value="$0" 
+                           readonly>
+                </td>
                 <td class="text-center">
                     <div class="form-check form-switch d-flex justify-content-center">
                         <input class="form-check-input extra-suma" 
                                type="checkbox" 
                                name="extras[${index}][suma_al_total]" 
+                               value="1" 
+                               >
+                    </div>
+                </td>
+                <td class="text-center">
+                    <div class="form-check form-switch d-flex justify-content-center">
+                        <input class="form-check-input extra-descuento" 
+                               type="checkbox" 
+                               name="extras[${index}][aplicar_el_descuento]" 
                                value="1" 
                                >
                     </div>
