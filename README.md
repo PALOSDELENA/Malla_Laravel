@@ -18,8 +18,8 @@ Este proyecto Laravel está configurado para ejecutarse en un entorno de desarro
 1. Clonar el repositorio:
 
 ```bash
-git clone https://github.com/tuusuario/tu-repo.git
-cd tu-repo
+https://github.com/PALOSDELENA/Malla_Laravel.git
+cd raiz
 
 2. Crear el archivo .env:
 
