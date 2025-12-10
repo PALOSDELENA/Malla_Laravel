@@ -304,8 +304,12 @@ Route::put('/cotizaciones/editar/{id}', [CotizacionController::class, 'update'])
 Route::delete('/cotizaciones/{id}', [CotizacionController::class, 'destroy'])->name('coti.destroy');
 Route::post('/cotizaciones/{id}/upload-factura', [CotizacionController::class, 'uploadFactura'])->name('coti.uploadFactura');
 
-// Clientes (creación via modal AJAX)
+// Clientes (creación y edición via modal AJAX)
 Route::post('/clientes', [ClienteController::class, 'store'])
     ->middleware('auth')->name('clientes.store');
+Route::get('/clientes/{id}', [ClienteController::class, 'show'])
+    ->middleware('auth')->name('clientes.show');
+Route::put('/clientes/{id}', [ClienteController::class, 'update'])
+    ->middleware('auth')->name('clientes.update');
 
 require __DIR__.'/auth.php';

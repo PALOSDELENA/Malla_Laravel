@@ -19,6 +19,9 @@
                             <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearCliente">
                                 <i class="fa-solid fa-user-plus"></i> Nuevo
                             </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="btnEditarCliente" disabled>
+                                <i class="fa-solid fa-user-pen"></i> Editar
+                            </button>
                         </div>
                     </div>
 
@@ -246,6 +249,40 @@
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                                     <button type="submit" class="btn btn-primary" id="btnGuardarCliente">Guardar Cliente</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- Modal Editar Cliente -->
+                <div class="modal fade" id="modalEditarCliente" tabindex="-1" aria-labelledby="modalEditarClienteLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <form id="formEditarCliente">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="modalEditarClienteLabel">Editar Cliente</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div id="clienteEditAlert" class="alert d-none" role="alert"></div>
+
+                                    <input type="hidden" id="editar_cliente_id">
+                                    <div class="mb-3">
+                                        <label for="editar_nombre" class="form-label">Nombre</label>
+                                        <input type="text" id="editar_nombre" name="nombre" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editar_celular" class="form-label">Celular</label>
+                                        <input type="text" id="editar_celular" name="celular" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="editar_correo" class="form-label">Correo</label>
+                                        <input type="email" id="editar_correo" name="correo" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary" id="btnActualizarCliente">Actualizar Cliente</button>
                                 </div>
                             </form>
                         </div>
@@ -854,6 +891,144 @@
                     btn.disabled = false;
                 }
             });
+        });
+    </script>
+
+    <script>
+        // AJAX submit para editar cliente desde modal
+        document.addEventListener('DOMContentLoaded', () => {
+            const clienteSelect = document.getElementById('cliente_id');
+            const btnEditar = document.getElementById('btnEditarCliente');
+            const formEditar = document.getElementById('formEditarCliente');
+            const alertBox = document.getElementById('clienteEditAlert');
+            const modalEl = document.getElementById('modalEditarCliente');
+            const modalBootstrap = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+            // Enable/disable edit button based on client selection
+            // Use Select2's change event
+            $('#cliente_id').on('change', function() {
+                btnEditar.disabled = !this.value;
+            });
+
+            // Load client data when edit button is clicked
+            btnEditar.addEventListener('click', async () => {
+                const clienteId = clienteSelect.value;
+                if (!clienteId) return;
+
+                try {
+                    const res = await fetch(`/clientes/${clienteId}`, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    });
+
+                    if (!res.ok) throw new Error('Error al cargar datos del cliente');
+
+                    const cliente = await res.json();
+                    
+                    // Populate form fields
+                    document.getElementById('editar_cliente_id').value = cliente.id;
+                    document.getElementById('editar_nombre').value = cliente.nombre;
+                    document.getElementById('editar_celular').value = cliente.celular || '';
+                    document.getElementById('editar_correo').value = cliente.correo || '';
+
+                    // Show modal
+                    modalBootstrap.show();
+                } catch (err) {
+                    console.error(err);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo cargar los datos del cliente',
+                        toast: true,
+                        position: 'top-end',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                }
+            });
+
+            // Handle form submission
+            if (formEditar) {
+                formEditar.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    alertBox.classList.add('d-none');
+                    const btn = document.getElementById('btnActualizarCliente');
+                    btn.disabled = true;
+
+                    const clienteId = document.getElementById('editar_cliente_id').value;
+                    const data = {
+                        nombre: document.getElementById('editar_nombre').value,
+                        celular: document.getElementById('editar_celular').value,
+                        correo: document.getElementById('editar_correo').value,
+                    };
+
+                    try {
+                        const res = await fetch(`/clientes/${clienteId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify(data)
+                        });
+
+                        const json = await res.json();
+                        if (!res.ok) throw json;
+
+                        // Update the select option with new data
+                        const option = clienteSelect.querySelector(`option[value="${json.id}"]`);
+                        if (option) {
+                            option.text = `${json.nombre} - ${json.celular ?? ''}`;
+                            option.setAttribute('data-nombre', json.nombre);
+                            option.setAttribute('data-celular', json.celular ?? '');
+                            option.setAttribute('data-correo', json.correo ?? '');
+                        }
+
+                        // Update Select2 data and trigger refresh
+                        const select2Data = $('#cliente_id').select2('data');
+                        if (select2Data && select2Data.length > 0) {
+                            select2Data[0].text = `${json.nombre} - ${json.celular ?? ''}`;
+                        }
+                        $('#cliente_id').trigger('change.select2');
+
+                        // Close modal and reset
+                        modalBootstrap.hide();
+                        formEditar.reset();
+
+                        // Show success message
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Cliente actualizado!',
+                            text: `${json.nombre} se ha actualizado correctamente`,
+                            timer: 2500,
+                            showConfirmButton: false,
+                            toast: true,
+                            position: 'top-end'
+                        });
+                    } catch (err) {
+                        console.error(err);
+                        alertBox.classList.remove('d-none');
+                        alertBox.classList.remove('alert-success');
+                        alertBox.classList.remove('alert-danger');
+                        if (err && err.errors) {
+                            // Validación
+                            alertBox.classList.add('alert-danger');
+                            alertBox.innerHTML = Object.values(err.errors).flat().join('<br>');
+                        } else if (err && err.message) {
+                            alertBox.classList.add('alert-danger');
+                            alertBox.textContent = err.message;
+                        } else {
+                            alertBox.classList.add('alert-danger');
+                            alertBox.textContent = 'Ocurrió un error al actualizar el cliente.';
+                        }
+                    } finally {
+                        btn.disabled = false;
+                    }
+                });
+            }
         });
     </script>
 
