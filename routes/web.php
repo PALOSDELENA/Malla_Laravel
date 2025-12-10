@@ -78,6 +78,9 @@ Route::delete('/productos/{producto}', [ProductoController::class, 'destroy'])
 Route::get('/productos/existencias', [ProductoController::class, 'stockChart'])
     ->middleware(['auth', 'verified'])->name('productos.stockChart');
 
+Route::post('/producto/crear', [ProductoController::class, 'storeCotizacion'])
+    ->middleware(['auth', 'verified'])->name('productos.storeCotizacion');
+
 // Cargos
 Route::get('/cargos', [CargosController::class, 'index'])
     ->middleware(['auth', 'verified'])->name('cargos.index');

@@ -61,7 +61,11 @@
                         <table class="table" id="itemsTable">
                             <thead>
                                 <tr>
-                                    <th style="width:60%">Producto</th>
+                                    <th style="width:60%">Producto
+                                        <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrearProducto">
+                                            <i class="fa-solid fa-plus"></i>
+                                        </button>
+                                    </th>
                                     <th style="width:120px">Cantidad</th>
                                     <th style="width:120px">Precio</th>
                                     <th style="width:160px">Total Item</th>
@@ -71,7 +75,7 @@
                             <tbody>
                                 <tr class="item-row">
                                     <td>
-                                        <select name="items[0][producto_id]" class="form-select item-producto" required>
+                                        <select id="producto_id" name="items[0][producto_id]" class="form-select item-producto" required>
                                             <option value="">Seleccione producto...</option>
                                             @foreach($productos as $prod)
                                                 <option value="{{ $prod->id }}" data-precio="{{ $prod->proPrecio ?? 0 }}">{{ $prod->proNombre }}</option>
@@ -242,6 +246,45 @@
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                                     <button type="submit" class="btn btn-primary" id="btnGuardarCliente">Guardar Cliente</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- Modal Crear Producto -->
+                <div class="modal fade" id="modalCrearProducto" tabindex="-1" aria-labelledby="modalCrearProductoLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <form id="formCrearProducto">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="modalCrearProductoLabel">Registrar Producto</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div id="productoAlert" class="alert d-none" role="alert"></div>
+
+                                    <div class="mb-3">
+                                        <label for="proNombre" class="form-label">Nombre</label>
+                                        <input type="text" id="proNombre" name="proNombre" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="proTipo" class="form-label">Tipo</label>
+                                        <select name="proTipo" id="proTipo" class="form-select" required>
+                                            <option value="">Seleccione el tipo</option>
+                                            <option value="Carta-E">Entrada</option>
+                                            <option value="Carta-F">Plato Fuerte</option>
+                                            <option value="Carta-P">Postre</option>
+                                            <option value="Carta-B">Bebida</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="proPrecio" class="form-label">Precio</label>
+                                        <input type="number" id="proPrecio" name="proPrecio" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary" id="btnGuardarProducto">Guardar Producto</button>
                                 </div>
                             </form>
                         </div>
@@ -745,73 +788,161 @@
     </script>
 
     <script>
-    // AJAX submit para crear cliente desde modal
-    document.addEventListener('DOMContentLoaded', () => {
-        const formCrear = document.getElementById('formCrearCliente');
-        const alertBox = document.getElementById('clienteAlert');
-        const modalEl = document.getElementById('modalCrearCliente');
-        const modalBootstrap = bootstrap.Modal.getOrCreateInstance(modalEl);
-        const clienteSelect = document.getElementById('cliente_id');
+        // AJAX submit para crear cliente desde modal
+        document.addEventListener('DOMContentLoaded', () => {
+            const formCrear = document.getElementById('formCrearCliente');
+            const alertBox = document.getElementById('clienteAlert');
+            const modalEl = document.getElementById('modalCrearCliente');
+            const modalBootstrap = bootstrap.Modal.getOrCreateInstance(modalEl);
+            const clienteSelect = document.getElementById('cliente_id');
 
-        if (!formCrear) return;
+            if (!formCrear) return;
 
-        formCrear.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            alertBox.classList.add('d-none');
-            const btn = document.getElementById('btnGuardarCliente');
-            btn.disabled = true;
+            formCrear.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                alertBox.classList.add('d-none');
+                const btn = document.getElementById('btnGuardarCliente');
+                btn.disabled = true;
 
-            const data = {
-                nombre: document.getElementById('nuevo_nombre').value,
-                celular: document.getElementById('nuevo_celular').value,
-                correo: document.getElementById('nuevo_correo').value,
-            };
+                const data = {
+                    nombre: document.getElementById('nuevo_nombre').value,
+                    celular: document.getElementById('nuevo_celular').value,
+                    correo: document.getElementById('nuevo_correo').value,
+                };
 
-            try {
-                const res = await fetch("{{ route('clientes.store') }}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
+                try {
+                    const res = await fetch("{{ route('clientes.store') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
 
-                const json = await res.json();
-                if (!res.ok) throw json;
+                    const json = await res.json();
+                    if (!res.ok) throw json;
 
-                // Añadir al select y seleccionarlo
-                const option = document.createElement('option');
-                option.value = json.id;
-                option.text = `${json.nombre} - ${json.celular ?? ''}`;
-                clienteSelect.appendChild(option);
-                clienteSelect.value = json.id;
+                    // Añadir al select y seleccionarlo
+                    const option = document.createElement('option');
+                    option.value = json.id;
+                    option.text = `${json.nombre} - ${json.celular ?? ''}`;
+                    clienteSelect.appendChild(option);
+                    clienteSelect.value = json.id;
 
-                // Cerrar modal y resetear
-                modalBootstrap.hide();
-                formCrear.reset();
-            } catch (err) {
-                console.error(err);
-                alertBox.classList.remove('d-none');
-                alertBox.classList.remove('alert-success');
-                alertBox.classList.remove('alert-danger');
-                if (err && err.errors) {
-                    // Validación
-                    alertBox.classList.add('alert-danger');
-                    alertBox.innerHTML = Object.values(err.errors).flat().join('<br>');
-                } else if (err && err.message) {
-                    alertBox.classList.add('alert-danger');
-                    alertBox.textContent = err.message;
-                } else {
-                    alertBox.classList.add('alert-danger');
-                    alertBox.textContent = 'Ocurrió un error al crear el cliente.';
+                    // Cerrar modal y resetear
+                    modalBootstrap.hide();
+                    formCrear.reset();
+                } catch (err) {
+                    console.error(err);
+                    alertBox.classList.remove('d-none');
+                    alertBox.classList.remove('alert-success');
+                    alertBox.classList.remove('alert-danger');
+                    if (err && err.errors) {
+                        // Validación
+                        alertBox.classList.add('alert-danger');
+                        alertBox.innerHTML = Object.values(err.errors).flat().join('<br>');
+                    } else if (err && err.message) {
+                        alertBox.classList.add('alert-danger');
+                        alertBox.textContent = err.message;
+                    } else {
+                        alertBox.classList.add('alert-danger');
+                        alertBox.textContent = 'Ocurrió un error al crear el cliente.';
+                    }
+                } finally {
+                    btn.disabled = false;
                 }
-            } finally {
-                btn.disabled = false;
-            }
+            });
         });
-    });
+    </script>
+
+    <script>
+        // AJAX submit para crear Producto desde modal
+        document.addEventListener('DOMContentLoaded', () => {
+            const formCrear = document.getElementById('formCrearProducto');
+            const alertBox = document.getElementById('productoAlert');
+            const modalEl = document.getElementById('modalCrearProducto');
+            const modalBootstrap = bootstrap.Modal.getOrCreateInstance(modalEl);
+            const productoSelect = document.getElementById('producto_id');
+
+            if (!formCrear) return;
+
+            formCrear.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                alertBox.classList.add('d-none');
+                const btn = document.getElementById('btnGuardarProducto');
+                btn.disabled = true;
+
+                const data = {
+                    proNombre: document.getElementById('proNombre').value,
+                    proTipo: document.getElementById('proTipo').value,
+                    proPrecio: document.getElementById('proPrecio').value,
+                    proUnidadMedida: 'Unidad',
+                };
+
+                try {
+                    const res = await fetch("{{ route('productos.storeCotizacion') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const json = await res.json();
+                    if (!res.ok) throw json;
+
+                    // Añadir a TODOS los selects de productos (no solo al primero)
+                    const allProductSelects = document.querySelectorAll('.item-producto');
+                    allProductSelects.forEach(select => {
+                        const option = document.createElement('option');
+                        option.value = json.id;
+                        option.text = json.proNombre;
+                        option.setAttribute('data-precio', json.proPrecio || 0);
+                        select.appendChild(option);
+                    });
+
+                    // Trigger Select2 to refresh all selects
+                    $('.item-producto').trigger('change.select2');
+
+                    // Cerrar modal y resetear
+                    modalBootstrap.hide();
+                    formCrear.reset();
+
+                    // Mostrar alerta de éxito
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Producto registrado!',
+                        text: `${json.proNombre} se ha agregado correctamente`,
+                        timer: 2500,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                } catch (err) {
+                    console.error(err);
+                    alertBox.classList.remove('d-none');
+                    alertBox.classList.remove('alert-success');
+                    alertBox.classList.remove('alert-danger');
+                    if (err && err.errors) {
+                        // Validación
+                        alertBox.classList.add('alert-danger');
+                        alertBox.innerHTML = Object.values(err.errors).flat().join('<br>');
+                    } else if (err && err.message) {
+                        alertBox.classList.add('alert-danger');
+                        alertBox.textContent = err.message;
+                    } else {
+                        alertBox.classList.add('alert-danger');
+                        alertBox.textContent = 'Ocurrió un error al crear el producto.';
+                    }
+                } finally {
+                    btn.disabled = false;
+                }
+            });
+        });
     </script>
 
     <script>

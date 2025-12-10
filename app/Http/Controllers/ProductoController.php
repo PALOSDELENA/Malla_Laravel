@@ -69,6 +69,21 @@ class ProductoController extends Controller
         // Redirecciona o responde
         return redirect()->back()->with('success', 'Producto registrado correctamente.');
     }
+
+    public function storeCotizacion(Request $request)
+    {
+        $data = $request->validate([
+            'proNombre' => 'required|string|max:255',
+            'proTipo' => 'required|string',
+            'proPrecio' => 'required|numeric',
+            'proUnidadMedida' => 'required|string|max:50',
+        ]);
+
+        $producto = Productos::create($data);
+
+        return response()->json($producto, 201);
+    }
+    
     /**
      * Display the specified resource.
      */
